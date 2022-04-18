@@ -70,6 +70,7 @@ class PlayerActivity : AppCompatActivity() {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             Log.d("ServiceConnection", "connected")
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
+
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerView.player = mExoPlayer
             val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
@@ -78,6 +79,7 @@ class PlayerActivity : AppCompatActivity() {
             audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
             //   mPlayerService?.setItems(mediaItem)
             mVisualizer.setAudioSessionId(audioSessionId)
+            mPlayerService?.setRadioWave(radioWave)
 
         }
 
