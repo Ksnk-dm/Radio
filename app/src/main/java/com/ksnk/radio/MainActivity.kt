@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
 var radioWave: RadioWave = RadioWave("test","test", "test", "test")
 
-//database.child("wave2").setValue(radioWave)
+    //database.child("wave6").setValue(radioWave)
 
 
         initDb()
