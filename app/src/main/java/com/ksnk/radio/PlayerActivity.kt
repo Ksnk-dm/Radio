@@ -4,11 +4,13 @@ package com.ksnk.radio
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.google.android.exoplayer2.ExoPlayer
@@ -26,16 +28,17 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
     private lateinit var radioWave: RadioWave
+    private var audioSessionId: Int = 0
 
     private var mPlayerService: PlayerService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
-        startPlayerService()
-       radioWave= (intent.getSerializableExtra("items") as RadioWave?)!!
 
-       // mExoPlayer?.setMediaItem(mediaItem)
+        radioWave = (intent.getSerializableExtra("items") as RadioWave?)!!
+
+        // mExoPlayer?.setMediaItem(mediaItem)
 
         mPlayerView = findViewById(R.id.playerView)
         mVisualizer = findViewById(R.id.bar)
@@ -51,10 +54,7 @@ class PlayerActivity : AppCompatActivity() {
         mNameTextView.text = radioWave?.name
         mFmFrequencyTextView.text = radioWave?.fmFrequency
 
-
-
-
-
+        startPlayerService()
 //     mExoPlayer?.setMediaItem(mediaItem)
 //
 //         mExoPlayer?.prepare()
@@ -63,7 +63,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        //   mExoPlayer?.clearMediaItems()
+        mVisualizer.release()
     }
 
     private var myConnection = object : ServiceConnection {
@@ -73,11 +73,12 @@ class PlayerActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerView.player = mExoPlayer
             val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
-
+            mExoPlayer?.clearMediaItems()
             mExoPlayer?.setMediaItem(mediaItem)
-            var audioSessionId = mExoPlayer?.audioSessionId
+            audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
             //   mPlayerService?.setItems(mediaItem)
-            mVisualizer.setAudioSessionId(audioSessionId!!)
+            mVisualizer.setAudioSessionId(audioSessionId)
+
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
