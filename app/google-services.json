@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "53617793533",
+    "project_id": "radio-b9295",
+    "storage_bucket": "radio-b9295.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53617793533:android:b3746a450966253bfda194",
+        "android_client_info": {
+          "package_name": "com.ksnk.radio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53617793533-gm46ok7a4og123eec1u7dvm9gi2o6pri.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCF34IK7ZIpE4UHaDsXr3-mYdSuINYu16g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53617793533-gm46ok7a4og123eec1u7dvm9gi2o6pri.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
