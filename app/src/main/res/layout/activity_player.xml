@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".PlayerActivity">
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <com.google.android.exoplayer2.ui.PlayerControlView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:controller_layout_id="@layout/custom_player_view"
-        app:show_timeout="0"></com.google.android.exoplayer2.ui.PlayerView>
+        app:show_timeout="0" />
 </LinearLayout>
