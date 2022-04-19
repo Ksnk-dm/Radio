@@ -15,7 +15,7 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_gravity="center"
-            android:layout_marginTop="130dp"
+            android:layout_marginTop="20dp"
             app:cardBackgroundColor="@color/black"
             app:cardCornerRadius="20dp">
 
@@ -32,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:gravity="center"
-            android:text="KissFm"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -42,7 +41,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="96.5"
             android:textColor="@color/white"
             android:textSize="16sp" />
 
@@ -58,8 +56,9 @@
             app:avWidth="4dp" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -68,14 +67,14 @@
                 android:layout_width="110dp"
                 android:layout_height="110dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/ic_pause_button_svgrepo_com" />
+                app:srcCompat="@drawable/ic_pause_icon" />
 
             <ImageButton
                 android:id="@+id/exo_play"
                 android:layout_width="110dp"
                 android:layout_height="110dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/ic__18620_play_icon" />
+                app:srcCompat="@drawable/ic_play_icon" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

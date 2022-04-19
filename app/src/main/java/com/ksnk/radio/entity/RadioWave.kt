@@ -1,4 +1,4 @@
-package com.ksnk.radio
+package com.ksnk.radio.entity
 
 import java.io.Serializable
 

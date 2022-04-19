@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Радио UA</string>
+<string name="error_network">Нет доступа к интернету</string>
+    <string name="get_serializable_extra">items</string>
+    <string name="get_name_shared_prefs_variable">name</string>
+    <string name="get_shared_prefs_init">base</string>
+
+    <string name="firebase_ref">RadioWaves</string>
+    <string name="firebase_url">https://radio-b9295-default-rtdb.europe-west1.firebasedatabase.app/</string>
+
+    <string name="dev_name">Developed by Ksnk-dm</string>
 </resources>
