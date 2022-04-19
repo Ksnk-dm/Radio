@@ -21,7 +21,7 @@ class MainRecyclerViewAdapter(private var items: List<RadioWave>, var context: C
     }
 
     override fun onBindViewHolder(holder: WaveViewHolder, position: Int) {
-        var name = sharedPreferences.getString("name","")
+        val name = sharedPreferences.getString("name","")
         if(name.equals(items[position].name)){
             holder.lottieAnimationView?.visibility=View.VISIBLE
         } else{

@@ -6,6 +6,7 @@ import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Binder
@@ -90,6 +91,11 @@ class PlayerService : Service() {
                     dismissedByUser: Boolean
                 ) {
                     stopSelf()
+                    val settings: SharedPreferences =
+                        getSharedPreferences("base", MODE_PRIVATE)
+                    val editor = settings.edit()
+                    editor.putString("name", "")
+                    editor.apply()
                 }
 
                 override fun onNotificationPosted(
@@ -103,6 +109,11 @@ class PlayerService : Service() {
                     } else {
                         //Here audio has stopped playing, so we can make notification dismissible on swipe.
                         stopForeground(false)
+                        val settings: SharedPreferences =
+                            getSharedPreferences("base", MODE_PRIVATE)
+                        val editor = settings.edit()
+                        editor.putString("name", "")
+                        editor.apply()
                     }
                 }
             })
@@ -129,12 +140,15 @@ class PlayerService : Service() {
 
     override fun onDestroy() {
         mPlayer?.release()
+        val settings: SharedPreferences =
+            getSharedPreferences("base", MODE_PRIVATE)
+        val editor = settings.edit()
+        editor.putString("name", "")
     }
 
     fun setItems(mediaItem: MediaItem) {
         //  mPlayer?.clearMediaItems()
         mPlayer?.setMediaItem(mediaItem)
-
     }
 
     fun getPlayer(): ExoPlayer? {

@@ -73,6 +73,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
     override fun onResume() {
         super.onResume()
         if (mExoPlayer?.isPlaying == true) {
@@ -81,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             mAdapter.notifyDataSetChanged()
         } else {
             floatingActionButton.setImageResource(R.drawable.ic__18620_play_icon)
+
         }
 
     }
@@ -129,7 +134,7 @@ class MainActivity : AppCompatActivity() {
             floatingActionButton.visibility = View.GONE
             val editor = settings.edit()
             editor.putString("name", "")
-
+            editor.apply()
         }
     }
 

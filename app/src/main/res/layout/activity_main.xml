@@ -29,7 +29,7 @@
         app:layout_anchor="@id/bottomAppBar"
         tools:visibility="visible"
         android:layout_height="match_parent"
-         android:layout_width="wrap_content"/>
+         android:layout_width="wrap_content" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -39,7 +39,22 @@
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:layout_marginBottom="0dp"
+        android:background="@color/purple_500"
+        android:backgroundTint="@color/purple_500"
         android:paddingTop="20dp"
-        app:layout_anchorGravity="bottom" />
+        app:backgroundTint="@color/purple_500"
+        app:layout_anchorGravity="bottom" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Developed by Ksnk-dm"
+            android:textColor="@color/white" />
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
