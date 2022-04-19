@@ -4,19 +4,17 @@ package com.ksnk.radio
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerControlView
-import com.google.android.exoplayer2.ui.PlayerView
 import com.squareup.picasso.Picasso
 
 class PlayerActivity : AppCompatActivity() {
@@ -32,12 +30,18 @@ class PlayerActivity : AppCompatActivity() {
 
     private var mPlayerService: PlayerService? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+        val settings: SharedPreferences =
+            getSharedPreferences("base", MODE_PRIVATE)
+        val editor = settings.edit()
+
 
         radioWave = (intent.getSerializableExtra("items") as RadioWave?)!!
-
+        editor.putString("name", radioWave.name)
+        editor.apply()
         // mExoPlayer?.setMediaItem(mediaItem)
 
         mPlayerView = findViewById(R.id.playerView)
@@ -49,10 +53,10 @@ class PlayerActivity : AppCompatActivity() {
 
 
         Picasso.get()
-            .load(radioWave?.image)
+            .load(radioWave.image)
             .into(mPosterImageView)
-        mNameTextView.text = radioWave?.name
-        mFmFrequencyTextView.text = radioWave?.fmFrequency
+        mNameTextView.text = radioWave.name
+        mFmFrequencyTextView.text = radioWave.fmFrequency
 
         startPlayerService()
 //     mExoPlayer?.setMediaItem(mediaItem)

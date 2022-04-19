@@ -2,13 +2,17 @@ package com.ksnk.radio
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 
-class MainRecyclerViewAdapter(private var items: List<RadioWave>, var context: Context) :
-    RecyclerView.Adapter<WaveViewHolder>() {
+class MainRecyclerViewAdapter(private var items: List<RadioWave>, var context: Context, var sharedPreferences: SharedPreferences) :
+    RecyclerView.Adapter<WaveViewHolder>(), NameInterface {
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
@@ -17,6 +21,12 @@ class MainRecyclerViewAdapter(private var items: List<RadioWave>, var context: C
     }
 
     override fun onBindViewHolder(holder: WaveViewHolder, position: Int) {
+        var name = sharedPreferences.getString("name","")
+        if(name.equals(items[position].name)){
+            holder.lottieAnimationView?.visibility=View.VISIBLE
+        } else{
+            holder.lottieAnimationView?.visibility=View.GONE
+        }
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
         Picasso.get()
@@ -27,9 +37,18 @@ class MainRecyclerViewAdapter(private var items: List<RadioWave>, var context: C
             intent.putExtra("items", items[position])
             context.startActivity(intent)
         }
+
     }
 
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    fun getInterface():NameInterface{
+        return this
+    }
+
+    override fun setName(name: String) {
+        TODO("Not yet implemented")
     }
 }
