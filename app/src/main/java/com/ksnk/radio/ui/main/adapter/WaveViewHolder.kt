@@ -1,10 +1,11 @@
-package com.ksnk.radio
+package com.ksnk.radio.ui.main.adapter
 
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
+import com.ksnk.radio.R
 
 class WaveViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var imageViewWave: ImageView? = itemView.findViewById(R.id.imageViewWave)

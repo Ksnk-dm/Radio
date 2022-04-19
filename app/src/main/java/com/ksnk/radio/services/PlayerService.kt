@@ -1,8 +1,8 @@
-package com.ksnk.radio
+package com.ksnk.radio.services
 
 import android.R
 import android.app.Notification
-import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -11,28 +11,23 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import androidx.annotation.Nullable
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
+import com.ksnk.radio.entity.RadioWave
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.Picasso.LoadedFrom
 
 
 class PlayerService : Service() {
     private lateinit var playerBinder: IBinder
     private var mPlayer: ExoPlayer? = null
     private lateinit var playerNotificationManger: PlayerNotificationManager
-    private var radioWave: RadioWave?=null
-    private var bitMapPoster: Bitmap?=null
+    private var radioWave: RadioWave? = null
+    private var bitMapPoster: Bitmap? = null
 
-    fun setRadioWave(radioWave: RadioWave) {
-        this.radioWave = radioWave
-    }
 
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
@@ -43,13 +38,37 @@ class PlayerService : Service() {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
-        Log.d("service", "start")
+        initNotification()
+    }
+
+    private fun initPlayer() {
+        mPlayer = ExoPlayer.Builder(this).build()
+        mPlayer?.prepare()
+        mPlayer?.play()
+    }
+
+    override fun onDestroy() {
+        mPlayer?.release()
+        clearSharedPrefsVar()
+    }
+
+    fun getPlayer(): ExoPlayer? {
+        return mPlayer
+    }
+
+    inner class PlayerBinder : Binder() {
+        fun getService(): PlayerService? {
+            return this@PlayerService
+        }
+    }
+
+    private fun initNotification() {
         playerNotificationManger = PlayerNotificationManager.Builder(
             this, 151,
             this.resources.getString(R.string.copy)
         )
             .setChannelNameResourceId(R.string.copy)
-            .setChannelImportance(IMPORTANCE_HIGH)
+            .setChannelImportance(IMPORTANCE_DEFAULT)
             .setMediaDescriptionAdapter(object : MediaDescriptionAdapter {
                 override fun getCurrentContentTitle(player: Player): CharSequence {
                     return radioWave?.name.toString()
@@ -60,7 +79,7 @@ class PlayerService : Service() {
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
-                    return radioWave?.fmFrequency + " FM"
+                    return radioWave?.fmFrequency +" "+"FM"
                 }
 
                 override fun getCurrentLargeIcon(
@@ -73,16 +92,12 @@ class PlayerService : Service() {
                         }
 
                         override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                            // loaded bitmap is here (bitmap)
                             bitMapPoster = bitmap!!
                         }
 
                         override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
 
                     })
-
-
-
                     return bitMapPoster
                 }
             }).setNotificationListener(object : PlayerNotificationManager.NotificationListener {
@@ -91,11 +106,7 @@ class PlayerService : Service() {
                     dismissedByUser: Boolean
                 ) {
                     stopSelf()
-                    val settings: SharedPreferences =
-                        getSharedPreferences("base", MODE_PRIVATE)
-                    val editor = settings.edit()
-                    editor.putString("name", "")
-                    editor.apply()
+                    clearSharedPrefsVar()
                 }
 
                 override fun onNotificationPosted(
@@ -104,16 +115,10 @@ class PlayerService : Service() {
                     ongoing: Boolean
                 ) {
                     if (ongoing) {
-                        // Here Audio is playing, so we need to make sure the service will not get destroyed by calling startForeground.
                         startForeground(notificationId, notification)
                     } else {
-                        //Here audio has stopped playing, so we can make notification dismissible on swipe.
                         stopForeground(false)
-                        val settings: SharedPreferences =
-                            getSharedPreferences("base", MODE_PRIVATE)
-                        val editor = settings.edit()
-                        editor.putString("name", "")
-                        editor.apply()
+                        clearSharedPrefsVar()
                     }
                 }
             })
@@ -122,42 +127,21 @@ class PlayerService : Service() {
         playerNotificationManger.setPlayer(mPlayer)
         playerNotificationManger.setSmallIcon(R.drawable.ic_media_play)
         playerNotificationManger.setUseNextAction(false)
-        playerNotificationManger.setUsePreviousAction(false)
-        playerNotificationManger.setUseNextActionInCompactView(false)
+        playerNotificationManger.setUsePreviousAction(true)
+        playerNotificationManger.setUseNextActionInCompactView(true)
         playerNotificationManger.setUsePreviousActionInCompactView(false)
         playerNotificationManger.setUseChronometer(true)
-
-
     }
 
-    private fun initPlayer() {
-        mPlayer = ExoPlayer.Builder(this).build()
-//        val mediaItem: MediaItem = MediaItem.fromUri("https://online.hitfm.ua/HitFM_HD")
-//        mPlayer?.setMediaItem(mediaItem)
-        mPlayer?.prepare()
-        mPlayer?.play()
-    }
-
-    override fun onDestroy() {
-        mPlayer?.release()
+    private fun clearSharedPrefsVar() {
         val settings: SharedPreferences =
             getSharedPreferences("base", MODE_PRIVATE)
         val editor = settings.edit()
         editor.putString("name", "")
+        editor.apply()
     }
 
-    fun setItems(mediaItem: MediaItem) {
-        //  mPlayer?.clearMediaItems()
-        mPlayer?.setMediaItem(mediaItem)
-    }
-
-    fun getPlayer(): ExoPlayer? {
-        return mPlayer
-    }
-
-    inner class PlayerBinder : Binder() {
-        fun getService(): PlayerService? {
-            return this@PlayerService
-        }
+    fun setRadioWave(radioWave: RadioWave) {
+        this.radioWave = radioWave
     }
 }

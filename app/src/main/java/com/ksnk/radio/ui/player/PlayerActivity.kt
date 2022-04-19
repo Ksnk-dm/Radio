@@ -1,4 +1,4 @@
-package com.ksnk.radio
+package com.ksnk.radio.ui.player
 
 
 import android.content.ComponentName
@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +14,9 @@ import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerControlView
+import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.R
+import com.ksnk.radio.entity.RadioWave
 import com.squareup.picasso.Picasso
 
 class PlayerActivity : AppCompatActivity() {
@@ -29,40 +31,47 @@ class PlayerActivity : AppCompatActivity() {
     private var audioSessionId: Int = 0
 
     private var mPlayerService: PlayerService? = null
+    private lateinit var settings: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
-        val settings: SharedPreferences =
-            getSharedPreferences("base", MODE_PRIVATE)
-        val editor = settings.edit()
+        init()
+        initSharedPrefs()
+        saveNameInSharedPrefs()
+        setParam()
+        startPlayerService()
+    }
 
-
-        radioWave = (intent.getSerializableExtra("items") as RadioWave?)!!
-        editor.putString("name", radioWave.name)
-        editor.apply()
-        // mExoPlayer?.setMediaItem(mediaItem)
-
-        mPlayerView = findViewById(R.id.playerView)
-        mVisualizer = findViewById(R.id.bar)
-        mPosterImageView = findViewById(R.id.imageViewPoster)
-        mNameTextView = findViewById(R.id.nameTextView)
-        mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
-        //    mExoPlayer = ExoPlayer.Builder(this).build()
-
-
+    private fun setParam() {
         Picasso.get()
             .load(radioWave.image)
             .into(mPosterImageView)
         mNameTextView.text = radioWave.name
         mFmFrequencyTextView.text = radioWave.fmFrequency
+    }
 
-        startPlayerService()
-//     mExoPlayer?.setMediaItem(mediaItem)
-//
-//         mExoPlayer?.prepare()
-//        mExoPlayer?.play()
+    private fun saveNameInSharedPrefs() {
+        radioWave =
+            (intent.getSerializableExtra(getString(R.string.get_serializable_extra)) as RadioWave?)!!
+        editor.putString(getString(R.string.get_name_shared_prefs_variable), radioWave.name)
+        editor.apply()
+    }
+
+    private fun initSharedPrefs() {
+        settings =
+            getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
+        editor = settings.edit()
+    }
+
+    private fun init() {
+        mPlayerView = findViewById(R.id.playerView)
+        mVisualizer = findViewById(R.id.bar)
+        mPosterImageView = findViewById(R.id.imageViewPoster)
+        mNameTextView = findViewById(R.id.nameTextView)
+        mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
     }
 
     override fun onDestroy() {
@@ -72,23 +81,18 @@ class PlayerActivity : AppCompatActivity() {
 
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
-            Log.d("ServiceConnection", "connected")
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
-
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerView.player = mExoPlayer
             val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
             mExoPlayer?.clearMediaItems()
             mExoPlayer?.setMediaItem(mediaItem)
             audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
-            //   mPlayerService?.setItems(mediaItem)
             mVisualizer.setAudioSessionId(audioSessionId)
             mPlayerService?.setRadioWave(radioWave)
-
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            Log.d("ServiceConnection", "disconnected")
             mPlayerService = null
             mExoPlayer = null
         }

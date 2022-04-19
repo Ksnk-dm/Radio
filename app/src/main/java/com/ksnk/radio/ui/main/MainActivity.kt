@@ -1,4 +1,4 @@
-package com.ksnk.radio
+package com.ksnk.radio.ui.main
 
 import android.Manifest
 import android.content.ComponentName
@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
@@ -17,11 +16,13 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
+import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.R
+import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.ui.main.adapter.MainRecyclerViewAdapter
 
 class MainActivity : AppCompatActivity() {
     private var mExoPlayer: ExoPlayer? = null
@@ -32,23 +33,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: MainRecyclerViewAdapter
     private lateinit var floatingActionButton: FloatingActionButton
-    private lateinit var nameInterface: NameInterface
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        settings = getSharedPreferences("base", MODE_PRIVATE)
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
-            ActivityCompat.requestPermissions(this, permissions, 0)
-        }
-        floatingActionButton = findViewById(R.id.floatingActionButtonMain)
+        initPermission()
+        initSharedPrefs()
+        init()
+        checkFabStatus()
+        initDb()
+        startPlayerService()
+    }
+
+    private fun checkFabStatus() {
         floatingActionButton.setOnClickListener {
             if (mExoPlayer?.isPlaying == true) {
                 mPlayerService?.getPlayer()?.pause()
@@ -58,23 +57,26 @@ class MainActivity : AppCompatActivity() {
                 floatingActionButton.setImageResource(R.drawable.ic_pause_button_svgrepo_com)
             }
         }
-
-        database =
-            FirebaseDatabase.getInstance("https://radio-b9295-default-rtdb.europe-west1.firebasedatabase.app/")
-                .getReference("RadioWaves")
-
-        var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
-
-      //  database.child("wave10").setValue(radioWave)
-
-
-        initDb()
-        startPlayerService()
-
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun initSharedPrefs() {
+        settings = getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
+    }
+
+    private fun init() {
+        floatingActionButton = findViewById(R.id.floatingActionButtonMain)
+        mRecyclerView = findViewById(R.id.main_recycler_view)
+    }
+
+    private fun initPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+            ActivityCompat.requestPermissions(this, permissions, 0)
+        }
     }
 
     override fun onResume() {
@@ -85,12 +87,15 @@ class MainActivity : AppCompatActivity() {
             mAdapter.notifyDataSetChanged()
         } else {
             floatingActionButton.setImageResource(R.drawable.ic__18620_play_icon)
-
         }
-
     }
 
     private fun initDb() {
+        database =
+            FirebaseDatabase.getInstance(getString(R.string.firebase_url))
+                .getReference(getString(R.string.firebase_ref))
+        // var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
+        //  database.child("wave10").setValue(radioWave)
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -107,17 +112,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecycler() {
-        mRecyclerView = findViewById(R.id.main_recycler_view)
+
         mGridLayoutManager = GridLayoutManager(this, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
         mAdapter = MainRecyclerViewAdapter(items, this, settings)
         mRecyclerView.adapter = mAdapter
-        nameInterface = mAdapter.getInterface()
     }
 
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
-            Log.d("ServiceConnection", "connected")
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             if (mExoPlayer?.isPlaying == true) {
@@ -128,12 +131,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            Log.d("ServiceConnection", "disconnected")
             mPlayerService = null
             mExoPlayer = null
             floatingActionButton.visibility = View.GONE
             val editor = settings.edit()
-            editor.putString("name", "")
+            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
             editor.apply()
         }
     }
