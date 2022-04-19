@@ -51,10 +51,10 @@ class MainActivity : AppCompatActivity() {
         floatingActionButton.setOnClickListener {
             if (mExoPlayer?.isPlaying == true) {
                 mPlayerService?.getPlayer()?.pause()
-                floatingActionButton.setImageResource(R.drawable.ic__18620_play_icon)
+                floatingActionButton.setImageResource(R.drawable.ic_play_icon)
             } else {
                 mPlayerService?.getPlayer()?.play()
-                floatingActionButton.setImageResource(R.drawable.ic_pause_button_svgrepo_com)
+                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             }
         }
     }
@@ -83,10 +83,10 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (mExoPlayer?.isPlaying == true) {
             floatingActionButton.visibility = View.VISIBLE
-            floatingActionButton.setImageResource(R.drawable.ic_pause_button_svgrepo_com)
+            floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             mAdapter.notifyDataSetChanged()
         } else {
-            floatingActionButton.setImageResource(R.drawable.ic__18620_play_icon)
+            floatingActionButton.setImageResource(R.drawable.ic_play_icon)
         }
     }
 
@@ -94,8 +94,8 @@ class MainActivity : AppCompatActivity() {
         database =
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
                 .getReference(getString(R.string.firebase_ref))
-        // var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
-        //  database.child("wave10").setValue(radioWave)
+                 var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
+      //    database.child("wave20").setValue(radioWave)
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -112,7 +112,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecycler() {
-
         mGridLayoutManager = GridLayoutManager(this, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
         mAdapter = MainRecyclerViewAdapter(items, this, settings)
@@ -125,7 +124,7 @@ class MainActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             if (mExoPlayer?.isPlaying == true) {
                 floatingActionButton.visibility = View.VISIBLE
-                floatingActionButton.setImageResource(R.drawable.ic_pause_button_svgrepo_com)
+                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             }
 
         }

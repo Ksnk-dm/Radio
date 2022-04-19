@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Binder
 import android.os.IBinder
@@ -79,7 +80,7 @@ class PlayerService : Service() {
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
-                    return radioWave?.fmFrequency +" "+"FM"
+                    return radioWave?.fmFrequency + " " + "FM"
                 }
 
                 override fun getCurrentLargeIcon(
@@ -88,7 +89,10 @@ class PlayerService : Service() {
                 ): Bitmap? {
                     Picasso.get().load(radioWave?.image).into(object : com.squareup.picasso.Target {
                         override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                            TODO("not implemented")
+                            bitMapPoster = BitmapFactory.decodeResource(
+                                resources,
+                                R.drawable.ic_media_play
+                            )
                         }
 
                         override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {

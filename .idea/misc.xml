@@ -3,11 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.11" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic__18620_play_icon.xml" value="0.1" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_music_note_24.xml" value="0.1" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_pause_24.xml" value="0.11" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_play_arrow_24.xml" value="0.11" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_launcher_background.xml" value="0.11" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_pause_button_svgrepo_com.xml" value="0.1" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_player.xml" value="0.1140625" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_splash.xml" value="0.10536980749746708" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/custom_player_view.xml" value="0.2" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/wave_items.xml" value="0.264" />
       </map>

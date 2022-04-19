@@ -24,7 +24,7 @@
         app:backgroundTint="@android:color/transparent"
         app:backgroundTintMode="screen"
         app:maxImageSize="55dp"
-        app:srcCompat="@drawable/ic__18620_play_icon"
+        app:srcCompat="@drawable/ic_play_icon"
         app:tint="@null"
         app:layout_anchor="@id/bottomAppBar"
         tools:visibility="visible"
