@@ -33,6 +33,6 @@ Ads in application
 * [ExoPlayer](https://exoplayer.dev/)
 ExoPlayer is an application level media player for Android. It provides an alternative to Android’s MediaPlayer API for playing audio and video both locally and over the Internet. ExoPlayer supports features not currently supported by Android’s MediaPlayer API, including DASH and SmoothStreaming adaptive playbacks. Unlike the MediaPlayer API, ExoPlayer is easy to customize and extend, and can be updated through Play Store application updates.
 * [Lottie](https://lottiefiles.com/)
-Lottie is an open source animation file format that's tiny, high quality, interactive, and can be manipulated at runtime.
+Is an open source animation file format that's tiny, high quality, interactive, and can be manipulated at runtime.
 * [Audio-Visualizer](https://github.com/gauravk95/audio-visualizer-android)
 A light-weight and easy-to-use Audio Visualizer for Android using the Android Canvas.
