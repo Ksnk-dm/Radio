@@ -79,6 +79,11 @@ class PlayerActivity : AppCompatActivity() {
         mVisualizer.release()
     }
 
+    override fun onStop() {
+        super.onStop()
+        finish()
+    }
+
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
@@ -88,13 +93,22 @@ class PlayerActivity : AppCompatActivity() {
             mExoPlayer?.clearMediaItems()
             mExoPlayer?.setMediaItem(mediaItem)
             audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
-            mVisualizer.setAudioSessionId(audioSessionId)
+            visualiserCheck()
             mPlayerService?.setRadioWave(radioWave)
+            mPlayerService?.initNotification()
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
             mPlayerService = null
             mExoPlayer = null
+        }
+    }
+
+    private fun visualiserCheck() {
+        try {
+            mVisualizer.setAudioSessionId(audioSessionId)
+        } catch (e: IllegalStateException) {
+            audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
         }
     }
 
