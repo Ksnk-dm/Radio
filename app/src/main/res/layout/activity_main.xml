@@ -16,20 +16,21 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButtonMain"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-
         android:clickable="true"
+        android:enabled="false"
         android:visibility="visible"
         app:backgroundTint="@android:color/transparent"
         app:backgroundTintMode="screen"
+        app:layout_anchor="@id/bottomAppBar"
         app:maxImageSize="55dp"
         app:srcCompat="@drawable/ic_play_icon"
         app:tint="@null"
-        app:layout_anchor="@id/bottomAppBar"
-        tools:visibility="visible"
-        android:layout_height="match_parent"
-         android:layout_width="wrap_content" />
+        tools:visibility="visible" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"

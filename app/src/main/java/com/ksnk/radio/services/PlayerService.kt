@@ -19,6 +19,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
 
 
@@ -39,7 +40,7 @@ class PlayerService : Service() {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
-        initNotification()
+       // initNotification()
     }
 
     private fun initPlayer() {
@@ -63,11 +64,10 @@ class PlayerService : Service() {
         }
     }
 
-    private fun initNotification() {
+    public fun initNotification() {
         playerNotificationManger = PlayerNotificationManager.Builder(
             this, 151,
-            this.resources.getString(R.string.copy)
-        )
+            this.resources.getString(R.string.copy))
             .setChannelNameResourceId(R.string.copy)
             .setChannelImportance(IMPORTANCE_DEFAULT)
             .setMediaDescriptionAdapter(object : MediaDescriptionAdapter {
@@ -76,23 +76,26 @@ class PlayerService : Service() {
                 }
 
                 override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                    return null
+                    val i = Intent(this@PlayerService, PlayerActivity::class.java)
+                    i.putExtra(getString(com.ksnk.radio.R.string.get_serializable_extra), radioWave)
+                    return PendingIntent.getActivity(
+                        this@PlayerService, 0, i,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
-                    return radioWave?.fmFrequency + " " + "FM"
+                    return radioWave?.fmFrequency
                 }
 
                 override fun getCurrentLargeIcon(
                     player: Player,
-                    callback: BitmapCallback
-                ): Bitmap? {
+                    callback: BitmapCallback): Bitmap? {
                     Picasso.get().load(radioWave?.image).into(object : com.squareup.picasso.Target {
                         override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
                             bitMapPoster = BitmapFactory.decodeResource(
                                 resources,
-                                R.drawable.ic_media_play
-                            )
+                                R.drawable.ic_media_play)
                         }
 
                         override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -100,7 +103,6 @@ class PlayerService : Service() {
                         }
 
                         override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
-
                     })
                     return bitMapPoster
                 }

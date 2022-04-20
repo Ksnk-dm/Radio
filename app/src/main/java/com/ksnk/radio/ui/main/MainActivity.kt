@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity() {
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -71,9 +73,7 @@ class MainActivity : AppCompatActivity() {
     private fun initPermission() {
         if (ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
             ActivityCompat.requestPermissions(this, permissions, 0)
         }
@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (mExoPlayer?.isPlaying == true) {
+         floatingActionButton.isEnabled=true
             floatingActionButton.visibility = View.VISIBLE
             floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             mAdapter.notifyDataSetChanged()
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
                 .getReference(getString(R.string.firebase_ref))
                  var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
-      //    database.child("wave20").setValue(radioWave)
+       //   database.child("wave30").setValue(radioWave)
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -124,9 +125,9 @@ class MainActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             if (mExoPlayer?.isPlaying == true) {
                 floatingActionButton.visibility = View.VISIBLE
+                floatingActionButton.isEnabled=true
                 floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             }
-
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
