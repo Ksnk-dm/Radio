@@ -16,7 +16,9 @@ Listening to many Ukrainian radio stations online in good quality. With the abil
 ![minSdkVersion 24](https://img.shields.io/badge/minSdkVersion-24-red.svg?style=true)
 ![compileSdkVersion 32](https://img.shields.io/badge/compileSdkVersion-32-green)
 ![gradle](https://img.shields.io/badge/Gradle-7.1.1-orange)
- ![Second screen](https://s1.hostingkartinok.com/uploads/images/2022/01/3d196eafacd7d52a70c2757a70aeadb5.gif)
+
+
+![first screen](https://i.ibb.co/qBnMRvC/video5404423460988392922.gif)
 
 ## Libraries and tools used in the project
 
