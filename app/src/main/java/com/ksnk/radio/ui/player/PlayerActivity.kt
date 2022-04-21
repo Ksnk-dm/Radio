@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,8 @@ class PlayerActivity : AppCompatActivity() {
     private var mPlayerService: PlayerService? = null
     private lateinit var settings: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
+
+    private lateinit var custButton:Button
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
