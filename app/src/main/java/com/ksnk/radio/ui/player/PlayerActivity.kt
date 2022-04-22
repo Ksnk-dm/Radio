@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,6 +20,7 @@ import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.R
 import com.ksnk.radio.entity.RadioWave
 import com.squareup.picasso.Picasso
+import kotlin.properties.Delegates
 
 class PlayerActivity : AppCompatActivity() {
     private var mExoPlayer: ExoPlayer? = null
@@ -29,7 +31,10 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
     private lateinit var radioWave: RadioWave
-    private var audioSessionId: Int = 0
+
+    private lateinit var radioWaveList: List<RadioWave>
+
+    private var audioSessionId by Delegates.notNull<Int>()
 
     private var mPlayerService: PlayerService? = null
     private lateinit var settings: SharedPreferences
@@ -59,6 +64,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun saveNameInSharedPrefs() {
         radioWave =
             (intent.getSerializableExtra(getString(R.string.get_serializable_extra)) as RadioWave?)!!
+        radioWaveList=intent.getSerializableExtra("list") as ArrayList<RadioWave>
         editor.putString(getString(R.string.get_name_shared_prefs_variable), radioWave.name)
         editor.apply()
     }
@@ -95,7 +101,7 @@ class PlayerActivity : AppCompatActivity() {
             val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
             mExoPlayer?.clearMediaItems()
             mExoPlayer?.setMediaItem(mediaItem)
-            audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
+            audioSessionId = mExoPlayer!!.audioSessionId
             visualiserCheck()
             mPlayerService?.setRadioWave(radioWave)
             mPlayerService?.initNotification()
@@ -111,7 +117,8 @@ class PlayerActivity : AppCompatActivity() {
         try {
             mVisualizer.setAudioSessionId(audioSessionId)
         } catch (e: IllegalStateException) {
-            audioSessionId = mPlayerService?.getPlayer()?.audioSessionId!!
+            e.stackTrace
+            Log.d("error", e.toString())
         }
     }
 

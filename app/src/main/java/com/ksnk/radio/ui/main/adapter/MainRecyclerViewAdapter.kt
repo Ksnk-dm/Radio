@@ -3,6 +3,7 @@ package com.ksnk.radio.ui.main.adapter
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import com.ksnk.radio.*
 import com.ksnk.radio.entity.RadioWave
 import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
+import java.util.ArrayList
 
 class MainRecyclerViewAdapter(
     private var items: List<RadioWave>,

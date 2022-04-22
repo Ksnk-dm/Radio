@@ -56,7 +56,7 @@
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/animationView"
-            android:layout_width="50dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
             android:visibility="gone"
             app:lottie_autoPlay="true"
@@ -64,4 +64,12 @@
             app:lottie_rawRes="@raw/music_anim" />
     </LinearLayout>
 
+    <View
+        android:layout_width="280dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#43939292"
+        android:foregroundGravity="center" />
 </LinearLayout>
