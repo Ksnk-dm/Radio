@@ -40,8 +40,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var settings: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
 
-    private lateinit var custButton:Button
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +62,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun saveNameInSharedPrefs() {
         radioWave =
             (intent.getSerializableExtra(getString(R.string.get_serializable_extra)) as RadioWave?)!!
-        radioWaveList=intent.getSerializableExtra("list") as ArrayList<RadioWave>
+                //    radioWaveList=intent.getSerializableExtra("list") as ArrayList<RadioWave>
         editor.putString(getString(R.string.get_name_shared_prefs_variable), radioWave.name)
         editor.apply()
     }
@@ -99,6 +97,8 @@ class PlayerActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerView.player = mExoPlayer
             val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
+
+            Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
             mExoPlayer?.clearMediaItems()
             mExoPlayer?.setMediaItem(mediaItem)
             audioSessionId = mExoPlayer!!.audioSessionId
