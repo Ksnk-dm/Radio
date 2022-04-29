@@ -1,4 +1,4 @@
-package com.ksnk.radio.ui.main.adapter
+package com.ksnk.radio.ui.listFragment.adapter
 
 import android.view.View
 import android.widget.ImageView

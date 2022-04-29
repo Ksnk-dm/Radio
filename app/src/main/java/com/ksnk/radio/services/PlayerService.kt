@@ -20,6 +20,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -30,6 +31,7 @@ import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
+import javax.inject.Inject
 
 
 class PlayerService : Service() {
@@ -39,6 +41,11 @@ class PlayerService : Service() {
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
 
+
+
+    @Inject
+    fun PlayerService() {
+    }
 
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
@@ -168,5 +175,10 @@ class PlayerService : Service() {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
+        var mediaItem:MediaItem = MediaItem.fromUri(radioWave.url.toString())
+        mPlayer = ExoPlayer.Builder(this).build()
+        mPlayer?.setMediaItem(mediaItem)
+        mPlayer?.prepare()
+        mPlayer?.play()
     }
 }

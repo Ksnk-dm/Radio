@@ -11,6 +11,8 @@ class RadioWaveRepository
 
     fun insertRadioWave(radioWave: RadioWave) = radioWaveDao.insert(radioWave)
 
+    fun insertListRadioWave(listRadioWave: List<RadioWave>) = radioWaveDao.insertAll(listRadioWave)
+
     fun deleteRadioWave(radioWave: RadioWave) = radioWaveDao.delete(radioWave)
 
     fun updateRadioWave(radioWave: RadioWave) = radioWaveDao.update(radioWave)

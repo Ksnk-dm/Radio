@@ -8,23 +8,27 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.view.View
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
-import com.ksnk.radio.di.modules.ViewModelFactory
 import com.ksnk.radio.services.PlayerService
-import com.ksnk.radio.ui.main.adapter.MainRecyclerViewAdapter
+import com.ksnk.radio.ui.listFragment.ListFragment
+import com.ksnk.radio.ui.playerFragment.PlayerFragment
+import com.ksnk.radio.ui.listFragment.adapter.MainRecyclerViewAdapter
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
@@ -38,16 +42,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mAdapter: MainRecyclerViewAdapter
     private lateinit var floatingActionButton: FloatingActionButton
 
+    private lateinit var bottomNavView: BottomNavigationView
+    private var fragmentView: FragmentContainerView? = null
+
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
 
-    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject lateinit var userViewModel: MainViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    @Inject
+    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
 
-        userViewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+
+
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
@@ -58,19 +70,19 @@ class MainActivity : AppCompatActivity() {
         checkFabStatus()
         initDb()
         startPlayerService()
-        userViewModel.createRadioWave()
+        // userViewModel.createRadioWave()
     }
 
     private fun checkFabStatus() {
-        floatingActionButton.setOnClickListener {
-            if (mExoPlayer?.isPlaying == true) {
-                mPlayerService?.getPlayer()?.pause()
-                floatingActionButton.setImageResource(R.drawable.ic_play_icon)
-            } else {
-                mPlayerService?.getPlayer()?.play()
-                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-            }
-        }
+//        floatingActionButton.setOnClickListener {
+//            if (mExoPlayer?.isPlaying == true) {
+//                mPlayerService?.getPlayer()?.pause()
+//                floatingActionButton.setImageResource(R.drawable.ic_play_icon)
+//            } else {
+//                mPlayerService?.getPlayer()?.play()
+//                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
+//            }
+//        }
     }
 
     private fun initSharedPrefs() {
@@ -78,8 +90,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        floatingActionButton = findViewById(R.id.floatingActionButtonMain)
-        mRecyclerView = findViewById(R.id.main_recycler_view)
+        bottomNavView = findViewById(R.id.bottomNavViewMain)
+        fragmentView = findViewById(R.id.fragmentContainerView)
+        var fragment: Fragment
+        bottomNavView.setOnItemSelectedListener {
+
+            when (it.itemId) {
+                R.id.item1 -> {
+                    fragment = ListFragment().newInstance()
+                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+                    transaction.replace(R.id.fragmentContainerView, fragment)
+                    transaction.addToBackStack(null)
+                    transaction.commit()
+                }
+                R.id.item2 -> {
+                    fragment = PlayerFragment().newInstance()
+                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+                    transaction.replace(R.id.fragmentContainerView, fragment)
+                    transaction.addToBackStack(null)
+                    transaction.commit()
+                }
+                R.id.item3 -> {
+
+                }
+            }
+            return@setOnItemSelectedListener true
+        }
+
+        // floatingActionButton = findViewById(R.id.floatingActionButtonMain)
+        //   mRecyclerView = findViewById(R.id.main_recycler_view)
     }
 
     private fun initPermission() {
@@ -95,14 +134,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (mExoPlayer?.isPlaying == true) {
-            floatingActionButton.isEnabled = true
-            floatingActionButton.visibility = View.VISIBLE
-            floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-            mAdapter.notifyDataSetChanged()
-        } else {
-            floatingActionButton.setImageResource(R.drawable.ic_play_icon)
-        }
+//        if (mExoPlayer?.isPlaying == true) {
+//            floatingActionButton.isEnabled = true
+//            floatingActionButton.visibility = View.VISIBLE
+//            floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
+//            mAdapter.notifyDataSetChanged()
+//        } else {
+//            floatingActionButton.setImageResource(R.drawable.ic_play_icon)
+//        }
     }
 
     private fun initDb() {
@@ -117,7 +156,7 @@ class MainActivity : AppCompatActivity() {
                     val radioWave: RadioWave? = dataSnapshot.getValue(RadioWave::class.java)
                     items.add(radioWave!!)
                 }
-                initRecycler()
+                viewModel.createListRadioWave(items)
             }
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
@@ -127,30 +166,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecycler() {
-        mGridLayoutManager = GridLayoutManager(this, 1)
-        mRecyclerView.layoutManager = mGridLayoutManager
-        mAdapter = MainRecyclerViewAdapter(items, this, settings)
-        mRecyclerView.adapter = mAdapter
+//        mGridLayoutManager = GridLayoutManager(this, 1)
+//        mRecyclerView.layoutManager = mGridLayoutManager
+//        mAdapter = MainRecyclerViewAdapter(items, this, settings)
+//        mRecyclerView.adapter = mAdapter
     }
 
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-            if (mExoPlayer?.isPlaying == true) {
-                floatingActionButton.visibility = View.VISIBLE
-                floatingActionButton.isEnabled = true
-                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-            }
+//            if (mExoPlayer?.isPlaying == true) {
+//                floatingActionButton.visibility = View.VISIBLE
+//                floatingActionButton.isEnabled = true
+//                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
+//            }
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-            mPlayerService = null
-            mExoPlayer = null
-            floatingActionButton.visibility = View.GONE
-            val editor = settings.edit()
-            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-            editor.apply()
+//            mPlayerService = null
+//            mExoPlayer = null
+//            floatingActionButton.visibility = View.GONE
+//            val editor = settings.edit()
+//            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
+//            editor.apply()
         }
     }
 
@@ -158,5 +197,9 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, PlayerService::class.java)
         bindService(intent, myConnection, BIND_AUTO_CREATE)
         startService(intent)
+    }
+
+    override fun onBackPressed() {
+       // super.onBackPressed()
     }
 }

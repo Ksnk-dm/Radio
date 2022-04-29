@@ -6,11 +6,19 @@ import com.ksnk.radio.data.repository.RadioWaveRepository
 import javax.inject.Inject
 
 class MainViewModel
-@Inject constructor(var radioWaveRepository: RadioWaveRepository):BaseViewModel() {
+@Inject constructor(var radioWaveRepository: RadioWaveRepository) : BaseViewModel() {
 
-    fun createRadioWave(){
-        val radioWave:RadioWave = RadioWave(1,"name", "image", "url","fm")
-        radioWaveRepository.insertRadioWave(radioWave)
+    fun createRadioWave() {
+       // val radioWave: RadioWave = RadioWave( "name", "image", "url", "fm")
+      //  radioWaveRepository.insertRadioWave(radioWave)
+    }
+
+    fun createListRadioWave(listRadioWave: List<RadioWave>){
+        radioWaveRepository.insertListRadioWave(listRadioWave)
+    }
+
+    fun getAll(): List<RadioWave> {
+        return radioWaveRepository.getAllRadioWave()
     }
 
 }

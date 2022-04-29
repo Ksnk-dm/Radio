@@ -1,23 +1,23 @@
-package com.ksnk.radio.ui.main.adapter
+package com.ksnk.radio.ui.listFragment.adapter
 
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
-import com.ksnk.radio.ui.player.PlayerActivity
+import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
+import javax.inject.Inject
 
 class MainRecyclerViewAdapter(
     private var items: List<RadioWave>,
-    var context: Context,
-    var sharedPreferences: SharedPreferences) :
+    var context: Context?
+) :
     RecyclerView.Adapter<WaveViewHolder>() {
-
+    @set:Inject
+    internal var mPlayerService: PlayerService? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
@@ -34,6 +34,10 @@ class MainRecyclerViewAdapter(
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
             startPlayerActivity(position)
+            var mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+            mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
+            mPlayerService?.getPlayer()?.play()
+            mPlayerService?.initNotification()
         }
     }
 
@@ -42,17 +46,17 @@ class MainRecyclerViewAdapter(
     }
 
     private fun checkStatusAnim(holder: WaveViewHolder, position: Int) {
-        val name = sharedPreferences.getString(context.getString(R.string.get_name_shared_prefs_variable), "")
-        if (name.equals(items[position].name)) {
-            holder.lottieAnimationView?.visibility = View.VISIBLE
-        } else {
-            holder.lottieAnimationView?.visibility = View.GONE
-        }
+//        val name = sharedPreferences.getString(context.getString(R.string.get_name_shared_prefs_variable), "")
+//        if (name.equals(items[position].name)) {
+//            holder.lottieAnimationView?.visibility = View.VISIBLE
+//        } else {
+//            holder.lottieAnimationView?.visibility = View.GONE
+//        }
     }
 
     private fun startPlayerActivity(position: Int) {
-        val intent = Intent(context, PlayerActivity::class.java)
-        intent.putExtra(context.getString(R.string.get_serializable_extra), items[position])
-        context.startActivity(intent)
+//        val intent = Intent(context, PlayerActivity::class.java)
+//        intent.putExtra(context.getString(R.string.get_serializable_extra), items[position])
+//        context.startActivity(intent)
     }
 }

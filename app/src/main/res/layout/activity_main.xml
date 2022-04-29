@@ -1,61 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
     android:orientation="vertical"
+    android:weightSum="2"
     tools:context=".ui.main.MainActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/main_recycler_view"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="60dp" />
+        android:layout_weight="2" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButtonMain"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:clickable="true"
-        android:enabled="false"
-        android:visibility="visible"
-        app:backgroundTint="@android:color/transparent"
-        app:backgroundTintMode="screen"
-        app:layout_anchor="@id/bottomAppBar"
-        app:maxImageSize="55dp"
-        app:srcCompat="@drawable/ic_play_icon"
-        app:tint="@null"
-        tools:visibility="visible" />
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottomAppBar"
-        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavViewMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="0dp"
-        android:background="@color/purple_500"
-        android:backgroundTint="@color/purple_500"
-        android:paddingTop="20dp"
-        app:backgroundTint="@color/purple_500"
-        app:layout_anchorGravity="bottom" >
+        app:menu="@menu/main_menu" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/dev_name"
-            android:textColor="@color/white" />
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/main_recycler_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_marginBottom="60dp"-->
+<!--        android:visibility="gone"-->
+<!--        tools:visibility="gone" />-->
 
-    </com.google.android.material.bottomappbar.BottomAppBar>
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/floatingActionButtonMain"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="match_parent"-->
+
+<!--        android:layout_alignParentEnd="true"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:clickable="true"-->
+<!--        android:enabled="false"-->
+<!--        android:visibility="gone"-->
+<!--        app:backgroundTint="@android:color/transparent"-->
+<!--        app:backgroundTintMode="screen"-->
+<!--        app:layout_anchor="@id/bottomAppBar"-->
+<!--        app:maxImageSize="55dp"-->
+<!--        app:srcCompat="@drawable/ic_play_icon"-->
+<!--        app:tint="@null"-->
+<!--        tools:visibility="gone" />-->
+
+<!--    <com.google.android.material.bottomappbar.BottomAppBar-->
+<!--        android:id="@+id/bottomAppBar"-->
+<!--        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_gravity="bottom"-->
+<!--        android:layout_marginBottom="0dp"-->
+<!--        android:background="@color/purple_500"-->
+<!--        android:backgroundTint="@color/purple_500"-->
+<!--        android:paddingTop="20dp"-->
+<!--        android:visibility="gone"-->
+<!--        app:backgroundTint="@color/purple_500"-->
+<!--        app:layout_anchorGravity="bottom">-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:gravity="center"-->
+<!--            android:text="@string/dev_name"-->
+<!--            android:textColor="@color/white" />-->
+
+<!--    </com.google.android.material.bottomappbar.BottomAppBar>-->
 
 
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>
