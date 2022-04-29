@@ -13,11 +13,12 @@ data class RadioWave(
     var name: String?,
     var image: String?,
     var url: String?,
-    var fmFrequency: String?
+    var fmFrequency: String?,
+    var favorite: Boolean?
 )
 
     : Serializable {
-    constructor() : this(null, null, null, null, null)
+    constructor() : this(null, null, null, null, null, false)
 
 
     override fun toString(): String {

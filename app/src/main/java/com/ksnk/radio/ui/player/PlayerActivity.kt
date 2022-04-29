@@ -76,7 +76,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun init() {
         mPlayerView = findViewById(R.id.playerView)
-        mVisualizer = findViewById(R.id.bar)
+       // mVisualizer = findViewById(R.id.bar)
         mPosterImageView = findViewById(R.id.imageViewPoster)
         mNameTextView = findViewById(R.id.nameTextView)
         mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
@@ -117,12 +117,12 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun visualiserCheck() {
-        try {
-            mVisualizer.setAudioSessionId(audioSessionId)
-        } catch (e: IllegalStateException) {
-            e.stackTrace
-            Log.d("error", e.toString())
-        }
+//        try {
+//            mVisualizer.setAudioSessionId(audioSessionId)
+//        } catch (e: IllegalStateException) {
+//            e.stackTrace
+//            Log.d("error", e.toString())
+//        }
     }
 
     private fun startPlayerService() {

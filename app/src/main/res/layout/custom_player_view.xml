@@ -30,7 +30,7 @@
             android:id="@+id/nameTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="15dp"
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="24sp"
@@ -44,10 +44,28 @@
             android:textColor="@color/white"
             android:textSize="16sp" />
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/favAnimationView"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:visibility="invisible"
+            app:lottie_autoPlay="false"
+            app:lottie_loop="false"
+            app:lottie_rawRes="@raw/like"
+            tools:visibility="invisible" />
+
+        <ImageButton
+            android:id="@+id/favoriteImageButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_baseline_favorite_border_24" />
+
         <com.gauravk.audiovisualizer.visualizer.BarVisualizer
             android:id="@+id/bar"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="150dp"
             android:layout_margin="15dp"
             app:avColor="#FFEB3B"
             app:avDensity="0.5"
@@ -63,33 +81,19 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/exo_prev"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/ic_svg" />
-
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/exo_pause"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                app:lottie_rawRes="@raw/music_anim" />
-
-            <ImageButton
                 android:id="@+id/exo_play"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:srcCompat="@drawable/ic_play_icon" />
 
             <ImageButton
-                android:id="@+id/exo_next"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:id="@+id/exo_pause"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/ic_next_button_svgrepo_com" />
+                app:srcCompat="@drawable/ic_pause_icon" />
+
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

@@ -55,7 +55,7 @@
         </LinearLayout>
 
         <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/animationView"
+            android:id="@+id/favAnimationView"
             android:layout_width="70dp"
             android:layout_height="match_parent"
             android:visibility="gone"

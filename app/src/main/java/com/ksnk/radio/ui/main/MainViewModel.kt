@@ -21,4 +21,8 @@ class MainViewModel
         return radioWaveRepository.getAllRadioWave()
     }
 
+    fun updateRadioWave(radioWave: RadioWave){
+        radioWaveRepository.updateRadioWave(radioWave)
+    }
+
 }
