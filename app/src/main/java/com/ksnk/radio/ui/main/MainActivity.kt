@@ -6,23 +6,27 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import androidx.annotation.NonNull
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
-import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.R
-import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.di.modules.ViewModelFactory
+import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.main.adapter.MainRecyclerViewAdapter
+import dagger.android.AndroidInjection
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
     private var mExoPlayer: ExoPlayer? = null
@@ -37,16 +41,24 @@ class MainActivity : AppCompatActivity() {
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
 
+    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject lateinit var userViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
+
+        userViewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
+
         initPermission()
         initSharedPrefs()
         init()
         checkFabStatus()
         initDb()
         startPlayerService()
+        userViewModel.createRadioWave()
     }
 
     private fun checkFabStatus() {
@@ -73,7 +85,9 @@ class MainActivity : AppCompatActivity() {
     private fun initPermission() {
         if (ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
             ActivityCompat.requestPermissions(this, permissions, 0)
         }
@@ -82,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (mExoPlayer?.isPlaying == true) {
-         floatingActionButton.isEnabled=true
+            floatingActionButton.isEnabled = true
             floatingActionButton.visibility = View.VISIBLE
             floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             mAdapter.notifyDataSetChanged()
@@ -95,8 +109,8 @@ class MainActivity : AppCompatActivity() {
         database =
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
                 .getReference(getString(R.string.firebase_ref))
-                 var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
-       //   database.child("wave30").setValue(radioWave)
+        //   var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
+        //   database.child("wave30").setValue(radioWave)
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -125,7 +139,7 @@ class MainActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             if (mExoPlayer?.isPlaying == true) {
                 floatingActionButton.visibility = View.VISIBLE
-                floatingActionButton.isEnabled=true
+                floatingActionButton.isEnabled = true
                 floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
             }
         }

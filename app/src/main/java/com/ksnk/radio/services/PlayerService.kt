@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable
 
 import android.os.Binder
 import android.os.IBinder
-import android.support.v4.media.MediaMetadataCompat
 
 
 import android.support.v4.media.session.MediaSessionCompat
@@ -21,16 +20,14 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaMetadata
 
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.ksnk.radio.R
-import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
 

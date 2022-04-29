@@ -8,7 +8,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +18,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.R
-import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.data.entity.RadioWave
 import com.squareup.picasso.Picasso
 import kotlin.properties.Delegates
 
@@ -31,6 +31,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
     private lateinit var radioWave: RadioWave
+    private lateinit var backImageButton: ImageButton
 
     private lateinit var radioWaveList: List<RadioWave>
 
@@ -79,6 +80,8 @@ class PlayerActivity : AppCompatActivity() {
         mPosterImageView = findViewById(R.id.imageViewPoster)
         mNameTextView = findViewById(R.id.nameTextView)
         mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
+        backImageButton=findViewById(R.id.backImageButton)
+        backImageButton.setOnClickListener { finish() }
     }
 
     override fun onDestroy() {
@@ -96,7 +99,7 @@ class PlayerActivity : AppCompatActivity() {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerView.player = mExoPlayer
-            val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url)
+            val mediaItem: MediaItem = MediaItem.fromUri(radioWave.url.toString())
 
             Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
             mExoPlayer?.clearMediaItems()
