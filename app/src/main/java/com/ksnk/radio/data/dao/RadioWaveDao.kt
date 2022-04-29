@@ -19,4 +19,7 @@ interface RadioWaveDao {
 
     @Query("SELECT * FROM radiowave")
     fun getAll():List<RadioWave>
+
+    @Query("SELECT * FROM radiowave WHERE favorite =1")
+    fun getFavoriteRadioWave():List<RadioWave>
 }

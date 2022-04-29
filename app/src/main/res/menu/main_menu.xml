@@ -5,6 +5,6 @@
         android:icon="@drawable/ic_baseline_list_24"/>
     <item android:title="Player" android:id="@+id/item2"
         android:icon="@drawable/ic_baseline_play_circle_filled_24"/>
-    <item android:title="Settings" android:id="@+id/item3"
-        android:icon="@drawable/ic_baseline_settings_24"/>
+    <item android:title="Favorite" android:id="@+id/item3"
+        android:icon="@drawable/ic_baseline_favorite_24"/>
 </menu>

@@ -1,34 +1,31 @@
-package com.ksnk.radio.ui.listFragment.adapter
+package com.ksnk.radio.ui.favoriteFragment.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.ksnk.radio.*
+import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
 
-class ListFragmentRecyclerViewAdapter(
+class FavoriteFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
     var context: Context?,
     var mPlayer: ExoPlayer,
-    var mService:PlayerService
+    var mService: PlayerService
 ) :
-    RecyclerView.Adapter<WaveViewHolder>() {
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
+    RecyclerView.Adapter<FavoriteViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return WaveViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
+        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
     }
 
-    override fun onBindViewHolder(holder: WaveViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: FavoriteViewHolder, position: Int) {
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
         Picasso.get()
@@ -39,18 +36,10 @@ class ListFragmentRecyclerViewAdapter(
             mPlayer.setMediaItem(mediaItem)
             mPlayer.play()
             mService?.setRadioWave(items[position])
-            notifyDataSetChanged()
-        }
-        if (mService.getRadioWave()?.name?.toString().equals(items[position].name)){
-            holder.lottieAnimationView?.visibility=View.VISIBLE
-        } else{
-            holder.lottieAnimationView?.visibility=View.INVISIBLE
         }
     }
 
     override fun getItemCount(): Int {
         return items.size
     }
-
-
 }

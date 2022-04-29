@@ -60,7 +60,7 @@ class PlayerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.player_fragment, container, false);
+        return inflater.inflate(R.layout.player_fragment, container, false)
     }
 
     private var myConnection = object : ServiceConnection {
@@ -73,13 +73,20 @@ class PlayerFragment : Fragment() {
                 .into(mPosterImageView)
             mNameTextView.text = mPlayerService?.getRadioWave()?.name
             mFmFrequencyTextView.text = mPlayerService?.getRadioWave()?.fmFrequency
+
+            radioWave = mPlayerService?.getRadioWave()!!
+
             if (mPlayerService?.getRadioWave()?.favorite == true) {
                 favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
             } else {
                 favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
             }
-            radioWave = mPlayerService?.getRadioWave()!!
+
+
+            if (mPlayerService == null) return
             audioSessionId = mExoPlayer!!.audioSessionId
+
+
             try {
                 mVisualizer.setAudioSessionId(audioSessionId)
             } catch (e: Exception) {
@@ -91,7 +98,6 @@ class PlayerFragment : Fragment() {
         override fun onServiceDisconnected(className: ComponentName) {
             mPlayerService = null
             mExoPlayer = null
-
         }
     }
 
@@ -111,15 +117,19 @@ class PlayerFragment : Fragment() {
         mVisualizer = view.findViewById(R.id.bar)
         lottieAnimationView = view.findViewById(R.id.favAnimationView)
         favoriteImageButton = view.findViewById(R.id.favoriteImageButton)
-
-
-
         favoriteImageButton.setOnClickListener {
-            radioWave.favorite = true
-            viewModel.updateRadioWave(radioWave)
-            favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
-            lottieAnimationView.visibility = View.VISIBLE
-            lottieAnimationView.playAnimation()
+
+            if (radioWave.favorite == false) {
+                radioWave.favorite = true
+                viewModel.updateRadioWave(radioWave)
+                favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+                lottieAnimationView.visibility = View.VISIBLE
+                lottieAnimationView.playAnimation()
+            } else {
+                radioWave.favorite = false
+                viewModel.updateRadioWave(radioWave)
+                favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+            }
             lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener {
                 override fun onAnimationStart(animation: Animator) {
 
@@ -139,16 +149,6 @@ class PlayerFragment : Fragment() {
 
 
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-
-    }
-
 
     companion object
 

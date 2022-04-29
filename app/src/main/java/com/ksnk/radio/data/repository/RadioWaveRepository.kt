@@ -18,4 +18,6 @@ class RadioWaveRepository
     fun updateRadioWave(radioWave: RadioWave) = radioWaveDao.update(radioWave)
 
     fun getAllRadioWave(): List<RadioWave> = radioWaveDao.getAll()
+
+    fun getFavoriteRadioWave(): List<RadioWave> = radioWaveDao.getFavoriteRadioWave()
 }

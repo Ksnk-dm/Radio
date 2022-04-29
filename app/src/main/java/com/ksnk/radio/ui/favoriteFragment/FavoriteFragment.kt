@@ -1,6 +1,9 @@
-package com.ksnk.radio.ui.listFragment
+package com.ksnk.radio.ui.favoriteFragment
 
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.LayoutInflater
@@ -15,14 +18,13 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
-import com.ksnk.radio.ui.main.MainViewModel
+import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
+import com.ksnk.radio.ui.main.MainViewModel
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
-class ListFragment : Fragment() {
-
-
+class FavoriteFragment : Fragment() {
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
@@ -30,7 +32,6 @@ class ListFragment : Fragment() {
 
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
-
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -42,7 +43,7 @@ class ListFragment : Fragment() {
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-        items = viewModel.getAll().toMutableList()
+        items = viewModel.getFavoriteRadioWave().toMutableList()
         super.onAttach(context)
     }
 
@@ -52,43 +53,39 @@ class ListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.list_fragment, container, false);
+        return inflater.inflate(R.layout.favorite_fragment, container, false);
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
-        mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
+        mRecyclerView = view.findViewById(R.id.favoriteRecyclerView)
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
-
-
-
     }
 
-    companion object
+    private fun startPlayerService() {
+        val intent = Intent(requireContext(), PlayerService::class.java)
+        requireActivity().bindService(intent, myConnection, AppCompatActivity.BIND_AUTO_CREATE)
+        requireActivity().startService(intent)
+    }
 
-    fun newInstance(): ListFragment {
-        return ListFragment()
+    companion object fun newInstance(): FavoriteFragment {
+        return FavoriteFragment()
     }
 
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-       //     val mediaItem: MediaItem = MediaItem.fromUri("https://online.kissfm.ua/KissFM_HD")
-
-         //   Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
-           // mExoPlayer?.clearMediaItems()
-          //  mExoPlayer?.setMediaItem(mediaItem)
-       //     mPlayerService?.setRadioWave("https://online.kissfm.ua/KissFM_HD")
-            mAdapter = ListFragmentRecyclerViewAdapter(items, activity?.applicationContext, mExoPlayer!!, mPlayerService!!)
+            mAdapter = ListFragmentRecyclerViewAdapter(
+                items,
+                activity?.applicationContext,
+                mExoPlayer!!,
+                mPlayerService!!
+            )
             mRecyclerView.adapter = mAdapter
             mPlayerService?.initNotification()
-//            mExoPlayer?.prepare()
-//            mExoPlayer?.play()
-
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -99,11 +96,5 @@ class ListFragment : Fragment() {
 //            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
 //            editor.apply()
         }
-    }
-
-    private fun startPlayerService() {
-        val intent = Intent(requireContext(), PlayerService::class.java)
-        requireActivity().bindService(intent, myConnection, AppCompatActivity.BIND_AUTO_CREATE)
-        requireActivity().startService(intent)
     }
 }

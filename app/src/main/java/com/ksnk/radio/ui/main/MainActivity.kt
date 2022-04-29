@@ -26,6 +26,7 @@ import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.playerFragment.PlayerFragment
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
@@ -111,7 +112,11 @@ class MainActivity : AppCompatActivity() {
                     transaction.commit()
                 }
                 R.id.item3 -> {
-
+                    fragment = FavoriteFragment().newInstance()
+                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+                    transaction.replace(R.id.fragmentContainerView, fragment)
+                    transaction.addToBackStack(null)
+                    transaction.commit()
                 }
             }
             return@setOnItemSelectedListener true

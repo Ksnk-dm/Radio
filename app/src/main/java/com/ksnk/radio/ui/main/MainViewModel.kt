@@ -25,4 +25,8 @@ class MainViewModel
         radioWaveRepository.updateRadioWave(radioWave)
     }
 
+    fun getFavoriteRadioWave(): List<RadioWave>{
+        return radioWaveRepository.getFavoriteRadioWave()
+    }
+
 }
