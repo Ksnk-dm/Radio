@@ -1,6 +1,6 @@
 package com.ksnk.radio.services
 
-import android.R
+
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.PendingIntent
@@ -10,17 +10,29 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+
 import android.os.Binder
 import android.os.IBinder
+
+
+import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
+
 import androidx.annotation.Nullable
+import androidx.core.app.NotificationCompat
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
-import com.ksnk.radio.entity.RadioWave
+import com.ksnk.radio.R
+import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
+import javax.inject.Inject
 
 
 class PlayerService : Service() {
@@ -29,6 +41,8 @@ class PlayerService : Service() {
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
+
+
 
 
     @Nullable
@@ -40,7 +54,7 @@ class PlayerService : Service() {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
-       // initNotification()
+        // initNotification()
     }
 
     private fun initPlayer() {
@@ -64,11 +78,12 @@ class PlayerService : Service() {
         }
     }
 
-    public fun initNotification() {
+    fun initNotification() {
         playerNotificationManger = PlayerNotificationManager.Builder(
             this, 151,
-            this.resources.getString(R.string.copy))
-            .setChannelNameResourceId(R.string.copy)
+            this.resources.getString(R.string.app_name)
+        )
+            .setChannelNameResourceId(R.string.app_name)
             .setChannelImportance(IMPORTANCE_DEFAULT)
             .setMediaDescriptionAdapter(object : MediaDescriptionAdapter {
                 override fun getCurrentContentTitle(player: Player): CharSequence {
@@ -90,12 +105,14 @@ class PlayerService : Service() {
 
                 override fun getCurrentLargeIcon(
                     player: Player,
-                    callback: BitmapCallback): Bitmap? {
+                    callback: BitmapCallback
+                ): Bitmap? {
                     Picasso.get().load(radioWave?.image).into(object : com.squareup.picasso.Target {
                         override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
                             bitMapPoster = BitmapFactory.decodeResource(
                                 resources,
-                                R.drawable.ic_media_play)
+                                R.drawable.ic_baseline_music_note_24
+                            )
                         }
 
                         override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -127,27 +144,38 @@ class PlayerService : Service() {
                         clearSharedPrefsVar()
                     }
                 }
-            })
-            .build()
-
+            }).build()
         playerNotificationManger.setPlayer(mPlayer)
-        playerNotificationManger.setSmallIcon(R.drawable.ic_media_play)
+        playerNotificationManger.setSmallIcon(R.drawable.ic_play_icon)
         playerNotificationManger.setUseNextAction(false)
         playerNotificationManger.setUsePreviousAction(true)
+        playerNotificationManger.setUsePlayPauseActions(true)
+        playerNotificationManger.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         playerNotificationManger.setUseNextActionInCompactView(true)
         playerNotificationManger.setUsePreviousActionInCompactView(false)
         playerNotificationManger.setUseChronometer(true)
+
+
+        var mediaSession: MediaSessionCompat = MediaSessionCompat(this, "MediaSessionManager")
+        playerNotificationManger.setMediaSessionToken(mediaSession.sessionToken)
+        var sessionConnector = MediaSessionConnector(mediaSession)
+        sessionConnector.setPlayer(mPlayer)
+
     }
 
     private fun clearSharedPrefsVar() {
         val settings: SharedPreferences =
-            getSharedPreferences("base", MODE_PRIVATE)
+            getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
         val editor = settings.edit()
-        editor.putString("name", "")
+        editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
         editor.apply()
     }
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
+    }
+
+    fun getRadioWave(): RadioWave? {
+        return radioWave
     }
 }

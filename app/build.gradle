@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
     id 'com.google.gms.google-services'
 }
 
@@ -46,6 +47,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-core:2.17.1'
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.17.1'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.17.1'
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.17.1'
 
     implementation 'com.squareup.picasso:picasso:2.71828'
 
@@ -53,4 +55,32 @@ dependencies {
 
     def lottieVersion = "3.4.0"
     implementation "com.airbnb.android:lottie:$lottieVersion"
+
+    // Dagger 2
+    def daggerVer = 2.20 // or latest version
+    kapt "com.google.dagger:dagger-android-processor:$daggerVer"
+    kapt  "com.google.dagger:dagger-android-support:$daggerVer"
+    kapt "com.google.dagger:dagger-compiler:$daggerVer"
+    implementation "com.google.dagger:dagger:$daggerVer"
+    implementation "com.google.dagger:dagger-android-support:$daggerVer"
+
+    // Room
+    def room_version = "2.5.0-alpha01"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-rxjava2:$room_version"
+    implementation "androidx.room:room-guava:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
+ //   implementation "androidx.room:room-paging:2.4.0-beta01"
+
+    //Life Cycle
+    def lifecycle_version = "2.4.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+
+    //Rxjava
+    def rxandroid = "2.1.1"
+    def rxjava = "2.2.9"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid"
+    implementation "io.reactivex.rxjava2:rxjava:$rxjava"
 }
