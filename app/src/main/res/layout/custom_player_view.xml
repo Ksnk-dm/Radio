@@ -69,12 +69,13 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:srcCompat="@drawable/ic_svg" />
 
-            <ImageButton
+            <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/exo_pause"
                 android:layout_width="110dp"
                 android:layout_height="110dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/ic_pause_icon" />
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/music_anim" />
 
             <ImageButton
                 android:id="@+id/exo_play"

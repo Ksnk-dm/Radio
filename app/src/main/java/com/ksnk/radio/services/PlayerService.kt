@@ -16,6 +16,7 @@ import android.os.IBinder
 
 
 import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
 
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
@@ -43,9 +44,6 @@ class PlayerService : Service() {
 
 
 
-    @Inject
-    fun PlayerService() {
-    }
 
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
@@ -175,10 +173,9 @@ class PlayerService : Service() {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
-        var mediaItem:MediaItem = MediaItem.fromUri(radioWave.url.toString())
-        mPlayer = ExoPlayer.Builder(this).build()
-        mPlayer?.setMediaItem(mediaItem)
-        mPlayer?.prepare()
-        mPlayer?.play()
+    }
+
+    fun getRadioWave(): RadioWave? {
+        return radioWave
     }
 }

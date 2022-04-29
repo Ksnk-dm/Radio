@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
@@ -11,13 +12,14 @@ import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
 import javax.inject.Inject
 
-class MainRecyclerViewAdapter(
+class ListFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
-    var context: Context?
+    var context: Context?,
+    var mPlayer: ExoPlayer,
+    var mService:PlayerService
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
-    @set:Inject
-    internal var mPlayerService: PlayerService? = null
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
@@ -35,9 +37,9 @@ class MainRecyclerViewAdapter(
         holder.itemView.setOnClickListener {
             startPlayerActivity(position)
             var mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
-            mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
-            mPlayerService?.getPlayer()?.play()
-            mPlayerService?.initNotification()
+            mPlayer.setMediaItem(mediaItem)
+            mPlayer.play()
+            mService?.setRadioWave(items[position])
         }
     }
 

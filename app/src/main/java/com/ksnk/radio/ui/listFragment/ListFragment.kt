@@ -3,7 +3,6 @@ package com.ksnk.radio.ui.listFragment
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.main.MainViewModel
-import com.ksnk.radio.ui.listFragment.adapter.MainRecyclerViewAdapter
+import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
@@ -27,7 +25,7 @@ class ListFragment : Fragment() {
 
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
-    private lateinit var mAdapter: MainRecyclerViewAdapter
+    private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
     private var mExoPlayer: ExoPlayer? = null
@@ -39,6 +37,8 @@ class ListFragment : Fragment() {
 
     @Inject
     lateinit var viewModel: MainViewModel
+
+
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
@@ -58,13 +58,13 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        startPlayerService()
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
-        mAdapter = MainRecyclerViewAdapter(items, activity?.applicationContext)
-        mRecyclerView.adapter = mAdapter
 
-        startPlayerService()
+
+
     }
 
     companion object
@@ -77,19 +77,18 @@ class ListFragment : Fragment() {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-            val mediaItem: MediaItem = MediaItem.fromUri("https://online.kissfm.ua/KissFM_HD")
+       //     val mediaItem: MediaItem = MediaItem.fromUri("https://online.kissfm.ua/KissFM_HD")
 
-            Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
-            mExoPlayer?.clearMediaItems()
-            mExoPlayer?.setMediaItem(mediaItem)
+         //   Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
+           // mExoPlayer?.clearMediaItems()
+          //  mExoPlayer?.setMediaItem(mediaItem)
        //     mPlayerService?.setRadioWave("https://online.kissfm.ua/KissFM_HD")
+            mAdapter = ListFragmentRecyclerViewAdapter(items, activity?.applicationContext, mExoPlayer!!, mPlayerService!!)
+            mRecyclerView.adapter = mAdapter
             mPlayerService?.initNotification()
-            mExoPlayer?.play()
-//            if (mExoPlayer?.isPlaying == true) {
-//                floatingActionButton.visibility = View.VISIBLE
-//                floatingActionButton.isEnabled = true
-//                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-//            }
+//            mExoPlayer?.prepare()
+//            mExoPlayer?.play()
+
         }
 
         override fun onServiceDisconnected(className: ComponentName) {

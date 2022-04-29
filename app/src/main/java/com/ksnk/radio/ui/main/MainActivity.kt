@@ -28,7 +28,7 @@ import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.playerFragment.PlayerFragment
-import com.ksnk.radio.ui.listFragment.adapter.MainRecyclerViewAdapter
+import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
-    private lateinit var mAdapter: MainRecyclerViewAdapter
+    private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
     private lateinit var floatingActionButton: FloatingActionButton
 
     private lateinit var bottomNavView: BottomNavigationView
