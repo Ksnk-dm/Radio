@@ -29,4 +29,8 @@ class MainViewModel
         return radioWaveRepository.getFavoriteRadioWave()
     }
 
+    fun getRadioWaveForId(id:Int):RadioWave{
+        return radioWaveRepository.getMediaForId(id)
+    }
+
 }

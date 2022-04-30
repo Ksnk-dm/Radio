@@ -4,6 +4,7 @@ import android.app.Service
 import androidx.fragment.app.Fragment
 
 import com.ksnk.radio.BuildConfig
+import com.ksnk.radio.PreferenceHelper
 import dagger.android.*
 import dagger.android.support.HasSupportFragmentInjector
 import javax.inject.Inject
@@ -18,6 +19,8 @@ class App : DaggerApplication(), HasActivityInjector,
     @set:Inject
     lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
 
+    @set:Inject
+    lateinit var preferencesHelper: PreferenceHelper
 
     override fun applicationInjector(): AppComponent {
         val appComponent: AppComponent =

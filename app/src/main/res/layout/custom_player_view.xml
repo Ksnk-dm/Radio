@@ -60,7 +60,8 @@
             android:layout_height="60dp"
             android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true" />
+            android:clickable="true"
+            android:focusable="true" />
 
         <com.gauravk.audiovisualizer.visualizer.BarVisualizer
             android:id="@+id/bar"

@@ -1,6 +1,7 @@
 package com.ksnk.radio.di
 
 import android.app.Application
+import com.ksnk.radio.PreferenceHelper
 import com.ksnk.radio.di.modules.*
 import dagger.BindsInstance
 import dagger.Component
@@ -29,4 +30,6 @@ interface AppComponent : AndroidInjector<App?> {
     }
 
     override fun inject(app: App?)
+
+    fun preferenceHelper(): PreferenceHelper
 }

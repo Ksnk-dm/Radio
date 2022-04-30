@@ -1,6 +1,7 @@
 package com.ksnk.radio.ui.listFragment.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.listeners.ChangeInformationListener
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
 import javax.inject.Inject
@@ -17,7 +19,7 @@ class ListFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
     var context: Context?,
     var mPlayer: ExoPlayer,
-    var mService:PlayerService
+    var mService: PlayerService
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
 
@@ -40,11 +42,12 @@ class ListFragmentRecyclerViewAdapter(
             mPlayer.play()
             mService?.setRadioWave(items[position])
             notifyDataSetChanged()
+
         }
-        if (mService.getRadioWave()?.name?.toString().equals(items[position].name)){
-            holder.lottieAnimationView?.visibility=View.VISIBLE
-        } else{
-            holder.lottieAnimationView?.visibility=View.INVISIBLE
+        if (mService.getRadioWave()?.name?.toString().equals(items[position].name)) {
+            holder.lottieAnimationView?.visibility = View.VISIBLE
+        } else {
+            holder.lottieAnimationView?.visibility = View.INVISIBLE
         }
     }
 

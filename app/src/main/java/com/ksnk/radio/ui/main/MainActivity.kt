@@ -1,6 +1,7 @@
 package com.ksnk.radio.ui.main
 
 import android.Manifest
+import android.animation.Animator
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -8,8 +9,14 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -18,24 +25,32 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
+import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
+import com.ksnk.radio.PreferenceHelper
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.listeners.ChangeInformationListener
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
-import com.ksnk.radio.ui.playerFragment.PlayerFragment
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
+import com.ksnk.radio.ui.playerFragment.PlayerFragment
+import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ChangeInformationListener {
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
+    private lateinit var mPlayerView: PlayerControlView
 
     private lateinit var database: DatabaseReference
     private lateinit var mRecyclerView: RecyclerView
@@ -48,12 +63,27 @@ class MainActivity : AppCompatActivity() {
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
+    private lateinit var mPosterImageView: ImageView
+    private lateinit var mNameTextView: TextView
+    private lateinit var mFmFrequencyTextView: TextView
+
+    private lateinit var radioWave: RadioWave
+    private lateinit var lottieAnimationView: LottieAnimationView
+    private lateinit var mVisualizer: BarVisualizer
+    private var audioSessionId by Delegates.notNull<Int>()
+    private lateinit var motionLayout: MotionLayout
+    private lateinit var favoriteImageButton: ImageButton
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     @Inject
     lateinit var viewModel: MainViewModel
+
+    @Inject
+    lateinit var preferencesHelper: PreferenceHelper
+
+    lateinit var titleTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -68,23 +98,14 @@ class MainActivity : AppCompatActivity() {
         initPermission()
         initSharedPrefs()
         init()
-        checkFabStatus()
         initDb()
         startPlayerService()
         // userViewModel.createRadioWave()
+        mPlayerView = findViewById(R.id.playerView)
+
+
     }
 
-    private fun checkFabStatus() {
-//        floatingActionButton.setOnClickListener {
-//            if (mExoPlayer?.isPlaying == true) {
-//                mPlayerService?.getPlayer()?.pause()
-//                floatingActionButton.setImageResource(R.drawable.ic_play_icon)
-//            } else {
-//                mPlayerService?.getPlayer()?.play()
-//                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-//            }
-//        }
-    }
 
     private fun initSharedPrefs() {
         settings = getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
@@ -124,6 +145,99 @@ class MainActivity : AppCompatActivity() {
 
         // floatingActionButton = findViewById(R.id.floatingActionButtonMain)
         //   mRecyclerView = findViewById(R.id.main_recycler_view)
+        mPosterImageView = findViewById(R.id.imageViewPoster)
+        mNameTextView = findViewById(R.id.nameTextView)
+        mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
+        mVisualizer = findViewById(R.id.bar)
+        lottieAnimationView = findViewById(R.id.favAnimationView)
+        favoriteImageButton = findViewById(R.id.favoriteImageButton)
+        motionLayout = findViewById(R.id.motion_layout)
+        var id = viewModel.getRadioWaveForId(preferencesHelper.getIdPlayMedia())
+        Log.d("iddddd", id.toString())
+        titleTextView = findViewById(R.id.title_textView)
+        titleTextView.text=id.name
+        val transitionListener = object : MotionLayout.TransitionListener {
+
+            override fun onTransitionStarted(p0: MotionLayout?, startId: Int, endId: Int) {
+
+            }
+
+            override fun onTransitionChange(
+                p0: MotionLayout?,
+                startId: Int,
+                endId: Int,
+                progress: Float
+            ) {
+                //nothing to do
+            }
+
+            override fun onTransitionCompleted(p0: MotionLayout?, currentId: Int) {
+                Log.d("transss", "complete")
+                Picasso.get()
+                    .load(mPlayerService?.getRadioWave()?.image)
+                    .into(mPosterImageView)
+                mPlayerView.player = mPlayerService?.getPlayer()
+                mNameTextView.text = mPlayerService?.getRadioWave()?.name
+                mFmFrequencyTextView.text = mPlayerService?.getRadioWave()?.fmFrequency
+                if (mPlayerService?.getRadioWave()?.favorite == true) {
+                    favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+                } else {
+                    favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                }
+                if (mPlayerService == null) return
+                audioSessionId = mExoPlayer!!.audioSessionId
+
+
+                try {
+                    mVisualizer.setAudioSessionId(audioSessionId)
+                } catch (e: Exception) {
+                    mVisualizer.release()
+                    mVisualizer.setAudioSessionId(audioSessionId)
+                }
+
+                favoriteImageButton.setOnClickListener {
+                    radioWave = mPlayerService?.getRadioWave()!!
+                    if (radioWave.favorite == false) {
+                        radioWave.favorite = true
+                        viewModel.updateRadioWave(radioWave)
+                        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+                        lottieAnimationView.visibility = View.VISIBLE
+                        lottieAnimationView.playAnimation()
+                    } else {
+                        radioWave.favorite = false
+                        viewModel.updateRadioWave(radioWave)
+                        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                    }
+                    lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {
+
+                        }
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            lottieAnimationView.visibility = View.INVISIBLE
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator) {
+                        }
+                    })
+                }
+
+            }
+
+            override fun onTransitionTrigger(
+                p0: MotionLayout?,
+                triggerId: Int,
+                positive: Boolean,
+                progress: Float
+            ) {
+
+            }
+
+        }
+        motionLayout.addTransitionListener(transitionListener)
     }
 
     private fun initPermission() {
@@ -137,17 +251,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-//        if (mExoPlayer?.isPlaying == true) {
-//            floatingActionButton.isEnabled = true
-//            floatingActionButton.visibility = View.VISIBLE
-//            floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-//            mAdapter.notifyDataSetChanged()
-//        } else {
-//            floatingActionButton.setImageResource(R.drawable.ic_play_icon)
-//        }
-    }
 
     private fun initDb() {
         database =
@@ -170,31 +273,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun initRecycler() {
-//        mGridLayoutManager = GridLayoutManager(this, 1)
-//        mRecyclerView.layoutManager = mGridLayoutManager
-//        mAdapter = MainRecyclerViewAdapter(items, this, settings)
-//        mRecyclerView.adapter = mAdapter
-    }
-
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-//            if (mExoPlayer?.isPlaying == true) {
-//                floatingActionButton.visibility = View.VISIBLE
-//                floatingActionButton.isEnabled = true
-//                floatingActionButton.setImageResource(R.drawable.ic_pause_icon)
-//            }
+            mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-//            mPlayerService = null
-//            mExoPlayer = null
-//            floatingActionButton.visibility = View.GONE
-//            val editor = settings.edit()
-//            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-//            editor.apply()
+            mPlayerService = null
+            mExoPlayer = null
         }
     }
 
@@ -205,6 +293,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-       // super.onBackPressed()
+        // super.onBackPressed()
+    }
+
+    override fun changeInform(title: String) {
+        titleTextView.text = title
     }
 }
