@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="#2B2B2B">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,8 +66,10 @@
         <com.gauravk.audiovisualizer.visualizer.BarVisualizer
             android:id="@+id/bar"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_margin="15dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:foregroundGravity="center"
             app:avColor="#FFEB3B"
             app:avDensity="0.5"
             app:avSpeed="normal"

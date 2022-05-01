@@ -2,14 +2,13 @@ package com.ksnk.radio.ui.main
 
 import android.Manifest
 import android.animation.Animator
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
-import android.content.SharedPreferences
+import android.annotation.SuppressLint
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -23,11 +22,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -46,6 +47,7 @@ import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 import kotlin.properties.Delegates
+
 
 class MainActivity : AppCompatActivity(), ChangeInformationListener {
     private var mExoPlayer: ExoPlayer? = null
@@ -73,6 +75,7 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
     private var audioSessionId by Delegates.notNull<Int>()
     private lateinit var motionLayout: MotionLayout
     private lateinit var favoriteImageButton: ImageButton
+    private lateinit var playImageView: ImageView
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -84,6 +87,24 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
     lateinit var preferencesHelper: PreferenceHelper
 
     lateinit var titleTextView: TextView
+    lateinit var posterImageView: ImageView
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+var radioWave:RadioWave = intent.getSerializableExtra("media") as RadioWave
+            Log.d("radiowave", radioWave.toString())
+            titleTextView.text=radioWave.name
+
+            Picasso.get()
+                .load(radioWave.image)
+                .into(posterImageView)
+            preferencesHelper.setIdPlayMedia(radioWave.id!!)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -94,6 +115,8 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(receiver, IntentFilter("rec"))
 
         initPermission()
         initSharedPrefs()
@@ -102,8 +125,23 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         startPlayerService()
         // userViewModel.createRadioWave()
         mPlayerView = findViewById(R.id.playerView)
+var id:Int=preferencesHelper.getIdPlayMedia()
+        radioWave=viewModel.getRadioWaveForId(id)
+        titleTextView.text=radioWave.name
 
+        Picasso.get()
+            .load(radioWave.image)
+            .into(posterImageView)
 
+        mExoPlayer?.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if(isPlaying){
+                    playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
+                } else {
+                    playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+                }
+            }
+        })
     }
 
 
@@ -111,6 +149,7 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         settings = getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun init() {
         bottomNavView = findViewById(R.id.bottomNavViewMain)
         fragmentView = findViewById(R.id.fragmentContainerView)
@@ -142,9 +181,6 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
             }
             return@setOnItemSelectedListener true
         }
-
-        // floatingActionButton = findViewById(R.id.floatingActionButtonMain)
-        //   mRecyclerView = findViewById(R.id.main_recycler_view)
         mPosterImageView = findViewById(R.id.imageViewPoster)
         mNameTextView = findViewById(R.id.nameTextView)
         mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
@@ -153,9 +189,8 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         favoriteImageButton = findViewById(R.id.favoriteImageButton)
         motionLayout = findViewById(R.id.motion_layout)
         var id = viewModel.getRadioWaveForId(preferencesHelper.getIdPlayMedia())
-        Log.d("iddddd", id.toString())
         titleTextView = findViewById(R.id.title_textView)
-        titleTextView.text=id.name
+        titleTextView.text = id.name
         val transitionListener = object : MotionLayout.TransitionListener {
 
             override fun onTransitionStarted(p0: MotionLayout?, startId: Int, endId: Int) {
@@ -238,7 +273,25 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
 
         }
         motionLayout.addTransitionListener(transitionListener)
+        posterImageView=findViewById(R.id.main_imageView)
+        playImageView=findViewById(R.id.play_imageView)
+
+        playImageView.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                if(mExoPlayer!!.isPlaying){
+                    mExoPlayer!!.pause()
+                } else {
+                    mExoPlayer!!.play()
+                }
+            }
+            false
+
+
+}
+
+
     }
+
 
     private fun initPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -278,6 +331,22 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
+            if(mExoPlayer!!.isPlaying){
+                playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
+            } else {
+                playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+            }
+            mPlayerService?.getPlayer()?.addListener(object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if(isPlaying){
+                        playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
+                    } else {
+                        playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+                    }
+                }
+            })
+
+
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -290,6 +359,8 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         val intent = Intent(this, PlayerService::class.java)
         bindService(intent, myConnection, BIND_AUTO_CREATE)
         startService(intent)
+        Log.d("startserv", "startServ")
+
     }
 
     override fun onBackPressed() {
@@ -299,4 +370,5 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
     override fun changeInform(title: String) {
         titleTextView.text = title
     }
+
 }

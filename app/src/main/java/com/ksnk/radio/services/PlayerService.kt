@@ -20,6 +20,7 @@ import android.util.Log
 
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 
@@ -41,6 +42,7 @@ class PlayerService : Service() {
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
+
 
 
 
@@ -92,7 +94,7 @@ class PlayerService : Service() {
 
                 override fun createCurrentContentIntent(player: Player): PendingIntent? {
                     val i = Intent(this@PlayerService, PlayerActivity::class.java)
-                    i.putExtra(getString(com.ksnk.radio.R.string.get_serializable_extra), radioWave)
+                    i.putExtra(getString(R.string.get_serializable_extra), radioWave)
                     return PendingIntent.getActivity(
                         this@PlayerService, 0, i,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -173,6 +175,9 @@ class PlayerService : Service() {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
+        var i =Intent("rec")
+        i.putExtra("media", radioWave)
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(i);
     }
 
     fun getRadioWave(): RadioWave? {

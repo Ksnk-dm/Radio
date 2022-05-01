@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<MotionScene
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:motion="http://schemas.android.com/apk/res-auto">
 
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
         motion:duration="1000">
+
         <KeyFrameSet>
             <KeyAttribute
                 motion:motionTarget="@+id/close_imageView"
@@ -21,15 +21,20 @@
                 motion:framePosition="95"
                 android:alpha="0" />
         </KeyFrameSet>
-        <OnSwipe
-            motion:touchAnchorId="@+id/main_container"
-            motion:touchRegionId="@id/main_container"
-            motion:dragDirection="dragUp"
-            motion:touchAnchorSide="top" />
+
+
+        <OnClick motion:targetId="@id/play_imageView"
+            motion:clickAction="transitionToStart"/>
+                <OnSwipe
+                    motion:touchAnchorId="@+id/main_container"
+                    motion:touchRegionId="@id/main_container"
+                    motion:dragDirection="dragUp"
+                    motion:touchAnchorSide="top" />
 
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
+
         <Constraint
             android:id="@+id/bottomNavViewMain"
             motion:layout_constraintEnd_toEndOf="parent"
@@ -42,7 +47,7 @@
             android:id="@+id/playerView"
             motion:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="match_parent"
             motion:layout_constraintBottom_toTopOf="@+id/bottomNavViewMain"
             motion:layout_constraintTop_toBottomOf="@+id/main_container"
             motion:layout_constraintHorizontal_bias="0.5"
@@ -50,14 +55,15 @@
             motion:layout_constraintVertical_bias="1.0" />
         <Constraint
             android:id="@+id/main_container"
-            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintEnd_toEndOf="@+id/close_imageView"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="65dp"
             motion:layout_constraintHorizontal_bias="0.5"
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
             motion:layout_constraintBottom_toTopOf="@+id/bottomNavViewMain"
-            motion:layout_constraintVertical_bias="1.0" />
+            motion:layout_constraintVertical_bias="1.0"
+            android:layout_marginEnd="50dp" />
         <Constraint
             android:id="@+id/main_imageView"
             android:layout_width="100dp"
@@ -80,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             motion:layout_constraintBottom_toBottomOf="@+id/close_imageView"
-            android:layout_marginEnd="24dp"
+            android:layout_marginEnd="0dp"
             android:alpha="1"
             motion:layout_constraintTop_toTopOf="@+id/close_imageView" />
         <Constraint
