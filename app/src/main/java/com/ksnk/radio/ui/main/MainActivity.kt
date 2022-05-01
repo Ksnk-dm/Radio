@@ -27,7 +27,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.gauravk.audiovisualizer.visualizer.BarVisualizer
+import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -45,6 +47,7 @@ import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import com.ksnk.radio.ui.playerFragment.PlayerFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
+import de.hdodenhof.circleimageview.CircleImageView
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -65,13 +68,13 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     lateinit var settings: SharedPreferences
-    private lateinit var mPosterImageView: ImageView
+    private lateinit var mPosterImageView: CircleImageView
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
 
     private lateinit var radioWave: RadioWave
     private lateinit var lottieAnimationView: LottieAnimationView
-    private lateinit var mVisualizer: BarVisualizer
+    private lateinit var mVisualizer: CircleLineVisualizer
     private var audioSessionId by Delegates.notNull<Int>()
     private lateinit var motionLayout: MotionLayout
     private lateinit var favoriteImageButton: ImageButton
@@ -90,9 +93,9 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
     lateinit var posterImageView: ImageView
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-var radioWave:RadioWave = intent.getSerializableExtra("media") as RadioWave
+            var radioWave: RadioWave = intent.getSerializableExtra("media") as RadioWave
             Log.d("radiowave", radioWave.toString())
-            titleTextView.text=radioWave.name
+            titleTextView.text = radioWave.name
 
             Picasso.get()
                 .load(radioWave.image)
@@ -108,16 +111,13 @@ var radioWave:RadioWave = intent.getSerializableExtra("media") as RadioWave
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-
-
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(receiver, IntentFilter("rec"))
-
+        var id: Int = preferencesHelper.getIdPlayMedia()
+        radioWave = viewModel.getRadioWaveForId(id)
         initPermission()
         initSharedPrefs()
         init()
@@ -125,9 +125,8 @@ var radioWave:RadioWave = intent.getSerializableExtra("media") as RadioWave
         startPlayerService()
         // userViewModel.createRadioWave()
         mPlayerView = findViewById(R.id.playerView)
-var id:Int=preferencesHelper.getIdPlayMedia()
-        radioWave=viewModel.getRadioWaveForId(id)
-        titleTextView.text=radioWave.name
+
+        titleTextView.text = radioWave.name
 
         Picasso.get()
             .load(radioWave.image)
@@ -135,7 +134,7 @@ var id:Int=preferencesHelper.getIdPlayMedia()
 
         mExoPlayer?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if(isPlaying){
+                if (isPlaying) {
                     playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
                 } else {
                     playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
@@ -184,7 +183,7 @@ var id:Int=preferencesHelper.getIdPlayMedia()
         mPosterImageView = findViewById(R.id.imageViewPoster)
         mNameTextView = findViewById(R.id.nameTextView)
         mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
-        mVisualizer = findViewById(R.id.bar)
+        mVisualizer = findViewById(R.id.blob)
         lottieAnimationView = findViewById(R.id.favAnimationView)
         favoriteImageButton = findViewById(R.id.favoriteImageButton)
         motionLayout = findViewById(R.id.motion_layout)
@@ -207,9 +206,11 @@ var id:Int=preferencesHelper.getIdPlayMedia()
             }
 
             override fun onTransitionCompleted(p0: MotionLayout?, currentId: Int) {
-                Log.d("transss", "complete")
+                var id: Int = preferencesHelper.getIdPlayMedia()
+                radioWave = viewModel.getRadioWaveForId(id)
                 Picasso.get()
                     .load(mPlayerService?.getRadioWave()?.image)
+                    .resize(150, 150)
                     .into(mPosterImageView)
                 mPlayerView.player = mPlayerService?.getPlayer()
                 mNameTextView.text = mPlayerService?.getRadioWave()?.name
@@ -238,6 +239,7 @@ var id:Int=preferencesHelper.getIdPlayMedia()
                         favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
                         lottieAnimationView.visibility = View.VISIBLE
                         lottieAnimationView.playAnimation()
+                        Log.d("clickk", "click")
                     } else {
                         radioWave.favorite = false
                         viewModel.updateRadioWave(radioWave)
@@ -273,12 +275,12 @@ var id:Int=preferencesHelper.getIdPlayMedia()
 
         }
         motionLayout.addTransitionListener(transitionListener)
-        posterImageView=findViewById(R.id.main_imageView)
-        playImageView=findViewById(R.id.play_imageView)
+        posterImageView = findViewById(R.id.main_imageView)
+        playImageView = findViewById(R.id.play_imageView)
 
         playImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                if(mExoPlayer!!.isPlaying){
+                if (mExoPlayer!!.isPlaying) {
                     mExoPlayer!!.pause()
                 } else {
                     mExoPlayer!!.play()
@@ -287,7 +289,7 @@ var id:Int=preferencesHelper.getIdPlayMedia()
             false
 
 
-}
+        }
 
 
     }
@@ -331,14 +333,21 @@ var id:Int=preferencesHelper.getIdPlayMedia()
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
-            if(mExoPlayer!!.isPlaying){
+            var id = preferencesHelper.getIdPlayMedia()
+            var mediaItem: MediaItem = MediaItem.fromUri(viewModel.getRadioWaveForId(id).url.toString())
+            mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
+            if(!mPlayerService?.getPlayer()!!.isPlaying){
+                mPlayerService?.getPlayer()!!.pause()
+            }
+            mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+            if (mExoPlayer!!.isPlaying) {
                 playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
             } else {
                 playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
             }
             mPlayerService?.getPlayer()?.addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if(isPlaying){
+                    if (isPlaying) {
                         playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
                     } else {
                         playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)

@@ -114,7 +114,7 @@ class PlayerFragment : Fragment() {
         mPosterImageView = view.findViewById(R.id.imageViewPoster)
         mNameTextView = view.findViewById(R.id.nameTextView)
         mFmFrequencyTextView = view.findViewById(R.id.fmFrequencyTextView)
-        mVisualizer = view.findViewById(R.id.bar)
+        mVisualizer = view.findViewById(R.id.blob)
         lottieAnimationView = view.findViewById(R.id.favAnimationView)
         favoriteImageButton = view.findViewById(R.id.favoriteImageButton)
         favoriteImageButton.setOnClickListener {

@@ -12,6 +12,7 @@
                 motion:motionTarget="@+id/close_imageView"
                 motion:framePosition="90"
                 android:alpha="0" />
+
             <KeyAttribute
                 motion:motionTarget="@+id/play_imageView"
                 motion:framePosition="90"
@@ -45,14 +46,14 @@
             motion:layout_constraintStart_toStartOf="parent" />
         <Constraint
             android:id="@+id/playerView"
-            motion:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             motion:layout_constraintBottom_toTopOf="@+id/bottomNavViewMain"
             motion:layout_constraintTop_toBottomOf="@+id/main_container"
             motion:layout_constraintHorizontal_bias="0.5"
-            motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintVertical_bias="1.0" />
+
+            motion:layout_constraintVertical_bias="1.0"
+            android:alpha="0" />
         <Constraint
             android:id="@+id/main_container"
             motion:layout_constraintEnd_toEndOf="@+id/close_imageView"
@@ -86,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             motion:layout_constraintBottom_toBottomOf="@+id/close_imageView"
-            android:layout_marginEnd="0dp"
+            android:layout_marginEnd="20dp"
             android:alpha="1"
             motion:layout_constraintTop_toTopOf="@+id/close_imageView" />
         <Constraint
@@ -100,6 +101,13 @@
             android:alpha="1"
             android:layout_marginStart="8dp"
             motion:layout_constraintTop_toTopOf="@+id/play_imageView" />
+        <Constraint
+            android:id="@+id/fragmentContainerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="122dp"
+            motion:layout_constraintTop_toTopOf="parent" />
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
@@ -110,6 +118,7 @@
             motion:layout_constraintBottom_toBottomOf="parent" />
         <Constraint
             android:id="@+id/playerView"
+            android:layout_marginTop="0dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             motion:layout_constraintTop_toTopOf="parent"
@@ -122,6 +131,15 @@
             motion:layout_constraintHorizontal_bias="0.5"
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintBottom_toBottomOf="@+id/fragmentContainerView" />
+            motion:layout_constraintBottom_toBottomOf="@+id/fragmentContainerView"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp" />
+        <Constraint
+            android:id="@+id/fragmentContainerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="0dp"
+            motion:layout_constraintTop_toTopOf="parent" />
     </ConstraintSet>
 </MotionScene>

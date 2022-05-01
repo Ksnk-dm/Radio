@@ -11,13 +11,16 @@
     app:layoutDescription="@xml/activity_main_scene"
     tools:context=".ui.main.MainActivity">
 
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="122dp"
         android:layout_weight="2"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
+        android:name="com.ksnk.radio.ui.listFragment.ListFragment"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavViewMain"
@@ -36,18 +39,17 @@
         android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:background="#2B2B2B"
-        android:focusable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="#2B2B2B">
 
         <com.google.android.exoplayer2.ui.PlayerControlView
             android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="50dp"
+            android:layout_marginTop="70dp"
             app:controller_layout_id="@layout/custom_player_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:show_timeout="0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -60,14 +62,13 @@
         android:alpha="0"
         app:layout_constraintBottom_toBottomOf="@id/main_container"
         app:layout_constraintEnd_toEndOf="@id/main_container"
-        app:layout_constraintTop_toTopOf="@id/main_container"
-        app:srcCompat="@drawable/ic_back_24" />
+        app:layout_constraintTop_toTopOf="@id/main_container" />
 
     <ImageButton
         android:id="@+id/play_imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="50dp"
         android:alpha="0"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
