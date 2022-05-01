@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
@@ -16,6 +17,7 @@ import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -26,14 +28,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
-import com.gauravk.audiovisualizer.visualizer.BarVisualizer
 import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.PreferenceHelper
@@ -48,6 +49,7 @@ import com.ksnk.radio.ui.playerFragment.PlayerFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
+import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -79,6 +81,9 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
     private lateinit var motionLayout: MotionLayout
     private lateinit var favoriteImageButton: ImageButton
     private lateinit var playImageView: ImageView
+    private lateinit var mainContainer: ConstraintLayout
+
+    private lateinit var animNetLottieAnimationView: LottieAnimationView
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -91,12 +96,14 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
 
     lateinit var titleTextView: TextView
     lateinit var posterImageView: ImageView
+    private lateinit var fragment: Fragment
+
+    var firstStartStatus: Boolean = true
+
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             var radioWave: RadioWave = intent.getSerializableExtra("media") as RadioWave
-            Log.d("radiowave", radioWave.toString())
             titleTextView.text = radioWave.name
-
             Picasso.get()
                 .load(radioWave.image)
                 .into(posterImageView)
@@ -109,77 +116,210 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
     }
 
+
+    private fun checkFirstStartStatus() {
+        firstStartStatus = preferencesHelper.getFirstStart()
+        if (firstStartStatus) {
+            initDb()
+        } else {
+            startPlayerService()
+        }
+    }
+
+    private fun initBroadcastManager() {
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(receiver, IntentFilter("rec"))
+    }
+
+    private fun favoriteStatusFalse() {
+        radioWave.favorite = true
+        viewModel.updateRadioWave(radioWave)
+        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+        lottieAnimationView.visibility = View.VISIBLE
+        lottieAnimationView.playAnimation()
+    }
+
+    private fun favoriteStatusTrue() {
+        radioWave.favorite = false
+        viewModel.updateRadioWave(radioWave)
+        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+    }
+
+    private fun initRadioWaveFromService() {
+        radioWave = mPlayerService?.getRadioWave()!!
+        if (radioWave.favorite == false) {
+            favoriteStatusFalse()
+        } else {
+            favoriteStatusTrue()
+        }
+
+    }
+
+    private var lottieAnimationListener = object : Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator) {
+
+        }
+
+        override fun onAnimationEnd(animation: Animator) {
+            lottieAnimationView.visibility = View.INVISIBLE
+        }
+
+        override fun onAnimationCancel(animation: Animator) {
+        }
+
+        override fun onAnimationRepeat(animation: Animator) {
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setListeners() {
+        favoriteImageButton.setOnClickListener {
+            initRadioWaveFromService()
+        }
+        lottieAnimationView.addAnimatorListener(lottieAnimationListener)
+        bottomNavView.setOnItemSelectedListener(bottomNavViewOnItemSelectListener)
+        playImageView.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                checkStatusClickPlayInMiniPlayer()
+            }
+            false
+        }
+    }
+
+    private fun checkStatusClickPlayInMiniPlayer() {
+        if (mExoPlayer!!.isPlaying) {
+            mExoPlayer!!.pause()
+        } else {
+            mExoPlayer!!.play()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(receiver, IntentFilter("rec"))
-        var id: Int = preferencesHelper.getIdPlayMedia()
-        radioWave = viewModel.getRadioWaveForId(id)
-        initPermission()
-        initSharedPrefs()
         init()
-        initDb()
-        startPlayerService()
-        // userViewModel.createRadioWave()
-        mPlayerView = findViewById(R.id.playerView)
+        checkFirstStartStatus()
+        initBroadcastManager()
+        initPermission()
+        setMediaInfoInMiniPlayer()
+        setListeners()
+    }
 
-        titleTextView.text = radioWave.name
-
+    private fun setMediaInfoInMiniPlayer() {
+        val id: Int = preferencesHelper.getIdPlayMedia()
+        val radioWave: RadioWave? = viewModel.getRadioWaveForId(id)
+        titleTextView.text = radioWave?.name
         Picasso.get()
-            .load(radioWave.image)
+            .load(radioWave?.image)
             .into(posterImageView)
-
-        mExoPlayer?.addListener(object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
-                } else {
-                    playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
-                }
-            }
-        })
+        preferencesHelper.setIdPlayMedia(radioWave?.id)
     }
 
 
-    private fun initSharedPrefs() {
-        settings = getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
+    private fun createListFragment() {
+        fragment = ListFragment().newInstance()
+        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragmentContainerView, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun createPlayerFragment() {
+        fragment = PlayerFragment().newInstance()
+        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragmentContainerView, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun createFavFragment() {
+        fragment = FavoriteFragment().newInstance()
+        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragmentContainerView, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private var bottomNavViewOnItemSelectListener = NavigationBarView.OnItemSelectedListener {
+        when (it.itemId) {
+            R.id.item1 -> {
+                createListFragment()
+            }
+            R.id.item2 -> {
+                createPlayerFragment()
+            }
+            R.id.item3 -> {
+                createFavFragment()
+            }
+        }
+        return@OnItemSelectedListener true
+    }
+
+    private val transitionListener = object : MotionLayout.TransitionListener {
+        override fun onTransitionStarted(p0: MotionLayout?, startId: Int, endId: Int) {}
+
+        override fun onTransitionChange(
+            p0: MotionLayout?,
+            startId: Int,
+            endId: Int,
+            progress: Float
+        ) {
+        }
+
+        override fun onTransitionCompleted(p0: MotionLayout?, currentId: Int) {
+            setParamMediaIfScrollMiniPlayer()
+            checkButtonPlayInMiniPlayer()
+            if (mPlayerService == null) return
+            setMediaSessionAndVisual()
+        }
+
+        override fun onTransitionTrigger(
+            p0: MotionLayout?,
+            triggerId: Int,
+            positive: Boolean,
+            progress: Float
+        ) {
+        }
+
+    }
+
+    private fun checkButtonPlayInMiniPlayer() {
+        if (mPlayerService?.getRadioWave()?.favorite == true) {
+            favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+        } else {
+            favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+        }
+    }
+
+    private fun setParamMediaIfScrollMiniPlayer() {
+        var id: Int = preferencesHelper.getIdPlayMedia()
+        radioWave = viewModel.getRadioWaveForId(id)
+        Picasso.get()
+            .load(mPlayerService?.getRadioWave()?.image)
+            .resize(150, 150)
+            .into(mPosterImageView)
+        mPlayerView.player = mPlayerService?.getPlayer()
+        mNameTextView.text = mPlayerService?.getRadioWave()?.name
+        mFmFrequencyTextView.text = mPlayerService?.getRadioWave()?.fmFrequency
+    }
+
+    private fun setMediaSessionAndVisual() {
+        audioSessionId = mExoPlayer!!.audioSessionId
+        try {
+            mVisualizer.setAudioSessionId(audioSessionId)
+        } catch (e: Exception) {
+            mVisualizer.release()
+            mVisualizer.setAudioSessionId(audioSessionId)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun init() {
+        mPlayerView = findViewById(R.id.playerView)
         bottomNavView = findViewById(R.id.bottomNavViewMain)
         fragmentView = findViewById(R.id.fragmentContainerView)
-        var fragment: Fragment
-        bottomNavView.setOnItemSelectedListener {
-
-            when (it.itemId) {
-                R.id.item1 -> {
-                    fragment = ListFragment().newInstance()
-                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-                    transaction.replace(R.id.fragmentContainerView, fragment)
-                    transaction.addToBackStack(null)
-                    transaction.commit()
-                }
-                R.id.item2 -> {
-                    fragment = PlayerFragment().newInstance()
-                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-                    transaction.replace(R.id.fragmentContainerView, fragment)
-                    transaction.addToBackStack(null)
-                    transaction.commit()
-                }
-                R.id.item3 -> {
-                    fragment = FavoriteFragment().newInstance()
-                    val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-                    transaction.replace(R.id.fragmentContainerView, fragment)
-                    transaction.addToBackStack(null)
-                    transaction.commit()
-                }
-            }
-            return@setOnItemSelectedListener true
-        }
         mPosterImageView = findViewById(R.id.imageViewPoster)
         mNameTextView = findViewById(R.id.nameTextView)
         mFmFrequencyTextView = findViewById(R.id.fmFrequencyTextView)
@@ -187,111 +327,11 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         lottieAnimationView = findViewById(R.id.favAnimationView)
         favoriteImageButton = findViewById(R.id.favoriteImageButton)
         motionLayout = findViewById(R.id.motion_layout)
-        var id = viewModel.getRadioWaveForId(preferencesHelper.getIdPlayMedia())
         titleTextView = findViewById(R.id.title_textView)
-        titleTextView.text = id.name
-        val transitionListener = object : MotionLayout.TransitionListener {
-
-            override fun onTransitionStarted(p0: MotionLayout?, startId: Int, endId: Int) {
-
-            }
-
-            override fun onTransitionChange(
-                p0: MotionLayout?,
-                startId: Int,
-                endId: Int,
-                progress: Float
-            ) {
-                //nothing to do
-            }
-
-            override fun onTransitionCompleted(p0: MotionLayout?, currentId: Int) {
-                var id: Int = preferencesHelper.getIdPlayMedia()
-                radioWave = viewModel.getRadioWaveForId(id)
-                Picasso.get()
-                    .load(mPlayerService?.getRadioWave()?.image)
-                    .resize(150, 150)
-                    .into(mPosterImageView)
-                mPlayerView.player = mPlayerService?.getPlayer()
-                mNameTextView.text = mPlayerService?.getRadioWave()?.name
-                mFmFrequencyTextView.text = mPlayerService?.getRadioWave()?.fmFrequency
-                if (mPlayerService?.getRadioWave()?.favorite == true) {
-                    favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
-                } else {
-                    favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                }
-                if (mPlayerService == null) return
-                audioSessionId = mExoPlayer!!.audioSessionId
-
-
-                try {
-                    mVisualizer.setAudioSessionId(audioSessionId)
-                } catch (e: Exception) {
-                    mVisualizer.release()
-                    mVisualizer.setAudioSessionId(audioSessionId)
-                }
-
-                favoriteImageButton.setOnClickListener {
-                    radioWave = mPlayerService?.getRadioWave()!!
-                    if (radioWave.favorite == false) {
-                        radioWave.favorite = true
-                        viewModel.updateRadioWave(radioWave)
-                        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
-                        lottieAnimationView.visibility = View.VISIBLE
-                        lottieAnimationView.playAnimation()
-                        Log.d("clickk", "click")
-                    } else {
-                        radioWave.favorite = false
-                        viewModel.updateRadioWave(radioWave)
-                        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                    }
-                    lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener {
-                        override fun onAnimationStart(animation: Animator) {
-
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            lottieAnimationView.visibility = View.INVISIBLE
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator) {
-                        }
-                    })
-                }
-
-            }
-
-            override fun onTransitionTrigger(
-                p0: MotionLayout?,
-                triggerId: Int,
-                positive: Boolean,
-                progress: Float
-            ) {
-
-            }
-
-        }
         motionLayout.addTransitionListener(transitionListener)
         posterImageView = findViewById(R.id.main_imageView)
         playImageView = findViewById(R.id.play_imageView)
-
-        playImageView.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                if (mExoPlayer!!.isPlaying) {
-                    mExoPlayer!!.pause()
-                } else {
-                    mExoPlayer!!.play()
-                }
-            }
-            false
-
-
-        }
-
-
+        animNetLottieAnimationView = findViewById(R.id.netAnim)
     }
 
 
@@ -311,8 +351,6 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         database =
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
                 .getReference(getString(R.string.firebase_ref))
-        //   var radioWave: RadioWave = RadioWave("test", "test", "test", "test")
-        //   database.child("wave30").setValue(radioWave)
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -320,6 +358,9 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
                     items.add(radioWave!!)
                 }
                 viewModel.createListRadioWave(items)
+                startPlayerService()
+                createListFragment()
+                preferencesHelper.setFirstStart(false)
             }
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
@@ -333,10 +374,14 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
-            var id = preferencesHelper.getIdPlayMedia()
-            var mediaItem: MediaItem = MediaItem.fromUri(viewModel.getRadioWaveForId(id).url.toString())
+            val id = preferencesHelper.getIdPlayMedia()
+            val url: String? = viewModel.getRadioWaveForId(id).url
+            val mediaItem: MediaItem =
+                MediaItem.fromUri(url!!)
             mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
-            if(!mPlayerService?.getPlayer()!!.isPlaying){
+
+
+            if (!mPlayerService?.getPlayer()!!.isPlaying) {
                 mPlayerService?.getPlayer()!!.pause()
             }
             mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
@@ -345,18 +390,11 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
             } else {
                 playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
             }
-            mPlayerService?.getPlayer()?.addListener(object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if (isPlaying) {
-                        playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
-                    } else {
-                        playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
-                    }
-                }
-            })
 
-
+            isPlayingMedia(mExoPlayer!!.isPlaying)
+            mPlayerService?.getPlayer()?.addListener(playerListener)
         }
+
 
         override fun onServiceDisconnected(className: ComponentName) {
             mPlayerService = null
@@ -364,20 +402,45 @@ class MainActivity : AppCompatActivity(), ChangeInformationListener {
         }
     }
 
-    private fun startPlayerService() {
-        val intent = Intent(this, PlayerService::class.java)
-        bindService(intent, myConnection, BIND_AUTO_CREATE)
-        startService(intent)
-        Log.d("startserv", "startServ")
+    private var playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            isPlayingMedia(isPlaying)
+        }
 
+        override fun onPlayerError(error: PlaybackException) {
+            when (error.errorCode) {
+                ERROR_CODE_IO_NETWORK_CONNECTION_FAILED -> {
+                    animNetLottieAnimationView.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        override fun onPlayerErrorChanged(error: PlaybackException?) {
+            animNetLottieAnimationView.visibility = View.INVISIBLE
+        }
     }
 
-    override fun onBackPressed() {
-        // super.onBackPressed()
-    }
 
-    override fun changeInform(title: String) {
-        titleTextView.text = title
+private fun isPlayingMedia(isPlaying: Boolean) {
+    if (isPlaying) {
+        playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
+    } else {
+        playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
     }
+}
+
+private fun startPlayerService() {
+    val intent = Intent(this, PlayerService::class.java)
+    bindService(intent, myConnection, BIND_AUTO_CREATE)
+    startService(intent)
+}
+
+override fun onBackPressed() {
+    // super.onBackPressed()
+}
+
+override fun changeInform(title: String) {
+    titleTextView.text = title
+}
 
 }

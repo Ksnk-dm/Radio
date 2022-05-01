@@ -31,6 +31,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.ui.main.MainActivity
 import com.ksnk.radio.ui.player.PlayerActivity
 import com.squareup.picasso.Picasso
 import javax.inject.Inject
@@ -93,7 +94,7 @@ class PlayerService : Service() {
                 }
 
                 override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                    val i = Intent(this@PlayerService, PlayerActivity::class.java)
+                    val i = Intent(this@PlayerService, MainActivity::class.java)
                     i.putExtra(getString(R.string.get_serializable_extra), radioWave)
                     return PendingIntent.getActivity(
                         this@PlayerService, 0, i,
