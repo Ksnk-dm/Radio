@@ -10,10 +10,8 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
-import com.ksnk.radio.listeners.ChangeInformationListener
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
 
 class ListFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
@@ -37,13 +35,12 @@ class ListFragmentRecyclerViewAdapter(
             .load(items[position].image)
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
-            var mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
-            mPlayer.setMediaItem(mediaItem)
-            mPlayer.play()
-            mService?.setRadioWave(items[position])
-            notifyDataSetChanged()
-
+            setMediaItem(position)
         }
+        radioWaveNameEquals(position, holder)
+    }
+
+    private fun radioWaveNameEquals(position: Int, holder: WaveViewHolder) {
         if (mService.getRadioWave()?.name?.toString().equals(items[position].name)) {
             holder.lottieAnimationView?.visibility = View.VISIBLE
         } else {
@@ -51,9 +48,16 @@ class ListFragmentRecyclerViewAdapter(
         }
     }
 
+    private fun setMediaItem(position: Int) {
+        val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+        mService.getPlayer()!!.setMediaItem(mediaItem)
+        mService.getPlayer()!!.prepare()
+        mService.getPlayer()!!.play()
+        mService.setRadioWave(items[position])
+        notifyDataSetChanged()
+    }
+
     override fun getItemCount(): Int {
         return items.size
     }
-
-
 }

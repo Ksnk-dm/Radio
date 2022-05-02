@@ -45,9 +45,6 @@ class PlayerService : Service() {
     private var bitMapPoster: Bitmap? = null
 
 
-
-
-
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
         return playerBinder
@@ -61,9 +58,9 @@ class PlayerService : Service() {
     }
 
     private fun initPlayer() {
-        mPlayer = ExoPlayer.Builder(this).build()
-        mPlayer?.prepare()
-        mPlayer?.play()
+        mPlayer = ExoPlayer.Builder(this).setUseLazyPreparation(false)
+            .setHandleAudioBecomingNoisy(true)
+            .setPauseAtEndOfMediaItems(false).build()
     }
 
     override fun onDestroy() {
@@ -176,9 +173,9 @@ class PlayerService : Service() {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
-        var i =Intent("rec")
+        val i = Intent("rec")
         i.putExtra("media", radioWave)
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(i);
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(i);
     }
 
     fun getRadioWave(): RadioWave? {
