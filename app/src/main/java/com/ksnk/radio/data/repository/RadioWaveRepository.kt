@@ -20,4 +20,6 @@ class RadioWaveRepository
     fun getAllRadioWave(): List<RadioWave> = radioWaveDao.getAll()
 
     fun getFavoriteRadioWave(): List<RadioWave> = radioWaveDao.getFavoriteRadioWave()
+
+    fun getMediaForId(id:Int):RadioWave = radioWaveDao.getRadioWaveForId(id)
 }

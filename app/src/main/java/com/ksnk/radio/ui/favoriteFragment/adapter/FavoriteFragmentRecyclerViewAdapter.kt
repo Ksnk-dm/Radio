@@ -9,7 +9,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
-import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.squareup.picasso.Picasso
 
 class FavoriteFragmentRecyclerViewAdapter(
@@ -32,7 +31,7 @@ class FavoriteFragmentRecyclerViewAdapter(
             .load(items[position].image)
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
-            var mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+            val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
             mPlayer.setMediaItem(mediaItem)
             mPlayer.play()
             mService?.setRadioWave(items[position])

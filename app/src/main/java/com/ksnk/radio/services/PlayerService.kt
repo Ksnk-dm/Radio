@@ -16,13 +16,11 @@ import android.os.IBinder
 
 
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
@@ -30,9 +28,8 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
-import com.ksnk.radio.ui.player.PlayerActivity
+import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
 
 
 class PlayerService : Service() {
@@ -43,12 +40,11 @@ class PlayerService : Service() {
     private var bitMapPoster: Bitmap? = null
 
 
-
-
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
         return playerBinder
     }
+
 
     override fun onCreate() {
         super.onCreate()
@@ -58,9 +54,9 @@ class PlayerService : Service() {
     }
 
     private fun initPlayer() {
-        mPlayer = ExoPlayer.Builder(this).build()
-        mPlayer?.prepare()
-        mPlayer?.play()
+        mPlayer = ExoPlayer.Builder(this).setUseLazyPreparation(false)
+            .setHandleAudioBecomingNoisy(true)
+            .setPauseAtEndOfMediaItems(false).build()
     }
 
     override fun onDestroy() {
@@ -91,8 +87,8 @@ class PlayerService : Service() {
                 }
 
                 override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                    val i = Intent(this@PlayerService, PlayerActivity::class.java)
-                    i.putExtra(getString(com.ksnk.radio.R.string.get_serializable_extra), radioWave)
+                    val i = Intent(this@PlayerService, MainActivity::class.java)
+                    i.putExtra(getString(R.string.get_serializable_extra), radioWave)
                     return PendingIntent.getActivity(
                         this@PlayerService, 0, i,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -173,6 +169,9 @@ class PlayerService : Service() {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
+        val i = Intent("rec")
+        i.putExtra("media", radioWave)
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(i);
     }
 
     fun getRadioWave(): RadioWave? {

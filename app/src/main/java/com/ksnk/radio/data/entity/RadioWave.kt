@@ -1,12 +1,12 @@
 package com.ksnk.radio.data.entity
 
+
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.io.Serializable
-import java.util.*
-import kotlin.random.Random
 
-@Entity
+@Entity(indices = [Index(value = ["name"], unique = true)])
 data class RadioWave(
     @PrimaryKey(autoGenerate = true)
     var id: Int?,
@@ -16,7 +16,6 @@ data class RadioWave(
     var fmFrequency: String?,
     var favorite: Boolean?
 )
-
     : Serializable {
     constructor() : this(null, null, null, null, null, false)
 

@@ -11,13 +11,12 @@ import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
 
 class ListFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
     var context: Context?,
     var mPlayer: ExoPlayer,
-    var mService:PlayerService
+    var mService: PlayerService
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
 
@@ -35,22 +34,29 @@ class ListFragmentRecyclerViewAdapter(
             .load(items[position].image)
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
-            var mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
-            mPlayer.setMediaItem(mediaItem)
-            mPlayer.play()
-            mService?.setRadioWave(items[position])
-            notifyDataSetChanged()
+            setMediaItem(position)
         }
-        if (mService.getRadioWave()?.name?.toString().equals(items[position].name)){
-            holder.lottieAnimationView?.visibility=View.VISIBLE
-        } else{
-            holder.lottieAnimationView?.visibility=View.INVISIBLE
+        radioWaveNameEquals(position, holder)
+    }
+
+    private fun radioWaveNameEquals(position: Int, holder: WaveViewHolder) {
+        if (mService.getRadioWave()?.name?.toString().equals(items[position].name)) {
+            holder.lottieAnimationView?.visibility = View.VISIBLE
+        } else {
+            holder.lottieAnimationView?.visibility = View.INVISIBLE
         }
+    }
+
+    private fun setMediaItem(position: Int) {
+        val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+        mService.getPlayer()!!.setMediaItem(mediaItem)
+        mService.getPlayer()!!.prepare()
+        mService.getPlayer()!!.play()
+        mService.setRadioWave(items[position])
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
         return items.size
     }
-
-
 }

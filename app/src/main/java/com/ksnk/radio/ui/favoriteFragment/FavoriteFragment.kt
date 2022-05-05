@@ -18,7 +18,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
-import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import com.ksnk.radio.ui.main.MainViewModel
 import dagger.android.support.AndroidSupportInjection
@@ -89,12 +88,8 @@ class FavoriteFragment : Fragment() {
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-//            mPlayerService = null
-//            mExoPlayer = null
-//            floatingActionButton.visibility = View.GONE
-//            val editor = settings.edit()
-//            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-//            editor.apply()
+            mPlayerService = null
+            mExoPlayer = null
         }
     }
 }

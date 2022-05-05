@@ -77,27 +77,15 @@ class ListFragment : Fragment() {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-       //     val mediaItem: MediaItem = MediaItem.fromUri("https://online.kissfm.ua/KissFM_HD")
-
-         //   Log.d("fffff",mediaItem.mediaMetadata.artist.toString() )
-           // mExoPlayer?.clearMediaItems()
-          //  mExoPlayer?.setMediaItem(mediaItem)
-       //     mPlayerService?.setRadioWave("https://online.kissfm.ua/KissFM_HD")
             mAdapter = ListFragmentRecyclerViewAdapter(items, activity?.applicationContext, mExoPlayer!!, mPlayerService!!)
             mRecyclerView.adapter = mAdapter
             mPlayerService?.initNotification()
-//            mExoPlayer?.prepare()
-//            mExoPlayer?.play()
 
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
-//            mPlayerService = null
-//            mExoPlayer = null
-//            floatingActionButton.visibility = View.GONE
-//            val editor = settings.edit()
-//            editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-//            editor.apply()
+            mPlayerService = null
+            mExoPlayer = null
         }
     }
 

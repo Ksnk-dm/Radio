@@ -16,10 +16,11 @@ class AppModule {
         return application
     }
 
+
     @Provides
     @Singleton
-    fun provideSharedPreference(context: Context): SharedPreferences? {
-        return context.getSharedPreferences("app", Context.MODE_PRIVATE)
+    fun provideSharedPreference(context: Context?): SharedPreferences {
+        return context?.getSharedPreferences("app", Context.MODE_PRIVATE)!!
     }
 
     @Provides

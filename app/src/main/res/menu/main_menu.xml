@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="List" android:id="@+id/item1"
-        android:icon="@drawable/ic_baseline_list_24"/>
-    <item android:title="Player" android:id="@+id/item2"
-        android:icon="@drawable/ic_baseline_play_circle_filled_24"/>
-    <item android:title="Favorite" android:id="@+id/item3"
-        android:icon="@drawable/ic_baseline_favorite_24"/>
+    <item
+        android:id="@+id/listFragmentItem"
+        android:icon="@drawable/ic_baseline_list_24"
+        android:title="@string/list_menu_item" />
+    <item
+        android:id="@+id/favoriteFragmentItem"
+        android:icon="@drawable/ic_baseline_favorite_24"
+        android:title="@string/fav_menu_item" />
+    <item
+        android:id="@+id/settingFragmentItem"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/set_menu_item" />
+
 </menu>

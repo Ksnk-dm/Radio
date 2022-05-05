@@ -8,7 +8,7 @@ interface RadioWaveDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg radioWave: RadioWave)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(listRadioWave: List<RadioWave>)
 
     @Delete
@@ -18,8 +18,11 @@ interface RadioWaveDao {
     fun update(vararg radioWave: RadioWave)
 
     @Query("SELECT * FROM radiowave")
-    fun getAll():List<RadioWave>
+    fun getAll(): List<RadioWave>
 
     @Query("SELECT * FROM radiowave WHERE favorite =1")
-    fun getFavoriteRadioWave():List<RadioWave>
+    fun getFavoriteRadioWave(): List<RadioWave>
+
+    @Query("SELECT * FROM radiowave WHERE id==:id")
+    fun getRadioWaveForId(id: Int):RadioWave
 }
