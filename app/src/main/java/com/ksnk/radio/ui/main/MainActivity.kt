@@ -42,6 +42,7 @@ import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
+import java.lang.NullPointerException
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        setMediaInfoInMiniPlayer()
     }
 
 
@@ -185,22 +187,29 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         init()
+        initPermission()
         checkFirstStartStatus()
         initBroadcastManager()
-        initPermission()
         setMediaInfoInMiniPlayer()
         setListeners()
+        //       initDb()
+//        var radioWave: RadioWave = RadioWave(1,"test", "test", "test", "test",true)
+//        database.child("wave66").setValue(radioWave)
     }
 
     private fun setMediaInfoInMiniPlayer() {
         val id: Int = preferencesHelper.getIdPlayMedia()
         val radioWave: RadioWave = viewModel.getRadioWaveForId(id)
-        titleTextView.text = radioWave.name
-        Picasso.get()
-            .load(radioWave.image)
-            .into(posterImageView)
-        preferencesHelper.setIdPlayMedia(radioWave.id)
+        if (radioWave != null) {
+            titleTextView.text = radioWave.name
+            Picasso.get()
+                .load(radioWave.image)
+                .into(posterImageView)
+            preferencesHelper.setIdPlayMedia(radioWave.id)
+        }
     }
+
+
 
 
     private fun createListFragment() {
@@ -317,6 +326,7 @@ class MainActivity : AppCompatActivity() {
         posterImageView = findViewById(R.id.main_imageView)
         playImageView = findViewById(R.id.play_imageView)
         animNetLottieAnimationView = findViewById(R.id.netAnim)
+
     }
 
 
@@ -332,10 +342,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun initDb() {
+    fun initDb() {
         database =
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
                 .getReference(getString(R.string.firebase_ref))
+
         val valueEventListener: ValueEventListener = object : ValueEventListener {
             override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
                 for (dataSnapshot in snapshot.children) {
@@ -346,6 +357,9 @@ class MainActivity : AppCompatActivity() {
                 startPlayerService()
                 createListFragment()
                 preferencesHelper.setFirstStart(false)
+                preferencesHelper.setIdPlayMedia(items[2].id)
+                var radioWave: RadioWave = RadioWave(888, "testov", "test", "test", "test", false)
+                database.child("wave44").setValue(radioWave)
             }
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
@@ -354,19 +368,51 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    fun updateDb() {
+        database =
+            FirebaseDatabase.getInstance(getString(R.string.firebase_url))
+                .getReference(getString(R.string.firebase_ref))
+        val valueEventListener: ValueEventListener = object : ValueEventListener {
+            override fun onDataChange(@NonNull @NotNull snapshot: DataSnapshot) {
+                for (dataSnapshot in snapshot.children) {
+                    val radioWave: RadioWave? = dataSnapshot.getValue(RadioWave::class.java)
+                    items.add(radioWave!!)
+                }
+                viewModel.createListRadioWave(items)
+                //    startPlayerService()
+                //     createListFragment()
+                preferencesHelper.setFirstStart(false)
+
+            }
+
+            override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
+        }
+        database.addValueEventListener(valueEventListener)
+    }
+
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
             val id = preferencesHelper.getIdPlayMedia()
-            val url: String? = viewModel.getRadioWaveForId(id).url
-            val mediaItem: MediaItem =
-                MediaItem.fromUri(url!!)
-            mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
-            mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+            var url: String?
+
+            try {
+               url = viewModel.getRadioWaveForId(id).url
+                val mediaItem: MediaItem =
+                    MediaItem.fromUri(url!!)
+                mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
+                mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+
+            } catch (e:NullPointerException){
+
+            }
             isPlayingMedia(mExoPlayer!!.isPlaying)
             mPlayerService?.getPlayer()?.addListener(playerListener)
+         //   val url: String? = viewModel.getRadioWaveForId(id).url
+
         }
 
 

@@ -12,6 +12,7 @@
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_music_note_24.xml" value="0.1" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_pause_24.xml" value="0.11" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_play_arrow_24.xml" value="0.11" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_sync_24.xml" value="0.1605" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_launcher_background.xml" value="0.11" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_next_button_svgrepo_com.xml" value="0.1565" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_pause_button_svgrepo_com.xml" value="0.1" />
@@ -21,12 +22,13 @@
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_player.xml" value="0.1140625" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/activity_splash.xml" value="0.10536980749746708" />
-        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/custom_player_view.xml" value="0.136" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/custom_player_view.xml" value="0.264" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/favorite_fragment.xml" value="0.15572916666666667" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/first_fragment.xml" value="0.18795289855072464" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/list_fragment.xml" value="0.19610507246376813" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/player_fragment.xml" value="0.18206521739130435" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/second_fragment.xml" value="0.18206521739130435" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/setting_fragment.xml" value="0.264" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/wave_items.xml" value="0.264" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/menu/main_menu.xml" value="0.21666666666666667" />
       </map>

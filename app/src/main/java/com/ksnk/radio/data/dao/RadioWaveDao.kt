@@ -8,7 +8,7 @@ interface RadioWaveDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg radioWave: RadioWave)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(listRadioWave: List<RadioWave>)
 
     @Delete

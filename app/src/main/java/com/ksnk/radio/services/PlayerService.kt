@@ -32,7 +32,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescripti
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
-import com.ksnk.radio.ui.player.PlayerActivity
+
 import com.squareup.picasso.Picasso
 import javax.inject.Inject
 
@@ -49,6 +49,7 @@ class PlayerService : Service() {
     override fun onBind(p0: Intent?): IBinder {
         return playerBinder
     }
+
 
     override fun onCreate() {
         super.onCreate()

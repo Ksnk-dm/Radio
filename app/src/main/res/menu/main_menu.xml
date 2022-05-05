@@ -6,6 +6,6 @@
     <item android:title="Favorite" android:id="@+id/favoriteFragmentItem"
         android:icon="@drawable/ic_baseline_favorite_24"/>
     <item android:title="Setting" android:id="@+id/settingFragmentItem"
-        android:icon="@drawable/ic_baseline_play_circle_filled_24"/>
+        android:icon="@drawable/ic_baseline_settings_24"/>
 
 </menu>

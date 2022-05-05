@@ -9,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class PreferenceHelper @Inject constructor(private var sharedPreferences: SharedPreferences) {
     fun getIdPlayMedia(): Int {
-        return sharedPreferences.getInt("id", 1)
+        return sharedPreferences.getInt("id",1)
     }
 
     fun setIdPlayMedia(id: Int?) {
