@@ -1,12 +1,10 @@
 package com.ksnk.radio.data.entity
 
-import androidx.room.ColumnInfo
+
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.io.Serializable
-import java.util.*
-import kotlin.random.Random
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
 data class RadioWave(

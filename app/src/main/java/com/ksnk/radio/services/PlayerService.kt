@@ -16,14 +16,11 @@ import android.os.IBinder
 
 
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
@@ -32,9 +29,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescripti
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
-
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
 
 
 class PlayerService : Service() {

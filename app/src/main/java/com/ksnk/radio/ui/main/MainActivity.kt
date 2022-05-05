@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -68,8 +67,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var motionLayout: MotionLayout
     private lateinit var favoriteImageButton: ImageButton
     private lateinit var playImageView: ImageView
-    private lateinit var mainContainer: ConstraintLayout
-
     private lateinit var animNetLottieAnimationView: LottieAnimationView
 
     @Inject
@@ -80,11 +77,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var preferencesHelper: PreferenceHelper
-
     lateinit var titleTextView: TextView
     lateinit var posterImageView: ImageView
     private lateinit var fragment: Fragment
-
     private var firstStartStatus: Boolean = true
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -192,9 +187,6 @@ class MainActivity : AppCompatActivity() {
         initBroadcastManager()
         setMediaInfoInMiniPlayer()
         setListeners()
-        //       initDb()
-//        var radioWave: RadioWave = RadioWave(1,"test", "test", "test", "test",true)
-//        database.child("wave66").setValue(radioWave)
     }
 
     private fun setMediaInfoInMiniPlayer() {
@@ -208,8 +200,6 @@ class MainActivity : AppCompatActivity() {
             preferencesHelper.setIdPlayMedia(radioWave.id)
         }
     }
-
-
 
 
     private fun createListFragment() {
@@ -358,8 +348,6 @@ class MainActivity : AppCompatActivity() {
                 createListFragment()
                 preferencesHelper.setFirstStart(false)
                 preferencesHelper.setIdPlayMedia(items[2].id)
-                var radioWave: RadioWave = RadioWave(888, "testov", "test", "test", "test", false)
-                database.child("wave44").setValue(radioWave)
             }
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
@@ -397,21 +385,20 @@ class MainActivity : AppCompatActivity() {
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
             val id = preferencesHelper.getIdPlayMedia()
-            var url: String?
+            val url: String?
 
             try {
-               url = viewModel.getRadioWaveForId(id).url
+                url = viewModel.getRadioWaveForId(id).url
                 val mediaItem: MediaItem =
                     MediaItem.fromUri(url!!)
                 mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
                 mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
-
-            } catch (e:NullPointerException){
-
+            } catch (e: NullPointerException) {
+                e.stackTrace
             }
             isPlayingMedia(mExoPlayer!!.isPlaying)
             mPlayerService?.getPlayer()?.addListener(playerListener)
-         //   val url: String? = viewModel.getRadioWaveForId(id).url
+
 
         }
 

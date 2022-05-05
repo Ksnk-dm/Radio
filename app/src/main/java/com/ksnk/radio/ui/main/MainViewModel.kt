@@ -8,10 +8,6 @@ import javax.inject.Inject
 class MainViewModel
 @Inject constructor(var radioWaveRepository: RadioWaveRepository) : BaseViewModel() {
 
-    fun createRadioWave() {
-       // val radioWave: RadioWave = RadioWave( "name", "image", "url", "fm")
-      //  radioWaveRepository.insertRadioWave(radioWave)
-    }
 
     fun createListRadioWave(listRadioWave: List<RadioWave>){
         radioWaveRepository.insertListRadioWave(listRadioWave)
