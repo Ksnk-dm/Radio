@@ -13,7 +13,7 @@
         android:name=".di.App"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication"
+        android:theme="@style/Theme.RadioUa"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.splash.SplashActivity"
