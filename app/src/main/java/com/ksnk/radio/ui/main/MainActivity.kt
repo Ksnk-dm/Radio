@@ -7,6 +7,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.text.TextUtils
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
@@ -37,6 +38,7 @@ import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
+import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
@@ -91,6 +93,29 @@ class MainActivity : AppCompatActivity() {
                 .into(posterImageView)
             preferencesHelper.setIdPlayMedia(radioWave.id!!)
         }
+    }
+
+    private fun checkImageNull() {
+        if (TextUtils.isEmpty(radioWave.image)) {
+            posterImageView.setImageResource(R.mipmap.ic_launcher_round);
+        } else {
+            Picasso.get()
+                .load(radioWave.image)
+                .into(posterImageView)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
+        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        init()
+        initPermission()
+        checkFirstStartStatus()
+        initBroadcastManager()
+        setMediaInfoInMiniPlayer()
+        setListeners()
     }
 
     override fun onDestroy() {
@@ -174,19 +199,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             mExoPlayer!!.play()
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        init()
-        initPermission()
-        checkFirstStartStatus()
-        initBroadcastManager()
-        setMediaInfoInMiniPlayer()
-        setListeners()
     }
 
     private fun setMediaInfoInMiniPlayer() {
