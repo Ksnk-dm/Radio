@@ -1,6 +1,7 @@
 package com.ksnk.radio.ui.listFragment.adapter
 
 import android.content.Context
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,13 +31,21 @@ class ListFragmentRecyclerViewAdapter(
     override fun onBindViewHolder(holder: WaveViewHolder, position: Int) {
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
-        Picasso.get()
-            .load(items[position].image)
-            .into(holder.imageViewWave)
+        checkImageNull(position, holder)
         holder.itemView.setOnClickListener {
             setMediaItem(position)
         }
         radioWaveNameEquals(position, holder)
+    }
+
+    private fun checkImageNull(position: Int, holder: WaveViewHolder) {
+        if (TextUtils.isEmpty(items[position].image)) {
+            holder.imageViewWave?.setImageResource(R.mipmap.ic_launcher_round);
+        } else {
+            Picasso.get()
+                .load(items[position].image)
+                .into(holder.imageViewWave)
+        }
     }
 
     private fun radioWaveNameEquals(position: Int, holder: WaveViewHolder) {

@@ -13,4 +13,5 @@
     <string name="list_menu_item">Список станций</string>
     <string name="fav_menu_item">Избранное</string>
     <string name="set_menu_item">Настройки</string>
+    <string name="set_title">Основные</string>
 </resources>
