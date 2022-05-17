@@ -70,6 +70,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var favoriteImageButton: ImageButton
     private lateinit var playImageView: ImageView
     private lateinit var animNetLottieAnimationView: LottieAnimationView
+    private lateinit var backImageButton: ImageButton
+    private lateinit var titleToolTextView: TextView
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -183,6 +185,7 @@ class MainActivity : AppCompatActivity() {
         favoriteImageButton.setOnClickListener {
             initRadioWaveFromService()
         }
+        backImageButton.setOnClickListener { motionLayout.transitionToStart() }
         lottieAnimationView.addAnimatorListener(lottieAnimationListener)
         bottomNavView.setOnItemSelectedListener(bottomNavViewOnItemSelectListener)
         playImageView.setOnTouchListener { _, event ->
@@ -220,6 +223,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
+        titleToolTextView.text = getString(R.string.list_menu_item)
     }
 
     private fun createSettingFragment() {
@@ -228,6 +232,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
+        titleToolTextView.text = getString(R.string.set_menu_item)
     }
 
     private fun createFavFragment() {
@@ -236,6 +241,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
+        titleToolTextView.text = getString(R.string.fav_menu_item)
     }
 
     private var bottomNavViewOnItemSelectListener = NavigationBarView.OnItemSelectedListener {
@@ -328,6 +334,9 @@ class MainActivity : AppCompatActivity() {
         posterImageView = findViewById(R.id.main_imageView)
         playImageView = findViewById(R.id.play_imageView)
         animNetLottieAnimationView = findViewById(R.id.netAnim)
+        backImageButton = findViewById(R.id.backImageButton)
+        titleToolTextView = findViewById(R.id.titleToolTextView)
+        titleToolTextView.text = getString(R.string.list_menu_item)
 
     }
 
@@ -456,5 +465,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         // super.onBackPressed()
+        motionLayout.transitionToStart()
     }
 }

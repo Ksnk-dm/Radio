@@ -3,6 +3,7 @@ package com.ksnk.radio.services
 
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
+import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -80,7 +81,7 @@ class PlayerService : Service() {
             this.resources.getString(R.string.app_name)
         )
             .setChannelNameResourceId(R.string.app_name)
-            .setChannelImportance(IMPORTANCE_DEFAULT)
+            .setChannelImportance(IMPORTANCE_NONE)
             .setMediaDescriptionAdapter(object : MediaDescriptionAdapter {
                 override fun getCurrentContentTitle(player: Player): CharSequence {
                     return radioWave?.name.toString()
