@@ -7,6 +7,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -29,17 +30,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
-import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.services.TimerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
-import java.lang.NullPointerException
+import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var backImageButton: ImageButton
     private lateinit var titleToolTextView: TextView
     private lateinit var searchView: SearchView
+    private lateinit var timerTextView: TextView
+    private lateinit var timerImageButton: ImageButton
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -106,14 +110,46 @@ class MainActivity : AppCompatActivity() {
         initBroadcastManager()
         setMediaInfoInMiniPlayer()
         setListeners()
+      //  startService(Intent(this, TimerService::class.java))
+     //   registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
+
+
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        //  stopService(Intent(this, TimerService::class.java))
         setMediaInfoInMiniPlayer()
     }
 
+    private val br: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            updateGUI(intent!!) // or whatever method used to update your GUI fields
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
+        Log.i("TAG", "Registered broacast receiver")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(br)
+        Log.i("TAG", "Unregistered broacast receiver")
+    }
+
+    override fun onStop() {
+        try {
+            unregisterReceiver(br)
+        } catch (e: java.lang.Exception) {
+            // Receiver was probably already stopped in onPause()
+        }
+        super.onStop()
+    }
 
     private fun checkFirstStartStatus() {
         firstStartStatus = preferencesHelper.getFirstStart()
@@ -172,6 +208,10 @@ class MainActivity : AppCompatActivity() {
     private fun setListeners() {
         favoriteImageButton.setOnClickListener {
             initRadioWaveFromService()
+        }
+        timerImageButton.setOnClickListener {
+            timerTextView.visibility=View.VISIBLE
+            startService(Intent(this, TimerService::class.java))
         }
         backImageButton.setOnClickListener { motionLayout.transitionToStart() }
         lottieAnimationView.addAnimatorListener(lottieAnimationListener)
@@ -324,6 +364,8 @@ class MainActivity : AppCompatActivity() {
         titleToolTextView = findViewById(R.id.titleToolTextView)
         titleToolTextView.text = getString(R.string.list_menu_item)
 //        searchView=findViewById(R.id.radio_search)
+        timerTextView = findViewById(R.id.timerTextView)
+        timerImageButton=findViewById(R.id.timerImageButton)
     }
 
     private fun initPermission() {
@@ -361,7 +403,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
     fun updateDb() {
         database =
             FirebaseDatabase.getInstance(getString(R.string.firebase_url))
@@ -388,7 +429,6 @@ class MainActivity : AppCompatActivity() {
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
             val id = preferencesHelper.getIdPlayMedia()
             val url: String?
-
             try {
                 url = viewModel.getRadioWaveForId(id).url
                 val mediaItem: MediaItem =
@@ -445,5 +485,19 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         // super.onBackPressed()
         motionLayout.transitionToStart()
+    }
+
+    private fun updateGUI(intent: Intent) {
+        if (intent.extras != null) {
+            val millisUntilFinished = intent.getLongExtra("countdown", 0)
+            Log.i("TAG", "Countdown seconds remaining: " + millisUntilFinished / 1000)
+            val time: Long = millisUntilFinished / 1000
+            timerTextView.text = time.toString()
+            if (time == 0L) {
+                mExoPlayer?.stop()
+                stopService(Intent(this, PlayerService::class.java))
+                timerTextView.text=""
+            }
+        }
     }
 }
