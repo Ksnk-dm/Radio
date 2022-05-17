@@ -21,8 +21,6 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 class ListFragment : Fragment() {
-
-
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
@@ -46,7 +44,6 @@ class ListFragment : Fragment() {
         super.onAttach(context)
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,16 +52,12 @@ class ListFragment : Fragment() {
         return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
-
-
-
     }
 
     companion object

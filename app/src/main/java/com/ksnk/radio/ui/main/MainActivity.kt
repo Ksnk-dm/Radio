@@ -7,12 +7,9 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.text.TextUtils
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -38,7 +35,6 @@ import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
-import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
@@ -58,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     private var fragmentView: FragmentContainerView? = null
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
+    private var matchedRadiWave: ArrayList<RadioWave> = arrayListOf()
     private lateinit var mPosterImageView: CircleImageView
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
@@ -72,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var animNetLottieAnimationView: LottieAnimationView
     private lateinit var backImageButton: ImageButton
     private lateinit var titleToolTextView: TextView
+    private lateinit var searchView: SearchView
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -94,16 +92,6 @@ class MainActivity : AppCompatActivity() {
                 .load(radioWave.image)
                 .into(posterImageView)
             preferencesHelper.setIdPlayMedia(radioWave.id!!)
-        }
-    }
-
-    private fun checkImageNull() {
-        if (TextUtils.isEmpty(radioWave.image)) {
-            posterImageView.setImageResource(R.mipmap.ic_launcher_round);
-        } else {
-            Picasso.get()
-                .load(radioWave.image)
-                .into(posterImageView)
         }
     }
 
@@ -216,7 +204,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun createListFragment() {
         fragment = ListFragment().newInstance()
         val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
@@ -284,7 +271,6 @@ class MainActivity : AppCompatActivity() {
             progress: Float
         ) {
         }
-
     }
 
     private fun checkButtonPlayInMiniPlayer() {
@@ -337,9 +323,8 @@ class MainActivity : AppCompatActivity() {
         backImageButton = findViewById(R.id.backImageButton)
         titleToolTextView = findViewById(R.id.titleToolTextView)
         titleToolTextView.text = getString(R.string.list_menu_item)
-
+//        searchView=findViewById(R.id.radio_search)
     }
-
 
     private fun initPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -351,7 +336,6 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, permissions, 0)
         }
     }
-
 
     fun initDb() {
         database =
@@ -389,10 +373,7 @@ class MainActivity : AppCompatActivity() {
                     items.add(radioWave!!)
                 }
                 viewModel.createListRadioWave(items)
-                //    startPlayerService()
-                //     createListFragment()
                 preferencesHelper.setFirstStart(false)
-
             }
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
@@ -419,8 +400,6 @@ class MainActivity : AppCompatActivity() {
             }
             isPlayingMedia(mExoPlayer!!.isPlaying)
             mPlayerService?.getPlayer()?.addListener(playerListener)
-
-
         }
 
 
