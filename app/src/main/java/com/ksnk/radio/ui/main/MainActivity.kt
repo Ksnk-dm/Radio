@@ -7,11 +7,11 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.annotation.NonNull
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.app.ActivityCompat
@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchView: SearchView
     private lateinit var timerTextView: TextView
     private lateinit var timerImageButton: ImageButton
+    private lateinit var addImageButton: ImageButton
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -87,6 +88,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var posterImageView: ImageView
     private lateinit var fragment: Fragment
     private var firstStartStatus: Boolean = true
+
+    private lateinit var setTimerButton: Button
+    private lateinit var minuteEditText: EditText
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -110,9 +114,8 @@ class MainActivity : AppCompatActivity() {
         initBroadcastManager()
         setMediaInfoInMiniPlayer()
         setListeners()
-      //  startService(Intent(this, TimerService::class.java))
-     //   registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
-
+        //  startService(Intent(this, TimerService::class.java))
+        //   registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
 
 
     }
@@ -133,13 +136,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
-        Log.i("TAG", "Registered broacast receiver")
     }
 
     override fun onPause() {
         super.onPause()
         unregisterReceiver(br)
-        Log.i("TAG", "Unregistered broacast receiver")
     }
 
     override fun onStop() {
@@ -210,9 +211,11 @@ class MainActivity : AppCompatActivity() {
             initRadioWaveFromService()
         }
         timerImageButton.setOnClickListener {
-            timerTextView.visibility=View.VISIBLE
-            startService(Intent(this, TimerService::class.java))
+            timerTextView.visibility = View.VISIBLE
+            createTimerAlertDialog()
+            //   startService(Intent(this, TimerService::class.java))
         }
+        addImageButton.setOnClickListener { createInsertAlertDialog() }
         backImageButton.setOnClickListener { motionLayout.transitionToStart() }
         lottieAnimationView.addAnimatorListener(lottieAnimationListener)
         bottomNavView.setOnItemSelectedListener(bottomNavViewOnItemSelectListener)
@@ -365,7 +368,8 @@ class MainActivity : AppCompatActivity() {
         titleToolTextView.text = getString(R.string.list_menu_item)
 //        searchView=findViewById(R.id.radio_search)
         timerTextView = findViewById(R.id.timerTextView)
-        timerImageButton=findViewById(R.id.timerImageButton)
+        timerImageButton = findViewById(R.id.timerImageButton)
+        addImageButton = findViewById(R.id.addImageButton)
     }
 
     private fun initPermission() {
@@ -487,17 +491,81 @@ class MainActivity : AppCompatActivity() {
         motionLayout.transitionToStart()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateGUI(intent: Intent) {
         if (intent.extras != null) {
+            timerImageButton.setImageResource(R.drawable.ic_baseline_timer_red_24)
+            timerImageButton.tag = "work"
             val millisUntilFinished = intent.getLongExtra("countdown", 0)
-            Log.i("TAG", "Countdown seconds remaining: " + millisUntilFinished / 1000)
-            val time: Long = millisUntilFinished / 1000
-            timerTextView.text = time.toString()
-            if (time == 0L) {
+            val min: Long = (millisUntilFinished / 1000) / 60
+            val sec: Long = (millisUntilFinished / 1000) % 60
+            timerTextView.text = "$min:$sec " + getString(R.string.minute_title)
+            if (sec == 0L) {
                 mExoPlayer?.stop()
                 stopService(Intent(this, PlayerService::class.java))
-                timerTextView.text=""
+                timerTextView.visibility = View.GONE
+                timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
+                timerImageButton.tag = "stop"
             }
         }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun createTimerAlertDialog() {
+        val builder = AlertDialog.Builder(this)
+            .create()
+        val view = layoutInflater.inflate(R.layout.timer_custom_alert_dialog, null)
+        val setTimerButton = view.findViewById<Button>(R.id.setTimerButton)
+        val minuteEditText = view.findViewById<EditText>(R.id.minuteEditText)
+        val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
+        val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
+        val minTextView = view.findViewById<TextView>(R.id.minTextView)
+        if (timerImageButton.tag == "work") {
+            setTimerButton.visibility = View.GONE
+            stopTimerButton.visibility = View.VISIBLE
+            minuteEditText.visibility = View.GONE
+            timerTextViewDialog.text = "timer is run"
+            minTextView.visibility = View.GONE
+
+        }
+        stopTimerButton.setOnClickListener {
+            stopService(Intent(this, TimerService::class.java))
+            setTimerButton.visibility = View.VISIBLE
+            stopTimerButton.visibility = View.GONE
+            minuteEditText.visibility = View.VISIBLE
+            timerTextView.visibility = View.GONE
+            timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
+            timerTextViewDialog.text = "Установить таймер"
+            timerImageButton.tag = "stop"
+            minTextView.visibility = View.VISIBLE
+        }
+
+        builder.setView(view)
+        setTimerButton.setOnClickListener {
+            val intent = Intent(this, TimerService::class.java)
+            intent.putExtra("minutes", minuteEditText.text.toString())
+            startService(intent)
+            builder.dismiss()
+        }
+        builder.setCanceledOnTouchOutside(true)
+        builder.show()
+    }
+
+    private fun createInsertAlertDialog() {
+        val builder = AlertDialog.Builder(this)
+            .create()
+        val view = layoutInflater.inflate(R.layout.add_radio_wave_alert_dialog, null)
+        val saveButton = view.findViewById<Button>(R.id.saveButton)
+        val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
+        val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
+        saveButton.setOnClickListener {
+            var radioWave: RadioWave = RadioWave()
+            radioWave.name = nameEditText.text.toString()
+            radioWave.url = urlEditText.text.toString()
+            viewModel.insert(radioWave)
+        }
+        builder.setView(view)
+        builder.setCanceledOnTouchOutside(true)
+        builder.show()
     }
 }

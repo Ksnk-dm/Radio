@@ -20,13 +20,23 @@ class TimerService : Service() {
     var bi = Intent(COUNTDOWN_BR)
 
     var cdt: CountDownTimer? = null
-
+    var minutes: String? = null
 
     override fun onCreate() {
         super.onCreate()
-        // playerService = PlayerService().PlayerBinder().getService()!!
-        Log.i(TAG, "Starting timer...")
-        cdt = object : CountDownTimer(10000, 1000) {
+        //60000 millis = 1 min
+    }
+
+    override fun onDestroy() {
+        cdt!!.cancel()
+        Log.i(TAG, "Timer cancelled")
+        super.onDestroy()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        minutes = intent?.getStringExtra("minutes")
+        Log.d("taggg", minutes.toString())
+        cdt = object : CountDownTimer(minutes?.toLong()!! * 60000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.i(TAG, "Countdown seconds remaining: " + millisUntilFinished / 1000)
                 bi.putExtra("countdown", millisUntilFinished)
@@ -40,15 +50,6 @@ class TimerService : Service() {
             }
         }
         (cdt as CountDownTimer).start()
-    }
-
-    override fun onDestroy() {
-        cdt!!.cancel()
-        Log.i(TAG, "Timer cancelled")
-        super.onDestroy()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 }
