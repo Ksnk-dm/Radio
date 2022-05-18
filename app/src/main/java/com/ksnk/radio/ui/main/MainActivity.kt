@@ -33,6 +33,7 @@ import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.helper.PreferenceHelper
+import com.ksnk.radio.listeners.FragmetSettingListener
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.services.TimerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
@@ -75,6 +76,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timerTextView: TextView
     private lateinit var timerImageButton: ImageButton
     private lateinit var addImageButton: ImageButton
+
+    private var fragmetSettingListener: FragmetSettingListener? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -515,9 +518,9 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
             .create()
         val view = layoutInflater.inflate(R.layout.timer_custom_alert_dialog, null)
-        val setTimerButton = view.findViewById<Button>(R.id.setTimerButton)
+        val setTimerButton = view.findViewById<ImageButton>(R.id.setTimerButton)
         val minuteEditText = view.findViewById<EditText>(R.id.minuteEditText)
-        val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
+        val stopTimerButton = view.findViewById<ImageButton>(R.id.stopTimerButton)
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
         if (timerImageButton.tag == "work") {
@@ -554,18 +557,32 @@ class MainActivity : AppCompatActivity() {
     private fun createInsertAlertDialog() {
         val builder = AlertDialog.Builder(this)
             .create()
-        val view = layoutInflater.inflate(R.layout.add_radio_wave_alert_dialog, null)
-        val saveButton = view.findViewById<Button>(R.id.saveButton)
+        val view = layoutInflater.inflate(R.layout.add_update_radio_wave_alert_dialog, null)
+        val saveButton = view.findViewById<ImageButton>(R.id.saveButton)
         val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
         val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
         saveButton.setOnClickListener {
             var radioWave: RadioWave = RadioWave()
             radioWave.name = nameEditText.text.toString()
+            radioWave.image = "https://cdn-icons-png.flaticon.com/512/186/186054.png"
+            radioWave.custom = true
             radioWave.url = urlEditText.text.toString()
-            viewModel.insert(radioWave)
+            if (nameEditText.text.trim() { it <= ' ' }
+                    .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
+                Toast.makeText(this, "text", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.insert(radioWave)
+                fragmetSettingListener?.update()
+                builder.dismiss()
+            }
+
         }
         builder.setView(view)
         builder.setCanceledOnTouchOutside(true)
         builder.show()
+    }
+
+    fun setSettingListener(fragmetSettingListener: FragmetSettingListener) {
+        this.fragmetSettingListener = fragmetSettingListener
     }
 }

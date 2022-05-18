@@ -24,5 +24,5 @@ interface RadioWaveDao {
     fun getFavoriteRadioWave(): List<RadioWave>
 
     @Query("SELECT * FROM radiowave WHERE id==:id")
-    fun getRadioWaveForId(id: Int):RadioWave
+    fun getRadioWaveForId(id: Int?):RadioWave
 }

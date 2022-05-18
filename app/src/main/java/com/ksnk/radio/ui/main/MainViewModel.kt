@@ -12,6 +12,10 @@ class MainViewModel
         radioWaveRepository.insertRadioWave(radioWave)
     }
 
+    fun delete(radioWave: RadioWave){
+        radioWaveRepository.deleteRadioWave(radioWave)
+    }
+
     fun createListRadioWave(listRadioWave: List<RadioWave>){
         radioWaveRepository.insertListRadioWave(listRadioWave)
     }
@@ -28,7 +32,7 @@ class MainViewModel
         return radioWaveRepository.getFavoriteRadioWave()
     }
 
-    fun getRadioWaveForId(id:Int):RadioWave{
+    fun getRadioWaveForId(id: Int?):RadioWave{
         return radioWaveRepository.getMediaForId(id)
     }
 

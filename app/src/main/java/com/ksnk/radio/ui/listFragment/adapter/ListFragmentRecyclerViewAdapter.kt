@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.listeners.IntMenu
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
 
@@ -17,21 +18,31 @@ class ListFragmentRecyclerViewAdapter(
     private var items: List<RadioWave>,
     var context: Context?,
     var mPlayer: ExoPlayer,
-    var mService: PlayerService
+    var mService: PlayerService,
+    var intMenu: IntMenu
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
 
-
+fun setItems(items: List<RadioWave>){
+    this.items=items
+}
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         return WaveViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
     }
 
+
     override fun onBindViewHolder(holder: WaveViewHolder, position: Int) {
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
         checkImageNull(position, holder)
+        if(items[position].custom==false){
+            holder.menuImageButton?.visibility=View.INVISIBLE
+        } else{
+            holder.menuImageButton?.visibility=View.VISIBLE
+        }
+        holder.menuImageButton?.setOnClickListener { intMenu.getMenu(items[position].id) }
         holder.itemView.setOnClickListener {
             setMediaItem(position)
         }
