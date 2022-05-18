@@ -16,6 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:text="Название станции"
             android:textColor="@color/white" />
 
@@ -23,6 +24,7 @@
             android:id="@+id/name_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:backgroundTint="@color/white"
             android:ems="10"
             android:hint="Введите название станции"
@@ -40,6 +42,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:text="Прямая ссылка на поток радио"
             android:textColor="@color/white" />
 
@@ -47,6 +50,7 @@
             android:id="@+id/url_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:backgroundTint="@color/white"
             android:ems="10"
             android:hint="Введите ссылку на поток"

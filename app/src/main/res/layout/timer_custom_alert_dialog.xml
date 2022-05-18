@@ -51,10 +51,10 @@
 
         <Button
             android:id="@+id/setTimerButton"
-            android:layout_width="100dp"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
             android:backgroundTint="@color/black"
-            android:text="set"
+            android:text="Установить таймер"
             android:textColor="@color/white" />
 
         <Button
