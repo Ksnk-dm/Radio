@@ -10,7 +10,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
-import com.ksnk.radio.listeners.IntMenu
+import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
 
@@ -19,13 +19,14 @@ class ListFragmentRecyclerViewAdapter(
     var context: Context?,
     var mPlayer: ExoPlayer,
     var mService: PlayerService,
-    var intMenu: IntMenu
+    var menuItemIdListener: MenuItemIdListener
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
 
-fun setItems(items: List<RadioWave>){
-    this.items=items
-}
+    fun setItems(items: List<RadioWave>) {
+        this.items = items
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -37,12 +38,17 @@ fun setItems(items: List<RadioWave>){
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
         checkImageNull(position, holder)
-        if(items[position].custom==false){
-            holder.menuImageButton?.visibility=View.INVISIBLE
-        } else{
-            holder.menuImageButton?.visibility=View.VISIBLE
+        if (items[position].favorite == true) {
+            holder.favImageView?.visibility = View.VISIBLE
+        } else {
+            holder.favImageView?.visibility = View.INVISIBLE
         }
-        holder.menuImageButton?.setOnClickListener { intMenu.getMenu(items[position].id) }
+        if (items[position].custom == false) {
+            holder.menuImageButton?.visibility = View.GONE
+        } else {
+            holder.menuImageButton?.visibility = View.VISIBLE
+        }
+        holder.menuImageButton?.setOnClickListener { menuItemIdListener.getItemMenu(items[position].id) }
         holder.itemView.setOnClickListener {
             setMediaItem(position)
         }

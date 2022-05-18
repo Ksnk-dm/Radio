@@ -14,4 +14,5 @@ class WaveViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var frequencyTextView: TextView? = itemView.findViewById(R.id.textViewFrequency)
     var lottieAnimationView:LottieAnimationView? =itemView.findViewById(R.id.favAnimationView)
     var menuImageButton:ImageButton?=itemView.findViewById(R.id.menuImageButton)
+    var favImageView:ImageView?=itemView.findViewById(R.id.favImageView)
 }

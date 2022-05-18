@@ -17,6 +17,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +34,7 @@ import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.helper.PreferenceHelper
-import com.ksnk.radio.listeners.FragmetSettingListener
+import com.ksnk.radio.listeners.FragmentSettingListener
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.services.TimerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
@@ -77,7 +78,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timerImageButton: ImageButton
     private lateinit var addImageButton: ImageButton
 
-    private var fragmetSettingListener: FragmetSettingListener? = null
+    private var fragmentSettingListener: FragmentSettingListener? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -94,6 +95,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var setTimerButton: Button
     private lateinit var minuteEditText: EditText
+
+    private lateinit var searchImageButton: ImageButton
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -117,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         initBroadcastManager()
         setMediaInfoInMiniPlayer()
         setListeners()
+        performSearch()
         //  startService(Intent(this, TimerService::class.java))
         //   registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
 
@@ -227,6 +231,17 @@ class MainActivity : AppCompatActivity() {
                 checkStatusClickPlayInMiniPlayer()
             }
             false
+        }
+        searchImageButton.setOnClickListener {
+            checkStatusSearchViewVisible()
+        }
+    }
+
+    private fun checkStatusSearchViewVisible() {
+        if (searchView.visibility == View.VISIBLE) {
+            searchView.visibility = View.GONE
+        } else {
+            searchView.visibility = View.VISIBLE
         }
     }
 
@@ -369,11 +384,13 @@ class MainActivity : AppCompatActivity() {
         backImageButton = findViewById(R.id.backImageButton)
         titleToolTextView = findViewById(R.id.titleToolTextView)
         titleToolTextView.text = getString(R.string.list_menu_item)
-//        searchView=findViewById(R.id.radio_search)
+        searchView = findViewById(R.id.radio_search)
         timerTextView = findViewById(R.id.timerTextView)
         timerImageButton = findViewById(R.id.timerImageButton)
         addImageButton = findViewById(R.id.addImageButton)
+        searchImageButton = findViewById(R.id.searchImageButton)
     }
+
 
     private fun initPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -474,6 +491,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun performSearch() {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                fragmentSettingListener?.search(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                fragmentSettingListener?.search(newText)
+                return true
+            }
+        })
+    }
+
 
     private fun isPlayingMedia(isPlaying: Boolean) {
         if (isPlaying) {
@@ -490,7 +521,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        // super.onBackPressed()
         motionLayout.transitionToStart()
     }
 
@@ -562,17 +592,17 @@ class MainActivity : AppCompatActivity() {
         val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
         val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
         saveButton.setOnClickListener {
-            var radioWave: RadioWave = RadioWave()
+            val radioWave: RadioWave = RadioWave()
             radioWave.name = nameEditText.text.toString()
             radioWave.image = "https://cdn-icons-png.flaticon.com/512/186/186054.png"
             radioWave.custom = true
             radioWave.url = urlEditText.text.toString()
-            if (nameEditText.text.trim() { it <= ' ' }
-                    .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
+            if (nameEditText.text.trim { it <= ' ' }
+                    .isEmpty() || urlEditText.text.trim { it <= ' ' }.isEmpty()) {
                 Toast.makeText(this, "text", Toast.LENGTH_SHORT).show()
             } else {
                 viewModel.insert(radioWave)
-                fragmetSettingListener?.update()
+                fragmentSettingListener?.update()
                 builder.dismiss()
             }
 
@@ -582,7 +612,7 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-    fun setSettingListener(fragmetSettingListener: FragmetSettingListener) {
-        this.fragmetSettingListener = fragmetSettingListener
+    fun setSettingListener(fragmentSettingListener: FragmentSettingListener) {
+        this.fragmentSettingListener = fragmentSettingListener
     }
 }

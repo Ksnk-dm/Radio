@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -18,8 +17,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
-import com.ksnk.radio.listeners.FragmetSettingListener
-import com.ksnk.radio.listeners.IntMenu
+import com.ksnk.radio.listeners.FragmentSettingListener
+import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
@@ -29,11 +28,12 @@ import com.ksnk.radio.ui.main.MainViewModel
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
-class ListFragment : Fragment(), IntMenu, FragmetSettingListener {
+class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
+    private var matchedRadioWave: ArrayList<RadioWave> = arrayListOf()
 
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
@@ -120,7 +120,7 @@ class ListFragment : Fragment(), IntMenu, FragmetSettingListener {
         requireActivity().startService(intent)
     }
 
-    override fun getMenu(id: Int?) {
+    override fun getItemMenu(id: Int?) {
         var radioWave: RadioWave = viewModel.getRadioWaveForId(id)
         Log.d("radiooo", radioWave.name.toString())
         createUpdateOrDeleteRadioWaveAlertDialog(radioWave)
@@ -165,6 +165,32 @@ class ListFragment : Fragment(), IntMenu, FragmetSettingListener {
 
     override fun update() {
         initAdapter()
+    }
+
+    override fun search(textSearch: String?) {
+        matchedRadioWave = arrayListOf()
+
+        textSearch?.let {
+            items.forEach { radioWave ->
+                if (radioWave.name!!.contains(textSearch, true) ||
+                    radioWave.name.toString().contains(textSearch, true)
+                ) {
+                    matchedRadioWave.add(radioWave)
+                }
+            }
+            updateRecyclerView()
+            if (matchedRadioWave.isEmpty()) {
+                Toast.makeText(activity, "No match found!", Toast.LENGTH_SHORT).show()
+            }
+            updateRecyclerView()
+        }
+    }
+
+    private fun updateRecyclerView() {
+        mRecyclerView.apply {
+            mAdapter?.setItems(matchedRadioWave)
+            mAdapter?.notifyDataSetChanged()
+        }
     }
 
     private fun initAdapter() {

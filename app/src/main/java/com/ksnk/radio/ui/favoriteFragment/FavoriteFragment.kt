@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
-import com.ksnk.radio.listeners.IntMenu
+import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.services.PlayerService
@@ -24,7 +24,7 @@ import com.ksnk.radio.ui.main.MainViewModel
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
-class FavoriteFragment : Fragment(), IntMenu {
+class FavoriteFragment : Fragment(), MenuItemIdListener {
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
@@ -95,7 +95,7 @@ class FavoriteFragment : Fragment(), IntMenu {
     }
 
 
-    override fun getMenu(id: Int?) {
+    override fun getItemMenu(id: Int?) {
         TODO("Not yet implemented")
     }
 }
