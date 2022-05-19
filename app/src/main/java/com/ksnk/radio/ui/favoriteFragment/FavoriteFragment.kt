@@ -98,4 +98,8 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
     override fun getItemMenu(id: Int?) {
         TODO("Not yet implemented")
     }
+
+    override fun updateCountOpenItem(id: Int?) {
+        TODO("Not yet implemented")
+    }
 }

@@ -15,13 +15,8 @@ data class RadioWave(
     var url: String?,
     var fmFrequency: String?,
     var favorite: Boolean?,
-    var custom:Boolean?
-)
-    : Serializable {
-    constructor() : this(null, null, null, null, null, false, false)
-
-
-    override fun toString(): String {
-        return "RadioWave(name='$name', image='$image', url='$url', fmFrequency='$fmFrequency')"
-    }
+    var custom:Boolean?,
+    var countOpen:Int?
+) : Serializable {
+    constructor() : this(null, null, null, null, null, false, false, 0)
 }

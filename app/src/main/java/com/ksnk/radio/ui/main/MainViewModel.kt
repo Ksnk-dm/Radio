@@ -36,4 +36,24 @@ class MainViewModel
         return radioWaveRepository.getMediaForId(id)
     }
 
+    fun getAllSortAsc():List<RadioWave>{
+        return radioWaveRepository.getAllSortAsc()
+    }
+
+    fun getAllSortDesc():List<RadioWave>{
+        return radioWaveRepository.getAllSortDesc()
+    }
+
+    fun getCustomSortAsc():List<RadioWave>{
+        return radioWaveRepository.getCustomSortAsc()
+    }
+
+    fun getCustomSortDesc():List<RadioWave>{
+        return radioWaveRepository.getCustomSortDesc()
+    }
+
+    fun getCustomAll():List<RadioWave>{
+        return radioWaveRepository.getCustomAll()
+    }
+
 }

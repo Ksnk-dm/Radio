@@ -7,20 +7,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.ksnk.radio.listeners.FragmentSettingListener
 import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import com.ksnk.radio.ui.main.MainActivity
@@ -32,12 +34,22 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var mRecyclerView: RecyclerView
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
+    private lateinit var sortImageButton: ImageButton
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     private var matchedRadioWave: ArrayList<RadioWave> = arrayListOf()
+    private lateinit var switch: SwitchMaterial
 
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+    private lateinit var bottomSheet: ConstraintLayout
+    private lateinit var sortAscImageButton: ImageButton
+    private lateinit var sortNameRadioGroup: RadioGroup
+    private lateinit var defaultRadioButton: RadioButton
+    private var checkStateSwitch: Boolean = false
 
+    @Inject
+    lateinit var preferencesHelper: PreferenceHelper
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -45,13 +57,12 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     @Inject
     lateinit var viewModel: MainViewModel
 
-
+    var defaultListItem: List<RadioWave> = mutableListOf<RadioWave>()
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
         items = viewModel.getAll().toMutableList()
         super.onAttach(context)
-
     }
 
     override fun onCreateView(
@@ -65,25 +76,71 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
+        switch = view.findViewById(R.id.switchMyStation)
+
+
+        sortNameRadioGroup = view.findViewById(R.id.sortNameRadioGroup)
+        sortNameRadioGroup.check(R.id.radioButtonDesc)
+        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
+
+            when (i) {
+                R.id.radioButtonDefault -> {
+                    defaultListItem = viewModel.getAll()
+                    updateRecyclerView(defaultListItem)
+                }
+                R.id.radioButtonAsc -> {
+                    if (switch.isChecked) {
+                        defaultListItem = viewModel.getCustomSortAsc()
+                        updateRecyclerView(defaultListItem)
+                    } else {
+                        defaultListItem = viewModel.getAllSortAsc()
+                        updateRecyclerView(defaultListItem)
+                    }
+                }
+                R.id.radioButtonDesc -> {
+                    if (switch.isChecked) {
+                        defaultListItem = viewModel.getCustomSortDesc()
+                        updateRecyclerView(defaultListItem)
+                    } else {
+                        defaultListItem = viewModel.getAllSortDesc()
+                        updateRecyclerView(defaultListItem)
+                    }
+                }
+
+            }
+
+        }
+        switch.setOnClickListener {
+            if (switch.isChecked) {
+                preferencesHelper.setSwitchEnabled(true)
+            } else {
+                preferencesHelper.setSwitchEnabled(false)
+            }
+        }
+        sortImageButton = view.findViewById(R.id.sortImageButton)
+        sortImageButton.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        sortAscImageButton = view.findViewById(R.id.sortAscImageButton)
+        sortAscImageButton.setOnClickListener {
+            val sortAscList: List<RadioWave> = viewModel.getAllSortAsc()
+            updateRecyclerView(sortAscList)
+        }
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
+        bottomSheet = view.findViewById(R.id.bottomSheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
+        checkStateSwitch = preferencesHelper.getSwitchEnabled()
+
+
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as MainActivity?)?.setSettingListener(this@ListFragment)
-    }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("onresume", "onresume")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("onpause", "onpause")
     }
 
     companion object
@@ -105,6 +162,19 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             )
             mRecyclerView.adapter = mAdapter
             mPlayerService?.initNotification()
+            if (checkStateSwitch) {
+                switch.isChecked = true
+                defaultListItem = viewModel.getCustomAll()
+
+                updateRecyclerView(defaultListItem)
+
+
+            } else {
+
+                switch.isChecked = false
+                defaultListItem = viewModel.getAll()
+                updateRecyclerView(defaultListItem)
+            }
 
         }
 
@@ -121,9 +191,16 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     override fun getItemMenu(id: Int?) {
-        var radioWave: RadioWave = viewModel.getRadioWaveForId(id)
-        Log.d("radiooo", radioWave.name.toString())
+        val radioWave: RadioWave = viewModel.getRadioWaveForId(id)
         createUpdateOrDeleteRadioWaveAlertDialog(radioWave)
+    }
+
+    override fun updateCountOpenItem(id: Int?) {
+        val radioWave: RadioWave = viewModel.getRadioWaveForId(id)
+        val count = radioWave.countOpen?.plus(1)
+        count?.plus(1)
+        radioWave.countOpen = count
+        viewModel.updateRadioWave(radioWave)
     }
 
     private fun createUpdateOrDeleteRadioWaveAlertDialog(radioWave: RadioWave) {
@@ -178,18 +255,18 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                     matchedRadioWave.add(radioWave)
                 }
             }
-            updateRecyclerView()
+            updateRecyclerView(matchedRadioWave)
             if (matchedRadioWave.isEmpty()) {
                 Toast.makeText(activity, "No match found!", Toast.LENGTH_SHORT).show()
             }
-            updateRecyclerView()
+            updateRecyclerView(matchedRadioWave)
         }
     }
 
-    private fun updateRecyclerView() {
+    private fun updateRecyclerView(updateList: List<RadioWave>) {
         mRecyclerView.apply {
-            mAdapter?.setItems(matchedRadioWave)
-            mAdapter?.notifyDataSetChanged()
+            mAdapter.setItems(updateList)
+            mAdapter.notifyDataSetChanged()
         }
     }
 

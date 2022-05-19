@@ -2,6 +2,7 @@ package com.ksnk.radio.helper
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.text.BoringLayout
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +18,14 @@ class PreferenceHelper @Inject constructor(private var sharedPreferences: Shared
         }
     }
 
+    fun setSwitchEnabled(enabled:Boolean){
+        sharedPreferences.edit().putBoolean("switch_status",enabled).apply()
+    }
+
+    fun getSwitchEnabled(): Boolean{
+        return sharedPreferences.getBoolean("switch_status", false)
+    }
+
     fun getFirstStart(): Boolean {
         return sharedPreferences.getBoolean("firstStart", true)
     }
@@ -25,4 +34,6 @@ class PreferenceHelper @Inject constructor(private var sharedPreferences: Shared
     fun setFirstStart(status: Boolean) {
         sharedPreferences.edit().putBoolean("firstStart", status).apply()
     }
+
+
 }

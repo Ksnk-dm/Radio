@@ -51,6 +51,7 @@ class ListFragmentRecyclerViewAdapter(
         holder.menuImageButton?.setOnClickListener { menuItemIdListener.getItemMenu(items[position].id) }
         holder.itemView.setOnClickListener {
             setMediaItem(position)
+            menuItemIdListener.updateCountOpenItem(items[position].id)
         }
         radioWaveNameEquals(position, holder)
     }
