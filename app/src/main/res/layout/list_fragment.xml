@@ -124,6 +124,20 @@
                                 android:layout_height="wrap_content"
                                 android:text="Z...A"
                                 android:textColor="@color/white" />
+
+                            <RadioButton
+                                android:id="@+id/popularRadioButton"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="От самого прослушиваемого"
+                                android:textColor="@color/white" />
+
+                            <RadioButton
+                                android:id="@+id/notPopularRadioButton"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="От самых не прослушиваемых"
+                                android:textColor="@color/white" />
                         </RadioGroup>
 
                     </LinearLayout>
@@ -150,22 +164,10 @@
                             android:textColor="@color/white" />
 
                         <RadioGroup
+                            android:id="@+id/topRadioGroup"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
 
-                            <RadioButton
-                                android:id="@+id/radioButton3"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="От самого прослушиваемого"
-                                android:textColor="@color/white" />
-
-                            <RadioButton
-                                android:id="@+id/radioButton4"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="От самых не прослушиваемых"
-                                android:textColor="@color/white" />
                         </RadioGroup>
 
                     </LinearLayout>

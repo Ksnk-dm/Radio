@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -46,6 +47,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var sortAscImageButton: ImageButton
     private lateinit var sortNameRadioGroup: RadioGroup
     private lateinit var defaultRadioButton: RadioButton
+    private lateinit var topRadioGroup: RadioGroup
     private var checkStateSwitch: Boolean = false
 
     @Inject
@@ -57,11 +59,17 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     @Inject
     lateinit var viewModel: MainViewModel
 
+    private var defaultRadioButtonStatus: Boolean = true
+    private var ascRadioButtonStatus: Boolean = false
+    private var descRadioButtonStatus: Boolean = false
+    private var popularRadioButtonStatus: Boolean = false
+    private var notPopularRadioButtonStatus: Boolean = false
+
     var defaultListItem: List<RadioWave> = mutableListOf<RadioWave>()
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-        items = viewModel.getAll().toMutableList()
+      //  items = viewModel.getAll().toMutableList()
         super.onAttach(context)
     }
 
@@ -77,18 +85,90 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
         switch = view.findViewById(R.id.switchMyStation)
-
-
+        topRadioGroup = view.findViewById(R.id.topRadioGroup)
         sortNameRadioGroup = view.findViewById(R.id.sortNameRadioGroup)
-        sortNameRadioGroup.check(R.id.radioButtonDesc)
-        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
+        defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
+        if (defaultRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonDefault)
+            items= viewModel.getAll().toMutableList()
+        }
+        Log.d("statuspref", defaultRadioButtonStatus.toString())
+        ascRadioButtonStatus = preferencesHelper.getSortAscStatus()
+        if (ascRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonAsc)
+            items=viewModel.getAllSortAsc().toMutableList()
+        }
+        Log.d("statuspref", ascRadioButtonStatus.toString())
+        descRadioButtonStatus = preferencesHelper.getSortDescStatus()
+        if (descRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonDesc)
+            items=viewModel.getAllSortDesc().toMutableList()
+        }
+        Log.d("statuspref", descRadioButtonStatus.toString())
+        popularRadioButtonStatus = preferencesHelper.getSortPopularStatus()
+        if (popularRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.popularRadioButton)
+            items=viewModel.getPopularAsc().toMutableList()
+        }
+        Log.d("statuspref", popularRadioButtonStatus.toString())
+        notPopularRadioButtonStatus = preferencesHelper.getSortNotPopularStatus()
+        if (notPopularRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.notPopularRadioButton)
+            items=viewModel.getAllSortDesc().toMutableList()
+        }
+        Log.d("statuspref", notPopularRadioButtonStatus.toString())
 
+        sortNameRadioGroup.checkedRadioButtonId
+//        if(defaultRadioButtonStatus){
+//            sortNameRadioGroup.check(R.id.radioButtonDefault)
+//        }
+//
+//        if(defaultRadioButtonStatus){
+//            sortNameRadioGroup.check(R.id.radioButtonAsc)
+//        }
+//
+//        if(defaultRadioButtonStatus){
+//            sortNameRadioGroup.check(R.id.radioButtonDesc)
+//        }
+//
+//        if(defaultRadioButtonStatus){
+//            topRadioGroup.check(R.id.popularRadioButton)
+//        }
+//
+//        if(defaultRadioButtonStatus){
+//            topRadioGroup.check(R.id.notPopularRadioButton)
+//        }
+
+        //  sortNameRadioGroup.check(R.id.radioButtonDesc)
+
+
+
+
+
+        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.radioButtonDefault -> {
-                    defaultListItem = viewModel.getAll()
-                    updateRecyclerView(defaultListItem)
+                    preferencesHelper.setDefaultSortStatus(true)
+                    preferencesHelper.setSortAscStatus(false)
+                    preferencesHelper.setSortDescStatus(false)
+                    preferencesHelper.setSortPopularStatus(false)
+                    preferencesHelper.setSortNotPopularStatus(false)
+                    topRadioGroup.clearCheck()
+                    if (switch.isChecked) {
+                        defaultListItem = viewModel.getCustomAll()
+                        updateRecyclerView(defaultListItem)
+                    } else {
+                        defaultListItem = viewModel.getAll()
+                        updateRecyclerView(defaultListItem)
+                    }
                 }
                 R.id.radioButtonAsc -> {
+                    topRadioGroup.clearCheck()
+                    preferencesHelper.setDefaultSortStatus(false)
+                    preferencesHelper.setSortAscStatus(true)
+                    preferencesHelper.setSortDescStatus(false)
+                    preferencesHelper.setSortPopularStatus(false)
+                    preferencesHelper.setSortNotPopularStatus(false)
                     if (switch.isChecked) {
                         defaultListItem = viewModel.getCustomSortAsc()
                         updateRecyclerView(defaultListItem)
@@ -98,6 +178,12 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                     }
                 }
                 R.id.radioButtonDesc -> {
+                    preferencesHelper.setDefaultSortStatus(false)
+                    preferencesHelper.setSortAscStatus(false)
+                    preferencesHelper.setSortDescStatus(true)
+                    preferencesHelper.setSortPopularStatus(false)
+                    preferencesHelper.setSortNotPopularStatus(false)
+                    topRadioGroup.clearCheck()
                     if (switch.isChecked) {
                         defaultListItem = viewModel.getCustomSortDesc()
                         updateRecyclerView(defaultListItem)
@@ -106,15 +192,31 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                         updateRecyclerView(defaultListItem)
                     }
                 }
-
+                R.id.popularRadioButton -> {
+                    preferencesHelper.setSortPopularStatus(true)
+                    preferencesHelper.setSortNotPopularStatus(false)
+                    preferencesHelper.setDefaultSortStatus(false)
+                    preferencesHelper.setSortAscStatus(false)
+                    preferencesHelper.setSortDescStatus(false)
+                }
+                R.id.notPopularRadioButton -> {
+                    preferencesHelper.setSortPopularStatus(false)
+                    preferencesHelper.setSortNotPopularStatus(true)
+                    preferencesHelper.setDefaultSortStatus(false)
+                    preferencesHelper.setSortAscStatus(false)
+                    preferencesHelper.setSortDescStatus(false)
+                }
             }
-
         }
         switch.setOnClickListener {
             if (switch.isChecked) {
                 preferencesHelper.setSwitchEnabled(true)
+                defaultListItem = viewModel.getCustomAll()
+                updateRecyclerView(defaultListItem)
             } else {
                 preferencesHelper.setSwitchEnabled(false)
+                defaultListItem = viewModel.getAll()
+                updateRecyclerView(defaultListItem)
             }
         }
         sortImageButton = view.findViewById(R.id.sortImageButton)
@@ -271,7 +373,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun initAdapter() {
-        items = viewModel.getAll().toMutableList()
+     //   items = viewModel.getAll().toMutableList()
         mAdapter = ListFragmentRecyclerViewAdapter(
             items,
             activity?.applicationContext,

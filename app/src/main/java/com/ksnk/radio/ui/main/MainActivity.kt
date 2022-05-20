@@ -548,9 +548,9 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
             .create()
         val view = layoutInflater.inflate(R.layout.timer_custom_alert_dialog, null)
-        val setTimerButton = view.findViewById<ImageButton>(R.id.setTimerButton)
+        val setTimerButton = view.findViewById<Button>(R.id.setTimerButton)
         val minuteEditText = view.findViewById<EditText>(R.id.minuteEditText)
-        val stopTimerButton = view.findViewById<ImageButton>(R.id.stopTimerButton)
+        val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
         if (timerImageButton.tag == "work") {
