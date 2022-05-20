@@ -3,6 +3,7 @@ package com.ksnk.radio.services
 
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
+import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -10,9 +11,12 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.media.MediaPlayer
 
 import android.os.Binder
 import android.os.IBinder
+import android.os.Parcel
+import android.os.Parcelable
 
 
 import android.support.v4.media.session.MediaSessionCompat
@@ -30,15 +34,22 @@ import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
+import javax.inject.Inject
 
 
-class PlayerService : Service() {
+class PlayerService() : Service(), Parcelable {
+
     private lateinit var playerBinder: IBinder
     private var mPlayer: ExoPlayer? = null
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
+    private var timerService:TimerService? = null
 
+    constructor(parcel: Parcel) : this() {
+        playerBinder = parcel.readStrongBinder()
+        bitMapPoster = parcel.readParcelable(Bitmap::class.java.classLoader)
+    }
 
     @Nullable
     override fun onBind(p0: Intent?): IBinder {
@@ -80,7 +91,7 @@ class PlayerService : Service() {
             this.resources.getString(R.string.app_name)
         )
             .setChannelNameResourceId(R.string.app_name)
-            .setChannelImportance(IMPORTANCE_DEFAULT)
+            .setChannelImportance(IMPORTANCE_NONE)
             .setMediaDescriptionAdapter(object : MediaDescriptionAdapter {
                 override fun getCurrentContentTitle(player: Player): CharSequence {
                     return radioWave?.name.toString()
@@ -176,5 +187,24 @@ class PlayerService : Service() {
 
     fun getRadioWave(): RadioWave? {
         return radioWave
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeStrongBinder(playerBinder)
+        parcel.writeParcelable(bitMapPoster, flags)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<PlayerService> {
+        override fun createFromParcel(parcel: Parcel): PlayerService {
+            return PlayerService(parcel)
+        }
+
+        override fun newArray(size: Int): Array<PlayerService?> {
+            return arrayOfNulls(size)
+        }
     }
 }

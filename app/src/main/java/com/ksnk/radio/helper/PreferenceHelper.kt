@@ -2,6 +2,7 @@ package com.ksnk.radio.helper
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.text.BoringLayout
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +18,14 @@ class PreferenceHelper @Inject constructor(private var sharedPreferences: Shared
         }
     }
 
+    fun setSwitchEnabled(enabled:Boolean){
+        sharedPreferences.edit().putBoolean("switch_status",enabled).apply()
+    }
+
+    fun getSwitchEnabled(): Boolean{
+        return sharedPreferences.getBoolean("switch_status", false)
+    }
+
     fun getFirstStart(): Boolean {
         return sharedPreferences.getBoolean("firstStart", true)
     }
@@ -25,4 +34,46 @@ class PreferenceHelper @Inject constructor(private var sharedPreferences: Shared
     fun setFirstStart(status: Boolean) {
         sharedPreferences.edit().putBoolean("firstStart", status).apply()
     }
+
+    fun getDefaultSortStatus():Boolean{
+        return sharedPreferences.getBoolean("default_radio", true)
+    }
+
+    fun setDefaultSortStatus(status: Boolean){
+        sharedPreferences.edit().putBoolean("default_radio",status).apply()
+    }
+
+    fun getSortAscStatus():Boolean{
+        return sharedPreferences.getBoolean("asc_radio",false)
+    }
+
+    fun setSortAscStatus(status: Boolean){
+        sharedPreferences.edit().putBoolean("asc_radio", status).apply()
+    }
+
+    fun getSortDescStatus():Boolean{
+        return sharedPreferences.getBoolean("desc_radio",false)
+    }
+
+    fun setSortDescStatus(status: Boolean){
+        sharedPreferences.edit().putBoolean("desc_radio", status).apply()
+    }
+
+    fun getSortPopularStatus():Boolean{
+        return sharedPreferences.getBoolean("popular_radio",false)
+    }
+
+    fun setSortPopularStatus(status: Boolean){
+        sharedPreferences.edit().putBoolean("popular_radio", status).apply()
+    }
+
+    fun getSortNotPopularStatus():Boolean{
+        return sharedPreferences.getBoolean("not_popular_radio",false)
+    }
+
+    fun setSortNotPopularStatus(status: Boolean){
+        sharedPreferences.edit().putBoolean("not_popular_radio", status).apply()
+    }
+
+
 }

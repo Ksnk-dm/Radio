@@ -21,5 +21,19 @@ class RadioWaveRepository
 
     fun getFavoriteRadioWave(): List<RadioWave> = radioWaveDao.getFavoriteRadioWave()
 
-    fun getMediaForId(id:Int):RadioWave = radioWaveDao.getRadioWaveForId(id)
+    fun getMediaForId(id: Int?):RadioWave = radioWaveDao.getRadioWaveForId(id)
+
+    fun getAllSortAsc():List<RadioWave> = radioWaveDao.getAllSortAsc()
+
+    fun getAllSortDesc():List<RadioWave> = radioWaveDao.getAllSortDesc()
+
+    fun getCustomSortAsc():List<RadioWave> = radioWaveDao.getCustomSortAsc()
+
+    fun getCustomSortDesc():List<RadioWave> = radioWaveDao.getCustomSortDesc()
+
+    fun getCustomAll():List<RadioWave> = radioWaveDao.getCustomAll()
+
+    fun getPopularSortAsc():List<RadioWave> = radioWaveDao.getPopularSortAsc()
+
+    fun getPopularSortDesc():List<RadioWave> = radioWaveDao.getCustomSortDesc()
 }

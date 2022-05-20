@@ -14,4 +14,5 @@
     <string name="fav_menu_item">Избранное</string>
     <string name="set_menu_item">Настройки</string>
     <string name="set_title">Основные</string>
+    <string name="minute_title">мин</string>
 </resources>

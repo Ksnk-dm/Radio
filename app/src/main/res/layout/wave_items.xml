@@ -14,11 +14,29 @@
         android:orientation="horizontal"
         android:weightSum="3">
 
-        <ImageView
-            android:id="@+id/imageViewWave"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            tools:srcCompat="@tools:sample/avatars" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="80dp">
+
+            <ImageView
+                android:id="@+id/imageViewWave"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/favAnimationView"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="0dp"
+                android:foregroundGravity="center"
+                android:visibility="visible"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/music_anim"
+                tools:visibility="visible" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,14 +71,24 @@
             </LinearLayout>
         </LinearLayout>
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/favAnimationView"
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/music_anim" />
+        <ImageView
+            android:id="@+id/favImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/ic_baseline_favorite_24"
+            tools:visibility="invisible" />
+
+        <ImageButton
+            android:id="@+id/menuImageButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_baseline_toc_24" />
     </LinearLayout>
 
     <View
