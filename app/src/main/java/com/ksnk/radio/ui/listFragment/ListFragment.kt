@@ -69,6 +69,16 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         super.onAttach(context)
     }
 
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        startPlayerService()
+        init(view)
+        initListeners()
+        loadPrefsAndUpdateRadioButton()
+        initRecycler()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -142,7 +152,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun ascSetPrefsAndUpdateRv() {
-        topRadioGroup.clearCheck()
+        //  topRadioGroup.clearCheck()
         preferencesHelper.setDefaultSortStatus(false)
         preferencesHelper.setSortAscStatus(true)
         preferencesHelper.setSortDescStatus(false)
@@ -156,7 +166,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         preferencesHelper.setSortDescStatus(true)
         preferencesHelper.setSortPopularStatus(false)
         preferencesHelper.setSortNotPopularStatus(false)
-        topRadioGroup.clearCheck()
+        //topRadioGroup.clearCheck()
     }
 
     private fun popularSetPrefsAndUpdateRv() {
@@ -165,8 +175,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         preferencesHelper.setDefaultSortStatus(false)
         preferencesHelper.setSortAscStatus(false)
         preferencesHelper.setSortDescStatus(false)
-        defaultListItem = viewModel.getPopularDesc()
-        updateRecyclerView(defaultListItem)
     }
 
     private fun notPopularSetPrefsAndUpdateRv() {
@@ -175,45 +183,56 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         preferencesHelper.setDefaultSortStatus(false)
         preferencesHelper.setSortAscStatus(false)
         preferencesHelper.setSortDescStatus(false)
-        defaultListItem = viewModel.getPopularAsc()
-        updateRecyclerView(defaultListItem)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        startPlayerService()
-        init(view)
-        initListeners()
-
-
+    private fun setDefaultStatusAndUpdateUI() {
         defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
         if (defaultRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.radioButtonDefault)
             items = viewModel.getAll().toMutableList()
         }
+    }
+
+    private fun setAscStatusAndUpdateUI() {
         ascRadioButtonStatus = preferencesHelper.getSortAscStatus()
         if (ascRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.radioButtonAsc)
             items = viewModel.getAllSortAsc().toMutableList()
         }
+    }
+
+    private fun setDescStatusAndUpdateUI() {
         descRadioButtonStatus = preferencesHelper.getSortDescStatus()
         if (descRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.radioButtonDesc)
             items = viewModel.getAllSortDesc().toMutableList()
         }
+    }
+
+    private fun setPopularStatusAndUpdateUI() {
         popularRadioButtonStatus = preferencesHelper.getSortPopularStatus()
         if (popularRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.popularRadioButton)
             items = viewModel.getPopularDesc().toMutableList()
         }
+    }
+
+    private fun setNotPopularStatusAndUpdateUI() {
         notPopularRadioButtonStatus = preferencesHelper.getSortNotPopularStatus()
         if (notPopularRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.notPopularRadioButton)
             items = viewModel.getPopularAsc().toMutableList()
-
         }
-        initRecycler()
     }
+
+    private fun loadPrefsAndUpdateRadioButton() {
+        setDefaultStatusAndUpdateUI()
+        setAscStatusAndUpdateUI()
+        setDescStatusAndUpdateUI()
+        setPopularStatusAndUpdateUI()
+        setNotPopularStatusAndUpdateUI()
+    }
+
 
     private fun initRecycler() {
         mGridLayoutManager = GridLayoutManager(activity, 1)
@@ -225,7 +244,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as MainActivity?)?.setSettingListener(this@ListFragment)
-
     }
 
     companion object
@@ -238,16 +256,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-            mAdapter = ListFragmentRecyclerViewAdapter(
-                items,
-                activity?.applicationContext,
-                mExoPlayer!!,
-                mPlayerService!!,
-                this@ListFragment
-            )
-            mRecyclerView.adapter = mAdapter
+            initAdapter()
             mPlayerService?.initNotification()
-
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -275,17 +285,10 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         viewModel.updateRadioWave(radioWave)
     }
 
-    private fun createUpdateOrDeleteRadioWaveAlertDialog(radioWave: RadioWave) {
-        val builder = AlertDialog.Builder(requireContext())
-            .create()
-        val view = layoutInflater.inflate(R.layout.add_update_radio_wave_alert_dialog, null)
-        val updateButton = view.findViewById<ImageButton>(R.id.saveButton)
-        val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
-        val delButton = view.findViewById<ImageButton>(R.id.delButton)
-        delButton.visibility = View.VISIBLE
-        nameEditText.setText(radioWave.name)
-        val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
-        urlEditText.setText(radioWave.url)
+    private fun initListenersAlertDialog(
+        updateButton: ImageButton, nameEditText: EditText,
+        urlEditText: EditText, radioWave: RadioWave, delButton: ImageButton, builder: AlertDialog
+    ) {
         updateButton.setOnClickListener {
             if (nameEditText.text.trim() { it <= ' ' }
                     .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
@@ -299,14 +302,34 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                 builder.dismiss()
                 initAdapter()
             }
-
-
         }
+
         delButton.setOnClickListener {
             viewModel.delete(radioWave)
             builder.dismiss()
             initAdapter()
         }
+    }
+
+    private fun createUpdateOrDeleteRadioWaveAlertDialog(radioWave: RadioWave) {
+        var builder = AlertDialog.Builder(requireContext())
+            .create()
+        val view = layoutInflater.inflate(R.layout.add_update_radio_wave_alert_dialog, null)
+        val updateButton = view.findViewById<ImageButton>(R.id.saveButton)
+        val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
+        val delButton = view.findViewById<ImageButton>(R.id.delButton)
+        delButton.visibility = View.VISIBLE
+        nameEditText.setText(radioWave.name)
+        val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
+        urlEditText.setText(radioWave.url)
+        initListenersAlertDialog(
+            updateButton,
+            nameEditText,
+            urlEditText,
+            radioWave,
+            delButton,
+            builder
+        )
         builder.setView(view)
         builder.setCanceledOnTouchOutside(true)
         builder.show()
@@ -317,8 +340,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     override fun search(textSearch: String?) {
-        matchedRadioWave = arrayListOf()
-
         textSearch?.let {
             items.forEach { radioWave ->
                 if (radioWave.name!!.contains(textSearch, true) ||
@@ -343,7 +364,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun initAdapter() {
-        //   items = viewModel.getAll().toMutableList()
         mAdapter = ListFragmentRecyclerViewAdapter(
             items,
             activity?.applicationContext,
