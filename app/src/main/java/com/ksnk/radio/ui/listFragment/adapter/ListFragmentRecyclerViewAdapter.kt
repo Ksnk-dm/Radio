@@ -38,22 +38,30 @@ class ListFragmentRecyclerViewAdapter(
         holder.frequencyTextView?.text = items[position].fmFrequency
         holder.nameTextView?.text = items[position].name
         checkImageNull(position, holder)
-        if (items[position].favorite == true) {
-            holder.favImageView?.visibility = View.VISIBLE
-        } else {
-            holder.favImageView?.visibility = View.INVISIBLE
-        }
-        if (items[position].custom == false) {
-            holder.menuImageButton?.visibility = View.GONE
-        } else {
-            holder.menuImageButton?.visibility = View.VISIBLE
-        }
+        checkFavItem(position, holder)
+        checkCustomItem(position, holder)
         holder.menuImageButton?.setOnClickListener { menuItemIdListener.getItemMenu(items[position].id) }
         holder.itemView.setOnClickListener {
             setMediaItem(position)
             menuItemIdListener.updateCountOpenItem(items[position].id)
         }
         radioWaveNameEquals(position, holder)
+    }
+
+    private fun checkCustomItem(position: Int, holder: WaveViewHolder) {
+        if (items[position].custom == false) {
+            holder.menuImageButton?.visibility = View.GONE
+        } else {
+            holder.menuImageButton?.visibility = View.VISIBLE
+        }
+    }
+
+    private fun checkFavItem(position: Int, holder: WaveViewHolder) {
+        if (items[position].favorite == true) {
+            holder.favImageView?.visibility = View.VISIBLE
+        } else {
+            holder.favImageView?.visibility = View.INVISIBLE
+        }
     }
 
     private fun checkImageNull(position: Int, holder: WaveViewHolder) {
