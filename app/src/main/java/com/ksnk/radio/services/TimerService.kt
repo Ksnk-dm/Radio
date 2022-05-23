@@ -4,47 +4,37 @@ import android.app.Service
 import android.content.Intent
 import android.os.CountDownTimer
 import android.os.IBinder
-import android.util.Log
-import javax.inject.Inject
+import com.ksnk.radio.R
 
 
 class TimerService : Service() {
+    var intentFilter ="count_down"
+    var bi = Intent(intentFilter)
+    var cdt: CountDownTimer? = null
+    var minutes: String? = null
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 
-    private val TAG = "BroadcastService"
-
-    val COUNTDOWN_BR = "com.ksnk.radio.countdown_br"
-    var bi = Intent(COUNTDOWN_BR)
-
-    var cdt: CountDownTimer? = null
-    var minutes: String? = null
-
     override fun onCreate() {
         super.onCreate()
-        //60000 millis = 1 min
     }
 
     override fun onDestroy() {
         cdt!!.cancel()
-        Log.i(TAG, "Timer cancelled")
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        minutes = intent?.getStringExtra("minutes")
-        Log.d("taggg", minutes.toString())
+        minutes = intent?.getStringExtra(getString(R.string.serializable_extra_min))
         cdt = object : CountDownTimer(minutes?.toLong()!! * 60000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.i(TAG, "Countdown seconds remaining: " + millisUntilFinished / 1000)
-                bi.putExtra("countdown", millisUntilFinished)
+                bi.putExtra(getString(R.string.serializable_extra_long), millisUntilFinished)
                 sendBroadcast(bi)
             }
 
             override fun onFinish() {
-                Log.i(TAG, "Timer finished")
                 stopService(Intent(this@TimerService, PlayerService::class.java))
                 stopService(Intent(this@TimerService, TimerService::class.java))
             }

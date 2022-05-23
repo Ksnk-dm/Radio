@@ -29,17 +29,15 @@ abstract class AppDataBase: RoomDatabase() {
                         INSTANCE = Room.databaseBuilder(
                             context!!,
                             AppDataBase::class.java,
-                            "name"
+                            "APP_DB"
                         ).allowMainThreadQueries()
                             .addCallback(object : Callback() {
                                 override fun onCreate(db: SupportSQLiteDatabase) {
                                     super.onCreate(db)
-                                    Log.d("test", "database created")
                                 }
 
                                 override fun onOpen(db: SupportSQLiteDatabase) {
                                     super.onOpen(db)
-                                    Log.d("test", "database opened")
                                 }
                             })
                             .build()

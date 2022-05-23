@@ -11,7 +11,6 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -39,15 +38,12 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     private var matchedRadioWave: ArrayList<RadioWave> = arrayListOf()
     private lateinit var switch: SwitchMaterial
-
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var bottomSheet: ConstraintLayout
-    private lateinit var sortAscImageButton: ImageButton
     private lateinit var sortNameRadioGroup: RadioGroup
-    private lateinit var defaultRadioButton: RadioButton
-    private lateinit var topRadioGroup: RadioGroup
+    private lateinit var hideBottomSheetImageButton: ImageButton
     private var checkStateSwitch: Boolean = false
 
     @Inject
@@ -69,8 +65,16 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
-      //  items = viewModel.getAll().toMutableList()
         super.onAttach(context)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        startPlayerService()
+        init(view)
+        initListeners()
+        loadPrefsAndUpdateRadioButton()
+        initRecycler()
     }
 
     override fun onCreateView(
@@ -81,168 +85,156 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        startPlayerService()
+    private fun init(view: View) {
         switch = view.findViewById(R.id.switchMyStation)
-        topRadioGroup = view.findViewById(R.id.topRadioGroup)
+        hideBottomSheetImageButton = view.findViewById(R.id.hideBottomSheetImageButton)
         sortNameRadioGroup = view.findViewById(R.id.sortNameRadioGroup)
-        defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
-        if (defaultRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonDefault)
-            items= viewModel.getAll().toMutableList()
-        }
-        Log.d("statuspref", defaultRadioButtonStatus.toString())
-        ascRadioButtonStatus = preferencesHelper.getSortAscStatus()
-        if (ascRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonAsc)
-            items=viewModel.getAllSortAsc().toMutableList()
-        }
-        Log.d("statuspref", ascRadioButtonStatus.toString())
-        descRadioButtonStatus = preferencesHelper.getSortDescStatus()
-        if (descRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonDesc)
-            items=viewModel.getAllSortDesc().toMutableList()
-        }
-        Log.d("statuspref", descRadioButtonStatus.toString())
-        popularRadioButtonStatus = preferencesHelper.getSortPopularStatus()
-        if (popularRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.popularRadioButton)
-            items=viewModel.getPopularAsc().toMutableList()
-        }
-        Log.d("statuspref", popularRadioButtonStatus.toString())
-        notPopularRadioButtonStatus = preferencesHelper.getSortNotPopularStatus()
-        if (notPopularRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.notPopularRadioButton)
-            items=viewModel.getAllSortDesc().toMutableList()
-        }
-        Log.d("statuspref", notPopularRadioButtonStatus.toString())
-
-        sortNameRadioGroup.checkedRadioButtonId
-//        if(defaultRadioButtonStatus){
-//            sortNameRadioGroup.check(R.id.radioButtonDefault)
-//        }
-//
-//        if(defaultRadioButtonStatus){
-//            sortNameRadioGroup.check(R.id.radioButtonAsc)
-//        }
-//
-//        if(defaultRadioButtonStatus){
-//            sortNameRadioGroup.check(R.id.radioButtonDesc)
-//        }
-//
-//        if(defaultRadioButtonStatus){
-//            topRadioGroup.check(R.id.popularRadioButton)
-//        }
-//
-//        if(defaultRadioButtonStatus){
-//            topRadioGroup.check(R.id.notPopularRadioButton)
-//        }
-
-        //  sortNameRadioGroup.check(R.id.radioButtonDesc)
-
-
-
-
-
-        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
-            when (i) {
-                R.id.radioButtonDefault -> {
-                    preferencesHelper.setDefaultSortStatus(true)
-                    preferencesHelper.setSortAscStatus(false)
-                    preferencesHelper.setSortDescStatus(false)
-                    preferencesHelper.setSortPopularStatus(false)
-                    preferencesHelper.setSortNotPopularStatus(false)
-                    topRadioGroup.clearCheck()
-                    if (switch.isChecked) {
-                        defaultListItem = viewModel.getCustomAll()
-                        updateRecyclerView(defaultListItem)
-                    } else {
-                        defaultListItem = viewModel.getAll()
-                        updateRecyclerView(defaultListItem)
-                    }
-                }
-                R.id.radioButtonAsc -> {
-                    topRadioGroup.clearCheck()
-                    preferencesHelper.setDefaultSortStatus(false)
-                    preferencesHelper.setSortAscStatus(true)
-                    preferencesHelper.setSortDescStatus(false)
-                    preferencesHelper.setSortPopularStatus(false)
-                    preferencesHelper.setSortNotPopularStatus(false)
-                    if (switch.isChecked) {
-                        defaultListItem = viewModel.getCustomSortAsc()
-                        updateRecyclerView(defaultListItem)
-                    } else {
-                        defaultListItem = viewModel.getAllSortAsc()
-                        updateRecyclerView(defaultListItem)
-                    }
-                }
-                R.id.radioButtonDesc -> {
-                    preferencesHelper.setDefaultSortStatus(false)
-                    preferencesHelper.setSortAscStatus(false)
-                    preferencesHelper.setSortDescStatus(true)
-                    preferencesHelper.setSortPopularStatus(false)
-                    preferencesHelper.setSortNotPopularStatus(false)
-                    topRadioGroup.clearCheck()
-                    if (switch.isChecked) {
-                        defaultListItem = viewModel.getCustomSortDesc()
-                        updateRecyclerView(defaultListItem)
-                    } else {
-                        defaultListItem = viewModel.getAllSortDesc()
-                        updateRecyclerView(defaultListItem)
-                    }
-                }
-                R.id.popularRadioButton -> {
-                    preferencesHelper.setSortPopularStatus(true)
-                    preferencesHelper.setSortNotPopularStatus(false)
-                    preferencesHelper.setDefaultSortStatus(false)
-                    preferencesHelper.setSortAscStatus(false)
-                    preferencesHelper.setSortDescStatus(false)
-                }
-                R.id.notPopularRadioButton -> {
-                    preferencesHelper.setSortPopularStatus(false)
-                    preferencesHelper.setSortNotPopularStatus(true)
-                    preferencesHelper.setDefaultSortStatus(false)
-                    preferencesHelper.setSortAscStatus(false)
-                    preferencesHelper.setSortDescStatus(false)
-                }
-            }
-        }
-        switch.setOnClickListener {
-            if (switch.isChecked) {
-                preferencesHelper.setSwitchEnabled(true)
-                defaultListItem = viewModel.getCustomAll()
-                updateRecyclerView(defaultListItem)
-            } else {
-                preferencesHelper.setSwitchEnabled(false)
-                defaultListItem = viewModel.getAll()
-                updateRecyclerView(defaultListItem)
-            }
-        }
         sortImageButton = view.findViewById(R.id.sortImageButton)
-        sortImageButton.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-        sortAscImageButton = view.findViewById(R.id.sortAscImageButton)
-        sortAscImageButton.setOnClickListener {
-            val sortAscList: List<RadioWave> = viewModel.getAllSortAsc()
-            updateRecyclerView(sortAscList)
-        }
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
         bottomSheet = view.findViewById(R.id.bottomSheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+    }
+
+    private fun initListeners() {
+        hideBottomSheetImageButton.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+        switch.setOnClickListener {
+            switchIsChecked()
+        }
+        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
+            when (i) {
+                R.id.radioButtonDefault -> {
+                    defaultSetPrefsAndUpdateRv()
+                }
+                R.id.radioButtonAsc -> {
+                    ascSetPrefsAndUpdateRv()
+                }
+                R.id.radioButtonDesc -> {
+                    descSetPrefsAndUpdateRv()
+                }
+                R.id.popularRadioButton -> {
+                    popularSetPrefsAndUpdateRv()
+                }
+                R.id.notPopularRadioButton -> {
+                    notPopularSetPrefsAndUpdateRv()
+                }
+            }
+        }
+        sortImageButton.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
+    private fun switchIsChecked() {
+        if (switch.isChecked) {
+            preferencesHelper.setSwitchEnabled(true)
+            defaultListItem = viewModel.getCustomAll()
+            updateRecyclerView(defaultListItem)
+        } else {
+            preferencesHelper.setSwitchEnabled(false)
+            defaultListItem = viewModel.getAll()
+            updateRecyclerView(defaultListItem)
+        }
+    }
+
+    private fun defaultSetPrefsAndUpdateRv() {
+        preferencesHelper.setDefaultSortStatus(true)
+        preferencesHelper.setSortAscStatus(false)
+        preferencesHelper.setSortDescStatus(false)
+        preferencesHelper.setSortPopularStatus(false)
+        preferencesHelper.setSortNotPopularStatus(false)
+    }
+
+    private fun ascSetPrefsAndUpdateRv() {
+        preferencesHelper.setDefaultSortStatus(false)
+        preferencesHelper.setSortAscStatus(true)
+        preferencesHelper.setSortDescStatus(false)
+        preferencesHelper.setSortPopularStatus(false)
+        preferencesHelper.setSortNotPopularStatus(false)
+    }
+
+    private fun descSetPrefsAndUpdateRv() {
+        preferencesHelper.setDefaultSortStatus(false)
+        preferencesHelper.setSortAscStatus(false)
+        preferencesHelper.setSortDescStatus(true)
+        preferencesHelper.setSortPopularStatus(false)
+        preferencesHelper.setSortNotPopularStatus(false)
+    }
+
+    private fun popularSetPrefsAndUpdateRv() {
+        preferencesHelper.setSortPopularStatus(true)
+        preferencesHelper.setSortNotPopularStatus(false)
+        preferencesHelper.setDefaultSortStatus(false)
+        preferencesHelper.setSortAscStatus(false)
+        preferencesHelper.setSortDescStatus(false)
+    }
+
+    private fun notPopularSetPrefsAndUpdateRv() {
+        preferencesHelper.setSortPopularStatus(false)
+        preferencesHelper.setSortNotPopularStatus(true)
+        preferencesHelper.setDefaultSortStatus(false)
+        preferencesHelper.setSortAscStatus(false)
+        preferencesHelper.setSortDescStatus(false)
+    }
+
+    private fun setDefaultStatusAndUpdateUI() {
+        defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
+        if (defaultRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonDefault)
+            items = viewModel.getAll().toMutableList()
+        }
+    }
+
+    private fun setAscStatusAndUpdateUI() {
+        ascRadioButtonStatus = preferencesHelper.getSortAscStatus()
+        if (ascRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonAsc)
+            items = viewModel.getAllSortAsc().toMutableList()
+        }
+    }
+
+    private fun setDescStatusAndUpdateUI() {
+        descRadioButtonStatus = preferencesHelper.getSortDescStatus()
+        if (descRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.radioButtonDesc)
+            items = viewModel.getAllSortDesc().toMutableList()
+        }
+    }
+
+    private fun setPopularStatusAndUpdateUI() {
+        popularRadioButtonStatus = preferencesHelper.getSortPopularStatus()
+        if (popularRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.popularRadioButton)
+            items = viewModel.getPopularDesc().toMutableList()
+        }
+    }
+
+    private fun setNotPopularStatusAndUpdateUI() {
+        notPopularRadioButtonStatus = preferencesHelper.getSortNotPopularStatus()
+        if (notPopularRadioButtonStatus) {
+            sortNameRadioGroup.check(R.id.notPopularRadioButton)
+            items = viewModel.getPopularAsc().toMutableList()
+        }
+    }
+
+    private fun loadPrefsAndUpdateRadioButton() {
+        setDefaultStatusAndUpdateUI()
+        setAscStatusAndUpdateUI()
+        setDescStatusAndUpdateUI()
+        setPopularStatusAndUpdateUI()
+        setNotPopularStatusAndUpdateUI()
+    }
+
+    private fun initRecycler() {
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
         checkStateSwitch = preferencesHelper.getSwitchEnabled()
-
-
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as MainActivity?)?.setSettingListener(this@ListFragment)
-
     }
 
     companion object
@@ -255,29 +247,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-            mAdapter = ListFragmentRecyclerViewAdapter(
-                items,
-                activity?.applicationContext,
-                mExoPlayer!!,
-                mPlayerService!!,
-                this@ListFragment
-            )
-            mRecyclerView.adapter = mAdapter
+            initAdapter()
             mPlayerService?.initNotification()
-            if (checkStateSwitch) {
-                switch.isChecked = true
-                defaultListItem = viewModel.getCustomAll()
-
-                updateRecyclerView(defaultListItem)
-
-
-            } else {
-
-                switch.isChecked = false
-                defaultListItem = viewModel.getAll()
-                updateRecyclerView(defaultListItem)
-            }
-
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -305,6 +276,32 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         viewModel.updateRadioWave(radioWave)
     }
 
+    private fun initListenersAlertDialog(
+        updateButton: ImageButton, nameEditText: EditText,
+        urlEditText: EditText, radioWave: RadioWave, delButton: ImageButton, builder: AlertDialog
+    ) {
+        updateButton.setOnClickListener {
+            if (nameEditText.text.trim() { it <= ' ' }
+                    .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
+                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
+            } else {
+                radioWave.name = nameEditText.text.toString()
+                radioWave.image = getString(R.string.default_logo_url)
+                radioWave.custom = true
+                radioWave.url = urlEditText.text.toString()
+                viewModel.updateRadioWave(radioWave)
+                builder.dismiss()
+                initAdapter()
+            }
+        }
+
+        delButton.setOnClickListener {
+            viewModel.delete(radioWave)
+            builder.dismiss()
+            initAdapter()
+        }
+    }
+
     private fun createUpdateOrDeleteRadioWaveAlertDialog(radioWave: RadioWave) {
         val builder = AlertDialog.Builder(requireContext())
             .create()
@@ -316,27 +313,14 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         nameEditText.setText(radioWave.name)
         val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
         urlEditText.setText(radioWave.url)
-        updateButton.setOnClickListener {
-            if (nameEditText.text.trim() { it <= ' ' }
-                    .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
-                Toast.makeText(activity, "text", Toast.LENGTH_SHORT).show()
-            } else {
-                radioWave.name = nameEditText.text.toString()
-                radioWave.image = "https://cdn-icons-png.flaticon.com/512/186/186054.png"
-                radioWave.custom = true
-                radioWave.url = urlEditText.text.toString()
-                viewModel.updateRadioWave(radioWave)
-                builder.dismiss()
-                initAdapter()
-            }
-
-
-        }
-        delButton.setOnClickListener {
-            viewModel.delete(radioWave)
-            builder.dismiss()
-            initAdapter()
-        }
+        initListenersAlertDialog(
+            updateButton,
+            nameEditText,
+            urlEditText,
+            radioWave,
+            delButton,
+            builder
+        )
         builder.setView(view)
         builder.setCanceledOnTouchOutside(true)
         builder.show()
@@ -347,8 +331,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     override fun search(textSearch: String?) {
-        matchedRadioWave = arrayListOf()
-
         textSearch?.let {
             items.forEach { radioWave ->
                 if (radioWave.name!!.contains(textSearch, true) ||
@@ -359,7 +341,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             }
             updateRecyclerView(matchedRadioWave)
             if (matchedRadioWave.isEmpty()) {
-                Toast.makeText(activity, "No match found!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, getText(R.string.no_match), Toast.LENGTH_SHORT).show()
             }
             updateRecyclerView(matchedRadioWave)
         }
@@ -373,7 +355,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun initAdapter() {
-     //   items = viewModel.getAll().toMutableList()
         mAdapter = ListFragmentRecyclerViewAdapter(
             items,
             activity?.applicationContext,

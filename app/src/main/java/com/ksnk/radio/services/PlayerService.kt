@@ -2,7 +2,6 @@ package com.ksnk.radio.services
 
 
 import android.app.Notification
-import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
@@ -11,7 +10,6 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.media.MediaPlayer
 
 import android.os.Binder
 import android.os.IBinder
@@ -34,7 +32,7 @@ import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
-import javax.inject.Inject
+
 
 
 class PlayerService() : Service(), Parcelable {
@@ -44,7 +42,6 @@ class PlayerService() : Service(), Parcelable {
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
-    private var timerService:TimerService? = null
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -61,7 +58,6 @@ class PlayerService() : Service(), Parcelable {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
-        // initNotification()
     }
 
     private fun initPlayer() {
@@ -161,11 +157,9 @@ class PlayerService() : Service(), Parcelable {
         playerNotificationManger.setUseNextActionInCompactView(true)
         playerNotificationManger.setUsePreviousActionInCompactView(false)
         playerNotificationManger.setUseChronometer(true)
-
-
-        var mediaSession: MediaSessionCompat = MediaSessionCompat(this, "MediaSessionManager")
+        val mediaSession: MediaSessionCompat = MediaSessionCompat(this, "MediaSessionManager")
         playerNotificationManger.setMediaSessionToken(mediaSession.sessionToken)
-        var sessionConnector = MediaSessionConnector(mediaSession)
+        val sessionConnector = MediaSessionConnector(mediaSession)
         sessionConnector.setPlayer(mPlayer)
 
     }
@@ -180,8 +174,8 @@ class PlayerService() : Service(), Parcelable {
 
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
-        val i = Intent("rec")
-        i.putExtra("media", radioWave)
+        val i = Intent(getString(R.string.intent_filter_notification))
+        i.putExtra(getString(R.string.serializable_extra), radioWave)
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(i);
     }
 

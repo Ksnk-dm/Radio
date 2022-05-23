@@ -35,5 +35,5 @@ class RadioWaveRepository
 
     fun getPopularSortAsc():List<RadioWave> = radioWaveDao.getPopularSortAsc()
 
-    fun getPopularSortDesc():List<RadioWave> = radioWaveDao.getCustomSortDesc()
+    fun getPopularSortDesc():List<RadioWave> = radioWaveDao.getPopularSortDesc()
 }

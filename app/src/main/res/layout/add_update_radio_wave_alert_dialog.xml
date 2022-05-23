@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:text="Название станции"
+            android:text="@string/name_station"
             android:textColor="@color/white" />
 
         <EditText
@@ -27,7 +27,7 @@
             android:layout_marginTop="5dp"
             android:backgroundTint="@color/white"
             android:ems="10"
-            android:hint="Введите название станции"
+            android:hint="@string/set_hint_edit_text"
             android:inputType="textPersonName"
             android:textColor="@color/white"
             android:textColorHint="@color/white" />
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:text="Прямая ссылка на поток радио"
+            android:text="@string/link_station"
             android:textColor="@color/white" />
 
         <EditText
@@ -53,7 +53,7 @@
             android:layout_marginTop="5dp"
             android:backgroundTint="@color/white"
             android:ems="10"
-            android:hint="Введите ссылку на поток"
+            android:hint="@string/set_hint_url_edit_text"
             android:inputType="textPersonName"
             android:textColor="@color/white"
             android:textColorHint="@color/white" />

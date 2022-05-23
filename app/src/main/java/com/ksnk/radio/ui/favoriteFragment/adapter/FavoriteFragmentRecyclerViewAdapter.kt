@@ -21,7 +21,7 @@ class FavoriteFragmentRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
+        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items_grid, parent, false))
     }
 
     override fun onBindViewHolder(holder: FavoriteViewHolder, position: Int) {
@@ -31,11 +31,15 @@ class FavoriteFragmentRecyclerViewAdapter(
             .load(items[position].image)
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
-            val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
-            mPlayer.setMediaItem(mediaItem)
-            mPlayer.play()
-            mService?.setRadioWave(items[position])
+            setRadioWaveAndPlay(position)
         }
+    }
+
+    private fun setRadioWaveAndPlay(position: Int) {
+        val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+        mPlayer.setMediaItem(mediaItem)
+        mPlayer.play()
+        mService.setRadioWave(items[position])
     }
 
     override fun getItemCount(): Int {
