@@ -10,13 +10,27 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/sortImageButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="7dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_baseline_sort_24" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/sortImageButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="7dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:srcCompat="@drawable/ic_baseline_sort_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="@string/title_sort_menu"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_fragment_recycler_view"
@@ -73,7 +87,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Только мои станции"
+                            android:text="@string/my_station_switch"
                             android:textColor="@color/white" />
                     </LinearLayout>
 
@@ -96,7 +110,7 @@
                             android:layout_height="match_parent"
                             android:foregroundGravity="center"
                             android:gravity="center"
-                            android:text="Сортировать по названию"
+                            android:text="@string/sort_title"
                             android:textColor="@color/white" />
 
                         <RadioGroup
@@ -108,35 +122,35 @@
                                 android:id="@+id/radioButtonDefault"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Default"
+                                android:text="@string/def_rb"
                                 android:textColor="@color/white" />
 
                             <RadioButton
                                 android:id="@+id/radioButtonAsc"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="A...Z"
+                                android:text="@string/asc_rb"
                                 android:textColor="@color/white" />
 
                             <RadioButton
                                 android:id="@+id/radioButtonDesc"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Z...A"
+                                android:text="@string/desc_rb"
                                 android:textColor="@color/white" />
 
                             <RadioButton
                                 android:id="@+id/popularRadioButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="От самого прослушиваемого"
+                                android:text="@string/popular_rb"
                                 android:textColor="@color/white" />
 
                             <RadioButton
                                 android:id="@+id/notPopularRadioButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="От самых не прослушиваемых"
+                                android:text="@string/not_popular_rb"
                                 android:textColor="@color/white" />
                         </RadioGroup>
 

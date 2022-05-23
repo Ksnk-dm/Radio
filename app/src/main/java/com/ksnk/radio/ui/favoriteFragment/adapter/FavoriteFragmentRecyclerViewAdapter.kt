@@ -21,7 +21,7 @@ class FavoriteFragmentRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
+        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items_grid, parent, false))
     }
 
     override fun onBindViewHolder(holder: FavoriteViewHolder, position: Int) {

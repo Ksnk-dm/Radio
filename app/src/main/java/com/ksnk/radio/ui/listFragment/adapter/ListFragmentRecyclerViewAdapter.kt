@@ -30,7 +30,7 @@ class ListFragmentRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return WaveViewHolder(layoutInflater.inflate(R.layout.wave_items, parent, false))
+        return WaveViewHolder(layoutInflater.inflate(R.layout.wave_items_list, parent, false))
     }
 
 

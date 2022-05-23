@@ -25,6 +25,14 @@
     <string name="set_timer_text">Установить таймер</string>
     <string name="set_timer_button">Установить таймер</string>
     <string name="stop_timer_button">Остановить</string>
+    <string name="my_station_switch">Только мои станции</string>
+    <string name="sort_title">Сортировать по названию</string>
+    <string name="def_rb">Стандартно</string>
+    <string name="asc_rb">А…Я</string>
+    <string name="desc_rb">Я…А</string>
+    <string name="popular_rb">От самого прослушиваемого</string>
+    <string name="not_popular_rb">От самых не прослушиваемых</string>
+    <string name="title_sort_menu">Сортировка</string>
 
     <string name="list_menu_item">Список станций</string>
     <string name="fav_menu_item">Избранное</string>
