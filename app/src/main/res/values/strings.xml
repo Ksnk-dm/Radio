@@ -7,6 +7,14 @@
 
     <string name="firebase_ref">RadioWaves</string>
     <string name="firebase_url">https://radio-b9295-default-rtdb.europe-west1.firebasedatabase.app/</string>
+    <string name="default_logo_url">https://cdn-icons-png.flaticon.com/512/186/186054.png</string>
+    <string name="intent_filter">count_down</string>
+    <string name="intent_filter_notification">notification</string>
+    <string name="serializable_extra">media</string>
+    <string name="serializable_extra_long">countdown</string>
+    <string name="serializable_extra_min">minutes</string>
+    <string name="tag_work">work</string>
+    <string name="tag_stop">stop</string>
 
     <string name="dev_name">Developed by Ksnk-dm</string>
 
@@ -15,4 +23,9 @@
     <string name="set_menu_item">Настройки</string>
     <string name="set_title">Основные</string>
     <string name="minute_title">мин</string>
+    <string name="timer_work">Таймер запущен</string>
+    <string name="timer_set">Установить таймер</string>
+
+    <string name="empty_edit_text">Введите Название станции или ссылку</string>
+    <string name="no_match">Совпадений не найдено</string>
 </resources>

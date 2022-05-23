@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            val radioWave: RadioWave = intent.getSerializableExtra("media") as RadioWave
+            val radioWave: RadioWave = intent.getSerializableExtra(getString(R.string.serializable_extra)) as RadioWave
             titleTextView.text = radioWave.name
             Picasso.get()
                 .load(radioWave.image)
@@ -121,28 +121,23 @@ class MainActivity : AppCompatActivity() {
         setMediaInfoInMiniPlayer()
         setListeners()
         performSearch()
-        //  startService(Intent(this, TimerService::class.java))
-        //   registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
-
-
     }
 
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
-        //  stopService(Intent(this, TimerService::class.java))
         setMediaInfoInMiniPlayer()
     }
 
     private val br: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            updateGUI(intent!!) // or whatever method used to update your GUI fields
+            updateGUI(intent!!)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        registerReceiver(br, IntentFilter("com.ksnk.radio.countdown_br"))
+        registerReceiver(br, IntentFilter(getString(R.string.intent_filter)))
     }
 
     override fun onPause() {
@@ -153,8 +148,8 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         try {
             unregisterReceiver(br)
-        } catch (e: java.lang.Exception) {
-            // Receiver was probably already stopped in onPause()
+        } catch (e:java.lang.Exception) {
+            e.stackTrace
         }
         super.onStop()
     }
@@ -170,7 +165,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initBroadcastManager() {
         LocalBroadcastManager.getInstance(this)
-            .registerReceiver(receiver, IntentFilter("rec"))
+            .registerReceiver(receiver, IntentFilter(getString(R.string.intent_filter_notification)))
     }
 
     private fun favoriteStatusFalse() {
@@ -220,7 +215,6 @@ class MainActivity : AppCompatActivity() {
         timerImageButton.setOnClickListener {
             timerTextView.visibility = View.VISIBLE
             createTimerAlertDialog()
-            //   startService(Intent(this, TimerService::class.java))
         }
         addImageButton.setOnClickListener { createInsertAlertDialog() }
         backImageButton.setOnClickListener { motionLayout.transitionToStart() }
@@ -528,8 +522,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateGUI(intent: Intent) {
         if (intent.extras != null) {
             timerImageButton.setImageResource(R.drawable.ic_baseline_timer_red_24)
-            timerImageButton.tag = "work"
-            val millisUntilFinished = intent.getLongExtra("countdown", 0)
+            timerImageButton.tag = getString(R.string.tag_work)
+            val millisUntilFinished = intent.getLongExtra(getString(R.string.serializable_extra_long), 0)
             val min: Long = (millisUntilFinished / 1000) / 60
             val sec: Long = (millisUntilFinished / 1000) % 60
             timerTextView.text = "$min:$sec " + getString(R.string.minute_title)
@@ -538,7 +532,7 @@ class MainActivity : AppCompatActivity() {
                 stopService(Intent(this, PlayerService::class.java))
                 timerTextView.visibility = View.GONE
                 timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
-                timerImageButton.tag = "stop"
+                timerImageButton.tag = getString(R.string.tag_stop)
             }
         }
     }
@@ -553,11 +547,11 @@ class MainActivity : AppCompatActivity() {
         val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
-        if (timerImageButton.tag == "work") {
+        if (timerImageButton.tag == getString(R.string.tag_work)) {
             setTimerButton.visibility = View.GONE
             stopTimerButton.visibility = View.VISIBLE
             minuteEditText.visibility = View.GONE
-            timerTextViewDialog.text = "timer is run"
+            timerTextViewDialog.text = getString(R.string.timer_work)
             minTextView.visibility = View.GONE
 
         }
@@ -568,15 +562,15 @@ class MainActivity : AppCompatActivity() {
             minuteEditText.visibility = View.VISIBLE
             timerTextView.visibility = View.GONE
             timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
-            timerTextViewDialog.text = "Установить таймер"
-            timerImageButton.tag = "stop"
+            timerTextViewDialog.text = getString(R.string.timer_set)
+            timerImageButton.tag = getString(R.string.tag_stop)
             minTextView.visibility = View.VISIBLE
         }
 
         builder.setView(view)
         setTimerButton.setOnClickListener {
             val intent = Intent(this, TimerService::class.java)
-            intent.putExtra("minutes", minuteEditText.text.toString())
+            intent.putExtra(getString(R.string.serializable_extra_min), minuteEditText.text.toString())
             startService(intent)
             builder.dismiss()
         }
@@ -594,12 +588,12 @@ class MainActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             val radioWave: RadioWave = RadioWave()
             radioWave.name = nameEditText.text.toString()
-            radioWave.image = "https://cdn-icons-png.flaticon.com/512/186/186054.png"
+            radioWave.image = getString(R.string.default_logo_url)
             radioWave.custom = true
             radioWave.url = urlEditText.text.toString()
             if (nameEditText.text.trim { it <= ' ' }
                     .isEmpty() || urlEditText.text.trim { it <= ' ' }.isEmpty()) {
-                Toast.makeText(this, "text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
             } else {
                 viewModel.insert(radioWave)
                 fragmentSettingListener?.update()

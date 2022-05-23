@@ -43,7 +43,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var sortNameRadioGroup: RadioGroup
-    private lateinit var topRadioGroup: RadioGroup
     private lateinit var hideBottomSheetImageButton: ImageButton
     private var checkStateSwitch: Boolean = false
 
@@ -69,7 +68,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         super.onAttach(context)
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
@@ -89,7 +87,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     private fun init(view: View) {
         switch = view.findViewById(R.id.switchMyStation)
-        topRadioGroup = view.findViewById(R.id.topRadioGroup)
         hideBottomSheetImageButton = view.findViewById(R.id.hideBottomSheetImageButton)
         sortNameRadioGroup = view.findViewById(R.id.sortNameRadioGroup)
         sortImageButton = view.findViewById(R.id.sortImageButton)
@@ -105,7 +102,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         switch.setOnClickListener {
             switchIsChecked()
         }
-
         sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.radioButtonDefault -> {
@@ -148,11 +144,9 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         preferencesHelper.setSortDescStatus(false)
         preferencesHelper.setSortPopularStatus(false)
         preferencesHelper.setSortNotPopularStatus(false)
-        topRadioGroup.clearCheck()
     }
 
     private fun ascSetPrefsAndUpdateRv() {
-        //  topRadioGroup.clearCheck()
         preferencesHelper.setDefaultSortStatus(false)
         preferencesHelper.setSortAscStatus(true)
         preferencesHelper.setSortDescStatus(false)
@@ -166,7 +160,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         preferencesHelper.setSortDescStatus(true)
         preferencesHelper.setSortPopularStatus(false)
         preferencesHelper.setSortNotPopularStatus(false)
-        //topRadioGroup.clearCheck()
     }
 
     private fun popularSetPrefsAndUpdateRv() {
@@ -233,13 +226,11 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         setNotPopularStatusAndUpdateUI()
     }
 
-
     private fun initRecycler() {
         mGridLayoutManager = GridLayoutManager(activity, 1)
         mRecyclerView.layoutManager = mGridLayoutManager
         checkStateSwitch = preferencesHelper.getSwitchEnabled()
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -292,10 +283,10 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         updateButton.setOnClickListener {
             if (nameEditText.text.trim() { it <= ' ' }
                     .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
-                Toast.makeText(activity, "text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
             } else {
                 radioWave.name = nameEditText.text.toString()
-                radioWave.image = "https://cdn-icons-png.flaticon.com/512/186/186054.png"
+                radioWave.image = getString(R.string.default_logo_url)
                 radioWave.custom = true
                 radioWave.url = urlEditText.text.toString()
                 viewModel.updateRadioWave(radioWave)
@@ -312,7 +303,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun createUpdateOrDeleteRadioWaveAlertDialog(radioWave: RadioWave) {
-        var builder = AlertDialog.Builder(requireContext())
+        val builder = AlertDialog.Builder(requireContext())
             .create()
         val view = layoutInflater.inflate(R.layout.add_update_radio_wave_alert_dialog, null)
         val updateButton = view.findViewById<ImageButton>(R.id.saveButton)
@@ -350,7 +341,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             }
             updateRecyclerView(matchedRadioWave)
             if (matchedRadioWave.isEmpty()) {
-                Toast.makeText(activity, "No match found!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, getText(R.string.no_match), Toast.LENGTH_SHORT).show()
             }
             updateRecyclerView(matchedRadioWave)
         }
