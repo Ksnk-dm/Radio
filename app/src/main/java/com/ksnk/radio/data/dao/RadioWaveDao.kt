@@ -41,9 +41,9 @@ interface RadioWaveDao {
     @Query("SELECT * FROM radiowave WHERE  custom=1 ORDER BY LOWER(name) DESC")
     fun getCustomSortDesc():List<RadioWave>
 
-    @Query("SELECT * FROM radiowave  ORDER BY countOpen ASC")
+    @Query("SELECT * FROM radiowave ORDER BY countOpen ASC")
     fun getPopularSortAsc():List<RadioWave>
 
-    @Query("SELECT * FROM radiowave  ORDER BY countOpen DESC")
+    @Query("SELECT * FROM radiowave ORDER BY countOpen DESC")
     fun getPopularSortDesc():List<RadioWave>
 }
