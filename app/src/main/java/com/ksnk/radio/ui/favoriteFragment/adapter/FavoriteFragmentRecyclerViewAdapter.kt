@@ -31,11 +31,15 @@ class FavoriteFragmentRecyclerViewAdapter(
             .load(items[position].image)
             .into(holder.imageViewWave)
         holder.itemView.setOnClickListener {
-            val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
-            mPlayer.setMediaItem(mediaItem)
-            mPlayer.play()
-            mService?.setRadioWave(items[position])
+            setRadioWaveAndPlay(position)
         }
+    }
+
+    private fun setRadioWaveAndPlay(position: Int) {
+        val mediaItem: MediaItem = MediaItem.fromUri(items[position].url.toString())
+        mPlayer.setMediaItem(mediaItem)
+        mPlayer.play()
+        mService.setRadioWave(items[position])
     }
 
     override fun getItemCount(): Int {

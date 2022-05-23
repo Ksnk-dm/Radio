@@ -40,7 +40,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="20dp"
                     android:gravity="center|left"
-                    android:text="Обновить станции"
+                    android:text="@string/update_station"
                     android:textColor="@color/white"
                     android:textSize="20sp" />
 
