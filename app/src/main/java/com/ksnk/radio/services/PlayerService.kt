@@ -18,11 +18,13 @@ import android.os.Parcelable
 
 
 import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
 
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
@@ -34,7 +36,6 @@ import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
 
 
-
 class PlayerService() : Service(), Parcelable {
 
     private lateinit var playerBinder: IBinder
@@ -42,6 +43,8 @@ class PlayerService() : Service(), Parcelable {
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
+    private val mediaSessionTag = "MediaSessionManager"
+    private var trackTitle = ""
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -64,11 +67,12 @@ class PlayerService() : Service(), Parcelable {
         mPlayer = ExoPlayer.Builder(this).setUseLazyPreparation(false)
             .setHandleAudioBecomingNoisy(true)
             .setPauseAtEndOfMediaItems(false).build()
+        mPlayer!!.addListener(playerListener)
     }
 
     override fun onDestroy() {
         mPlayer?.release()
-        clearSharedPrefsVar()
+        //  clearSharedPrefsVar()
     }
 
     fun getPlayer(): ExoPlayer? {
@@ -103,7 +107,7 @@ class PlayerService() : Service(), Parcelable {
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
-                    return radioWave?.fmFrequency
+                    return trackTitle
                 }
 
                 override fun getCurrentLargeIcon(
@@ -132,7 +136,6 @@ class PlayerService() : Service(), Parcelable {
                     dismissedByUser: Boolean
                 ) {
                     stopSelf()
-                    clearSharedPrefsVar()
                 }
 
                 override fun onNotificationPosted(
@@ -144,7 +147,6 @@ class PlayerService() : Service(), Parcelable {
                         startForeground(notificationId, notification)
                     } else {
                         stopForeground(false)
-                        clearSharedPrefsVar()
                     }
                 }
             }).build()
@@ -157,19 +159,10 @@ class PlayerService() : Service(), Parcelable {
         playerNotificationManger.setUseNextActionInCompactView(true)
         playerNotificationManger.setUsePreviousActionInCompactView(false)
         playerNotificationManger.setUseChronometer(true)
-        val mediaSession: MediaSessionCompat = MediaSessionCompat(this, "MediaSessionManager")
+        val mediaSession = MediaSessionCompat(this, mediaSessionTag)
         playerNotificationManger.setMediaSessionToken(mediaSession.sessionToken)
         val sessionConnector = MediaSessionConnector(mediaSession)
         sessionConnector.setPlayer(mPlayer)
-
-    }
-
-    private fun clearSharedPrefsVar() {
-        val settings: SharedPreferences =
-            getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
-        val editor = settings.edit()
-        editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-        editor.apply()
     }
 
     fun setRadioWave(radioWave: RadioWave) {
@@ -199,6 +192,12 @@ class PlayerService() : Service(), Parcelable {
 
         override fun newArray(size: Int): Array<PlayerService?> {
             return arrayOfNulls(size)
+        }
+    }
+
+    private var playerListener = object : Player.Listener {
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            trackTitle = mediaMetadata.title.toString()
         }
     }
 }

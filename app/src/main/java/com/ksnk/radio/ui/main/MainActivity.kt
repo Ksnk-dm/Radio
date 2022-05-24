@@ -25,6 +25,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.airbnb.lottie.LottieAnimationView
 import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer
 import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
 import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -58,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     private var fragmentView: FragmentContainerView? = null
 
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
-    private var matchedRadiWave: ArrayList<RadioWave> = arrayListOf()
     private lateinit var mPosterImageView: CircleImageView
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timerTextView: TextView
     private lateinit var timerImageButton: ImageButton
     private lateinit var addImageButton: ImageButton
+    private lateinit var titleTextViewPlayer: TextView
+    private lateinit var trackInfoMiniPlayerTextView: TextView
 
     private var fragmentSettingListener: FragmentSettingListener? = null
 
@@ -100,7 +102,8 @@ class MainActivity : AppCompatActivity() {
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            val radioWave: RadioWave = intent.getSerializableExtra(getString(R.string.serializable_extra)) as RadioWave
+            val radioWave: RadioWave =
+                intent.getSerializableExtra(getString(R.string.serializable_extra)) as RadioWave
             titleTextView.text = radioWave.name
             Picasso.get()
                 .load(radioWave.image)
@@ -148,7 +151,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         try {
             unregisterReceiver(br)
-        } catch (e:java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             e.stackTrace
         }
         super.onStop()
@@ -165,7 +168,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initBroadcastManager() {
         LocalBroadcastManager.getInstance(this)
-            .registerReceiver(receiver, IntentFilter(getString(R.string.intent_filter_notification)))
+            .registerReceiver(
+                receiver,
+                IntentFilter(getString(R.string.intent_filter_notification))
+            )
     }
 
     private fun favoriteStatusFalse() {
@@ -383,6 +389,9 @@ class MainActivity : AppCompatActivity() {
         timerImageButton = findViewById(R.id.timerImageButton)
         addImageButton = findViewById(R.id.addImageButton)
         searchImageButton = findViewById(R.id.searchImageButton)
+        titleTextViewPlayer = findViewById(R.id.titlePlayerTextView)
+        trackInfoMiniPlayerTextView = findViewById(R.id.track_info_textView)
+        trackInfoMiniPlayerTextView.isSelected=true
     }
 
 
@@ -418,7 +427,6 @@ class MainActivity : AppCompatActivity() {
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
         }
         database.addValueEventListener(valueEventListener)
-
     }
 
     fun updateDb() {
@@ -460,7 +468,6 @@ class MainActivity : AppCompatActivity() {
             mPlayerService?.getPlayer()?.addListener(playerListener)
         }
 
-
         override fun onServiceDisconnected(className: ComponentName) {
             mPlayerService = null
             mExoPlayer = null
@@ -468,6 +475,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var playerListener = object : Player.Listener {
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            titleTextViewPlayer.text = mediaMetadata.title.toString()
+            trackInfoMiniPlayerTextView.text = mediaMetadata.title.toString()
+        }
+
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             isPlayingMedia(isPlaying)
         }
@@ -476,6 +488,13 @@ class MainActivity : AppCompatActivity() {
             when (error.errorCode) {
                 ERROR_CODE_IO_NETWORK_CONNECTION_FAILED -> {
                     animNetLottieAnimationView.visibility = View.VISIBLE
+                }
+                ERROR_CODE_IO_FILE_NOT_FOUND -> {
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.error_payback),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -523,7 +542,8 @@ class MainActivity : AppCompatActivity() {
         if (intent.extras != null) {
             timerImageButton.setImageResource(R.drawable.ic_baseline_timer_red_24)
             timerImageButton.tag = getString(R.string.tag_work)
-            val millisUntilFinished = intent.getLongExtra(getString(R.string.serializable_extra_long), 0)
+            val millisUntilFinished =
+                intent.getLongExtra(getString(R.string.serializable_extra_long), 0)
             val min: Long = (millisUntilFinished / 1000) / 60
             val sec: Long = (millisUntilFinished / 1000) % 60
             timerTextView.text = "$min:$sec " + getString(R.string.minute_title)
@@ -570,7 +590,10 @@ class MainActivity : AppCompatActivity() {
         builder.setView(view)
         setTimerButton.setOnClickListener {
             val intent = Intent(this, TimerService::class.java)
-            intent.putExtra(getString(R.string.serializable_extra_min), minuteEditText.text.toString())
+            intent.putExtra(
+                getString(R.string.serializable_extra_min),
+                minuteEditText.text.toString()
+            )
             startService(intent)
             builder.dismiss()
         }
@@ -599,7 +622,6 @@ class MainActivity : AppCompatActivity() {
                 fragmentSettingListener?.update()
                 builder.dismiss()
             }
-
         }
         builder.setView(view)
         builder.setCanceledOnTouchOutside(true)

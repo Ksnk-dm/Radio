@@ -22,6 +22,7 @@ import com.ksnk.radio.listeners.FragmentSettingListener
 import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.enums.DisplayListType
 import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
@@ -51,7 +52,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-
+    private lateinit var displayListType:DisplayListType
     @Inject
     lateinit var viewModel: MainViewModel
 
@@ -227,9 +228,19 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun initRecycler() {
-        mGridLayoutManager = GridLayoutManager(activity, 1)
+        displayListType = preferencesHelper.getDisplayListType()
+        mGridLayoutManager = when (displayListType) {
+            DisplayListType.List -> {
+                GridLayoutManager(activity, 1)
+            }
+            DisplayListType.Grid -> {
+                GridLayoutManager(activity, 2)
+            }
+        }
+
         mRecyclerView.layoutManager = mGridLayoutManager
         checkStateSwitch = preferencesHelper.getSwitchEnabled()
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -283,7 +294,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         updateButton.setOnClickListener {
             if (nameEditText.text.trim() { it <= ' ' }
                     .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
-                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT)
+                    .show()
             } else {
                 radioWave.name = nameEditText.text.toString()
                 radioWave.image = getString(R.string.default_logo_url)
@@ -339,15 +351,22 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                     matchedRadioWave.add(radioWave)
                 }
             }
-            updateRecyclerView(matchedRadioWave)
+            updateRecyclerViewSearch(matchedRadioWave)
             if (matchedRadioWave.isEmpty()) {
                 Toast.makeText(activity, getText(R.string.no_match), Toast.LENGTH_SHORT).show()
             }
-            updateRecyclerView(matchedRadioWave)
+            updateRecyclerViewSearch(matchedRadioWave)
         }
     }
 
     private fun updateRecyclerView(updateList: List<RadioWave>) {
+        mRecyclerView.apply {
+            mAdapter.setItems(updateList)
+            mAdapter.notifyDataSetChanged()
+        }
+    }
+    private fun updateRecyclerViewSearch(updateList: List<RadioWave>) {
+        mAdapter.clearItems()
         mRecyclerView.apply {
             mAdapter.setItems(updateList)
             mAdapter.notifyDataSetChanged()
@@ -363,5 +382,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             this@ListFragment
         )
         mRecyclerView.adapter = mAdapter
+        mAdapter.setDisplayListType(displayListType)
     }
 }

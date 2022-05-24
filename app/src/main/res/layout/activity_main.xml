@@ -43,7 +43,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="right">
+            android:gravity="end">
 
             <TextView
                 android:id="@+id/titleToolTextView"
@@ -195,4 +195,18 @@
         app:layout_constraintEnd_toStartOf="@+id/play_imageView"
         app:layout_constraintStart_toEndOf="@+id/main_imageView"
         app:layout_constraintTop_toTopOf="@+id/play_imageView" />
+
+    <TextView
+        android:id="@+id/track_info_textView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:textSize="10sp"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="@+id/bottomNavViewMain"
+        app:layout_constraintTop_toBottomOf="parent" />
 </androidx.constraintlayout.motion.widget.MotionLayout>

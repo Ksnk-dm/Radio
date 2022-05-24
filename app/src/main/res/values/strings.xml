@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Радио UA</string>
-<string name="error_network">Нет доступа к интернету</string>
+    <string name="error_network">Нет доступа к интернету</string>
     <string name="get_serializable_extra">items</string>
     <string name="get_name_shared_prefs_variable">name</string>
     <string name="get_shared_prefs_init">base</string>
@@ -33,7 +33,10 @@
     <string name="popular_rb">От самого прослушиваемого</string>
     <string name="not_popular_rb">От самых не прослушиваемых</string>
     <string name="title_sort_menu">Сортировка</string>
-
+    <string name="error_payback">Ошибка воспроизведения</string>
+    <string name="list_rb">Список</string>
+    <string name="grid_rb">Сетка</string>
+    <string name="view_tv">Отображение</string>
     <string name="list_menu_item">Список станций</string>
     <string name="fav_menu_item">Избранное</string>
     <string name="set_menu_item">Настройки</string>

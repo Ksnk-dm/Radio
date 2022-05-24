@@ -18,6 +18,8 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.enums.DisplayListType
+import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
 import com.ksnk.radio.ui.main.MainViewModel
@@ -29,10 +31,11 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
-
+    private lateinit var displayListType: DisplayListType
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
-
+    @Inject
+    lateinit var preferencesHelper: PreferenceHelper
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
@@ -60,7 +63,15 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
         mRecyclerView = view.findViewById(R.id.favoriteRecyclerView)
-        mGridLayoutManager = GridLayoutManager(activity, 1)
+        displayListType = preferencesHelper.getDisplayListType()
+        mGridLayoutManager = when (displayListType) {
+            DisplayListType.List -> {
+                GridLayoutManager(activity, 1)
+            }
+            DisplayListType.Grid -> {
+                GridLayoutManager(activity, 2)
+            }
+        }
         mRecyclerView.layoutManager = mGridLayoutManager
     }
 
@@ -85,6 +96,7 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
                 mPlayerService!!,
             this@FavoriteFragment)
             mRecyclerView.adapter = mAdapter
+            mAdapter.setDisplayListType(displayListType)
             mPlayerService?.initNotification()
         }
 
@@ -96,10 +108,10 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
 
 
     override fun getItemMenu(id: Int?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun updateCountOpenItem(id: Int?) {
-        TODO("Not yet implemented")
+
     }
 }
