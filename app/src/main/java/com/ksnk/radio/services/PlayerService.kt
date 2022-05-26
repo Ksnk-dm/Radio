@@ -5,34 +5,36 @@ import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-
+import android.icu.number.NumberFormatter.with
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
-
-
 import android.support.v4.media.session.MediaSessionCompat
-
+import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
+import com.ksnk.radio.PlayerWidget
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
-
+import com.squareup.picasso.Picasso.LoadedFrom
 
 
 class PlayerService() : Service(), Parcelable {
@@ -42,6 +44,12 @@ class PlayerService() : Service(), Parcelable {
     private lateinit var playerNotificationManger: PlayerNotificationManager
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
+    private val mediaSessionTag = "MediaSessionManager"
+    private var trackTitle = ""
+    var remoteViews: RemoteViews? = null
+    var thisWidget: ComponentName? = null
+    var appWidgetManager: AppWidgetManager? = null
+    private var stationName = ""
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -58,17 +66,22 @@ class PlayerService() : Service(), Parcelable {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
+        appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+        remoteViews = RemoteViews(applicationContext.packageName, R.layout.player_widget)
+        thisWidget = ComponentName(applicationContext, PlayerWidget::class.java)
+
     }
 
     private fun initPlayer() {
         mPlayer = ExoPlayer.Builder(this).setUseLazyPreparation(false)
             .setHandleAudioBecomingNoisy(true)
             .setPauseAtEndOfMediaItems(false).build()
+        mPlayer!!.addListener(playerListener)
     }
 
     override fun onDestroy() {
         mPlayer?.release()
-        clearSharedPrefsVar()
+        //  clearSharedPrefsVar()
     }
 
     fun getPlayer(): ExoPlayer? {
@@ -103,7 +116,7 @@ class PlayerService() : Service(), Parcelable {
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
-                    return radioWave?.fmFrequency
+                    return trackTitle
                 }
 
                 override fun getCurrentLargeIcon(
@@ -132,7 +145,6 @@ class PlayerService() : Service(), Parcelable {
                     dismissedByUser: Boolean
                 ) {
                     stopSelf()
-                    clearSharedPrefsVar()
                 }
 
                 override fun onNotificationPosted(
@@ -144,7 +156,6 @@ class PlayerService() : Service(), Parcelable {
                         startForeground(notificationId, notification)
                     } else {
                         stopForeground(false)
-                        clearSharedPrefsVar()
                     }
                 }
             }).build()
@@ -157,19 +168,10 @@ class PlayerService() : Service(), Parcelable {
         playerNotificationManger.setUseNextActionInCompactView(true)
         playerNotificationManger.setUsePreviousActionInCompactView(false)
         playerNotificationManger.setUseChronometer(true)
-        val mediaSession: MediaSessionCompat = MediaSessionCompat(this, "MediaSessionManager")
+        val mediaSession = MediaSessionCompat(this, mediaSessionTag)
         playerNotificationManger.setMediaSessionToken(mediaSession.sessionToken)
         val sessionConnector = MediaSessionConnector(mediaSession)
         sessionConnector.setPlayer(mPlayer)
-
-    }
-
-    private fun clearSharedPrefsVar() {
-        val settings: SharedPreferences =
-            getSharedPreferences(getString(R.string.get_shared_prefs_init), MODE_PRIVATE)
-        val editor = settings.edit()
-        editor.putString(getString(R.string.get_name_shared_prefs_variable), "")
-        editor.apply()
     }
 
     fun setRadioWave(radioWave: RadioWave) {
@@ -199,6 +201,48 @@ class PlayerService() : Service(), Parcelable {
 
         override fun newArray(size: Int): Array<PlayerService?> {
             return arrayOfNulls(size)
+        }
+    }
+
+    private var playerListener = object : Player.Listener {
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            trackTitle = mediaMetadata.title.toString()
+            stationName = mediaMetadata.station.toString()
+            remoteViews!!.setTextViewText(R.id.trackWidgetTextView, trackTitle)
+            remoteViews!!.setTextViewText(R.id.nameWidgetTextView, stationName)
+
+            Picasso.get()
+                .load(radioWave?.image)
+                .into(object : com.squareup.picasso.Target {
+                    override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
+                        remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+                    }
+
+                    override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
+
+                    }
+
+                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+
+                    }
+
+                })
+            appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (isPlaying) {
+                remoteViews!!.setImageViewResource(
+                    R.id.playWidgetImageButton,
+                    R.drawable.ic_baseline_pause_24
+                )
+            } else {
+                remoteViews!!.setImageViewResource(
+                    R.id.playWidgetImageButton,
+                    R.drawable.ic_baseline_play_arrow_24
+                )
+            }
+            appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
         }
     }
 }

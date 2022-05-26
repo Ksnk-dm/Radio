@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.ksnk.radio.R
 import com.ksnk.radio.ui.main.MainActivity
 
@@ -17,6 +18,7 @@ import com.ksnk.radio.ui.main.MainActivity
 class SplashActivity : AppCompatActivity() {
     private lateinit var repeatImageButton: ImageButton
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.statusBarColor = ContextCompat.getColor(this, R.color.black)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         initButton()

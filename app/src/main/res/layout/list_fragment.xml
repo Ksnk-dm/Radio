@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     android:orientation="vertical">
 
     <LinearLayout
@@ -24,6 +25,7 @@
                 app:srcCompat="@drawable/ic_baseline_sort_24" />
 
             <TextView
+                android:id="@+id/titleSortTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -87,8 +89,11 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:buttonTint="@color/yellow"
                             android:text="@string/my_station_switch"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            app:thumbTint="@color/yellow"
+                            app:trackTint="@color/white" />
                     </LinearLayout>
 
                     <View
@@ -122,6 +127,7 @@
                                 android:id="@+id/radioButtonDefault"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:buttonTint="@color/yellow"
                                 android:text="@string/def_rb"
                                 android:textColor="@color/white" />
 
@@ -129,6 +135,7 @@
                                 android:id="@+id/radioButtonAsc"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:buttonTint="@color/yellow"
                                 android:text="@string/asc_rb"
                                 android:textColor="@color/white" />
 
@@ -136,6 +143,7 @@
                                 android:id="@+id/radioButtonDesc"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:buttonTint="@color/yellow"
                                 android:text="@string/desc_rb"
                                 android:textColor="@color/white" />
 
@@ -143,6 +151,7 @@
                                 android:id="@+id/popularRadioButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:buttonTint="@color/yellow"
                                 android:text="@string/popular_rb"
                                 android:textColor="@color/white" />
 
@@ -150,6 +159,7 @@
                                 android:id="@+id/notPopularRadioButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:buttonTint="@color/yellow"
                                 android:text="@string/not_popular_rb"
                                 android:textColor="@color/white" />
                         </RadioGroup>

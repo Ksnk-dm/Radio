@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.11" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/bottom_nav_item_color.xml" value="0.1945" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/circle.xml" value="0.212" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic__18620_play_icon.xml" value="0.1" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/drawable/ic_baseline_expand_more_24.xml" value="0.14" />
@@ -34,6 +35,7 @@
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/first_fragment.xml" value="0.18795289855072464" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/list_fragment.xml" value="0.19610507246376813" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/player_fragment.xml" value="0.18206521739130435" />
+        <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/player_widget.xml" value="0.536" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/second_fragment.xml" value="0.18206521739130435" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/setting_fragment.xml" value="0.264" />
         <entry key="..\:/Users/ukrko/AndroidStudioProjects/MyApplication10/app/src/main/res/layout/timer_custom_alert_dialog.xml" value="0.2" />

@@ -22,6 +22,7 @@ import com.ksnk.radio.listeners.FragmentSettingListener
 import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.enums.DisplayListType
 import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.ui.listFragment.adapter.ListFragmentRecyclerViewAdapter
@@ -35,8 +36,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var mGridLayoutManager: GridLayoutManager
     private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
     private lateinit var sortImageButton: ImageButton
-    private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
-    private var matchedRadioWave: ArrayList<RadioWave> = arrayListOf()
+    private var items: MutableList<RadioWave>? = null
+    private var matchedRadioWave: ArrayList<RadioWave>? = null
     private lateinit var switch: SwitchMaterial
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
@@ -44,6 +45,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var sortNameRadioGroup: RadioGroup
     private lateinit var hideBottomSheetImageButton: ImageButton
+    private lateinit var titleSortTextView: TextView
     private var checkStateSwitch: Boolean = false
 
     @Inject
@@ -51,6 +53,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    private lateinit var displayListType: DisplayListType
 
     @Inject
     lateinit var viewModel: MainViewModel
@@ -61,7 +64,9 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private var popularRadioButtonStatus: Boolean = false
     private var notPopularRadioButtonStatus: Boolean = false
 
-    var defaultListItem: List<RadioWave> = mutableListOf<RadioWave>()
+    private var defaultListItem: List<RadioWave> = mutableListOf<RadioWave>()
+
+
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
@@ -93,6 +98,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
         bottomSheet = view.findViewById(R.id.bottomSheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        titleSortTextView = view.findViewById(R.id.titleSortTextView)
     }
 
     private fun initListeners() {
@@ -122,6 +128,9 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             }
         }
         sortImageButton.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        titleSortTextView.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
@@ -227,9 +236,19 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun initRecycler() {
-        mGridLayoutManager = GridLayoutManager(activity, 1)
+        displayListType = preferencesHelper.getDisplayListType()
+        mGridLayoutManager = when (displayListType) {
+            DisplayListType.List -> {
+                GridLayoutManager(activity, 1)
+            }
+            DisplayListType.Grid -> {
+                GridLayoutManager(activity, 2)
+            }
+        }
+
         mRecyclerView.layoutManager = mGridLayoutManager
         checkStateSwitch = preferencesHelper.getSwitchEnabled()
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -283,7 +302,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         updateButton.setOnClickListener {
             if (nameEditText.text.trim() { it <= ' ' }
                     .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
-                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT)
+                    .show()
             } else {
                 radioWave.name = nameEditText.text.toString()
                 radioWave.image = getString(R.string.default_logo_url)
@@ -331,19 +351,20 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     override fun search(textSearch: String?) {
+        matchedRadioWave = arrayListOf()
         textSearch?.let {
-            items.forEach { radioWave ->
+            items?.forEach { radioWave ->
                 if (radioWave.name!!.contains(textSearch, true) ||
                     radioWave.name.toString().contains(textSearch, true)
                 ) {
-                    matchedRadioWave.add(radioWave)
+                    matchedRadioWave?.add(radioWave)
                 }
             }
-            updateRecyclerView(matchedRadioWave)
-            if (matchedRadioWave.isEmpty()) {
+            updateRecyclerView(matchedRadioWave!!)
+            if (matchedRadioWave!!.isEmpty()) {
                 Toast.makeText(activity, getText(R.string.no_match), Toast.LENGTH_SHORT).show()
             }
-            updateRecyclerView(matchedRadioWave)
+            updateRecyclerView(matchedRadioWave!!)
         }
     }
 
@@ -356,12 +377,13 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     private fun initAdapter() {
         mAdapter = ListFragmentRecyclerViewAdapter(
-            items,
+            items!!,
             activity?.applicationContext,
             mExoPlayer!!,
             mPlayerService!!,
             this@ListFragment
         )
         mRecyclerView.adapter = mAdapter
+        mAdapter.setDisplayListType(displayListType)
     }
 }

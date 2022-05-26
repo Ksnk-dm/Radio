@@ -8,7 +8,9 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.enums.DisplayListType
 import com.ksnk.radio.services.PlayerService
+import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.squareup.picasso.Picasso
 
 class FavoriteFragmentRecyclerViewAdapter(
@@ -18,11 +20,47 @@ class FavoriteFragmentRecyclerViewAdapter(
     var mService: PlayerService
 ) :
     RecyclerView.Adapter<FavoriteViewHolder>() {
+    private val grid = 0
+    private val list = 1
+    private var displayListType: DisplayListType? = null
+    private val waveViewHolder:FavoriteViewHolder? = null
+
+    fun setDisplayListType(displayListType: DisplayListType) {
+        this.displayListType = displayListType
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayListType == DisplayListType.List) {
+            return list
+        } else {
+            return grid
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return FavoriteViewHolder(layoutInflater.inflate(R.layout.wave_items_grid, parent, false))
-    }
+        when (viewType) {
+            list -> {
+                return FavoriteViewHolder(
+                    layoutInflater.inflate(
+                        R.layout.wave_items_list,
+                        parent,
+                        false
+                    )
+                )
+            }
+            grid -> {
+                return FavoriteViewHolder(
+                    layoutInflater.inflate(
+                        R.layout.wave_items_grid,
+                        parent,
+                        false
+                    )
+                )
+            }
+        }
+        return waveViewHolder!!   }
 
     override fun onBindViewHolder(holder: FavoriteViewHolder, position: Int) {
         holder.frequencyTextView?.text = items[position].fmFrequency

@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.ksnk.radio.*
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.enums.DisplayListType
 import com.ksnk.radio.listeners.MenuItemIdListener
 import com.ksnk.radio.services.PlayerService
 import com.squareup.picasso.Picasso
@@ -19,9 +20,25 @@ class ListFragmentRecyclerViewAdapter(
     var context: Context?,
     var mPlayer: ExoPlayer,
     var mService: PlayerService,
-    var menuItemIdListener: MenuItemIdListener
+    private var menuItemIdListener: MenuItemIdListener
 ) :
     RecyclerView.Adapter<WaveViewHolder>() {
+    private val grid = 0
+    private val list = 1
+    private val waveViewHolder: WaveViewHolder? = null
+    private  var displayListType:DisplayListType?=null
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayListType==DisplayListType.List){
+            return list
+        } else{
+            return grid
+        }
+    }
+
+    fun setDisplayListType(displayListType: DisplayListType) {
+        this.displayListType = displayListType
+    }
 
     fun setItems(items: List<RadioWave>) {
         this.items = items
@@ -30,7 +47,27 @@ class ListFragmentRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WaveViewHolder {
         val layoutInflater =
             parent.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        return WaveViewHolder(layoutInflater.inflate(R.layout.wave_items_list, parent, false))
+        when (viewType) {
+            list -> {
+                return WaveViewHolder(
+                    layoutInflater.inflate(
+                        R.layout.wave_items_list,
+                        parent,
+                        false
+                    )
+                )
+            }
+            grid -> {
+                return WaveViewHolder(
+                    layoutInflater.inflate(
+                        R.layout.wave_items_grid,
+                        parent,
+                        false
+                    )
+                )
+            }
+        }
+        return waveViewHolder!!
     }
 
 
@@ -46,6 +83,10 @@ class ListFragmentRecyclerViewAdapter(
             menuItemIdListener.updateCountOpenItem(items[position].id)
         }
         radioWaveNameEquals(position, holder)
+    }
+
+    fun clearItems(){
+        items.isNullOrEmpty()
     }
 
     private fun checkCustomItem(position: Int, holder: WaveViewHolder) {
