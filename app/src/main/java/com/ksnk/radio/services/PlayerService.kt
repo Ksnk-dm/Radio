@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.icu.number.NumberFormatter.with
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
@@ -19,6 +20,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaMetadata
@@ -32,6 +34,7 @@ import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Picasso.LoadedFrom
 
 
 class PlayerService() : Service(), Parcelable {
@@ -44,8 +47,9 @@ class PlayerService() : Service(), Parcelable {
     private val mediaSessionTag = "MediaSessionManager"
     private var trackTitle = ""
     var remoteViews: RemoteViews? = null
-    var thisWidget: ComponentName? =null
-    var appWidgetManager:AppWidgetManager? = null
+    var thisWidget: ComponentName? = null
+    var appWidgetManager: AppWidgetManager? = null
+    private var stationName = ""
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -63,7 +67,7 @@ class PlayerService() : Service(), Parcelable {
         playerBinder = PlayerBinder()
         initPlayer()
         appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-         remoteViews= RemoteViews(applicationContext.packageName, R.layout.player_widget)
+        remoteViews = RemoteViews(applicationContext.packageName, R.layout.player_widget)
         thisWidget = ComponentName(applicationContext, PlayerWidget::class.java)
 
     }
@@ -203,8 +207,42 @@ class PlayerService() : Service(), Parcelable {
     private var playerListener = object : Player.Listener {
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             trackTitle = mediaMetadata.title.toString()
-            remoteViews!!.setTextViewText(R.id.appwidget_text, trackTitle)
+            stationName = mediaMetadata.station.toString()
+            remoteViews!!.setTextViewText(R.id.trackWidgetTextView, trackTitle)
+            remoteViews!!.setTextViewText(R.id.nameWidgetTextView, stationName)
+
+            Picasso.get()
+                .load(radioWave?.image)
+                .into(object : com.squareup.picasso.Target {
+                    override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
+                        remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+                    }
+
+                    override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
+
+                    }
+
+                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+
+                    }
+
+                })
             appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (isPlaying) {
+                remoteViews!!.setImageViewResource(
+                    R.id.playWidgetImageButton,
+                    R.drawable.ic_baseline_pause_24
+                )
+            } else {
+                remoteViews!!.setImageViewResource(
+                    R.id.playWidgetImageButton,
+                    R.drawable.ic_baseline_play_arrow_24
+                )
             }
+            appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+        }
     }
 }
