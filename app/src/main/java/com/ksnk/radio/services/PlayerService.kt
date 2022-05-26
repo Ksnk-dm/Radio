@@ -5,21 +5,18 @@ import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
-
-
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
-
+import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -30,6 +27,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
+import com.ksnk.radio.PlayerWidget
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
@@ -45,6 +43,9 @@ class PlayerService() : Service(), Parcelable {
     private var bitMapPoster: Bitmap? = null
     private val mediaSessionTag = "MediaSessionManager"
     private var trackTitle = ""
+    var remoteViews: RemoteViews? = null
+    var thisWidget: ComponentName? =null
+    var appWidgetManager:AppWidgetManager? = null
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -61,6 +62,10 @@ class PlayerService() : Service(), Parcelable {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
+        appWidgetManager = AppWidgetManager.getInstance(applicationContext)
+         remoteViews= RemoteViews(applicationContext.packageName, R.layout.player_widget)
+        thisWidget = ComponentName(applicationContext, PlayerWidget::class.java)
+
     }
 
     private fun initPlayer() {
@@ -198,6 +203,8 @@ class PlayerService() : Service(), Parcelable {
     private var playerListener = object : Player.Listener {
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             trackTitle = mediaMetadata.title.toString()
-        }
+            remoteViews!!.setTextViewText(R.id.appwidget_text, trackTitle)
+            appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+            }
     }
 }

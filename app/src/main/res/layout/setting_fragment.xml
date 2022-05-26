@@ -87,6 +87,7 @@
                             android:id="@+id/listRadioButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:buttonTint="@color/yellow"
                             android:text="@string/list_rb"
                             android:textColor="@color/white" />
 
@@ -94,6 +95,7 @@
                             android:id="@+id/gridRadioButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:buttonTint="@color/yellow"
                             android:text="@string/grid_rb"
                             android:textColor="@color/white" />
                     </RadioGroup>
