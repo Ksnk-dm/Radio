@@ -3,7 +3,6 @@ package com.ksnk.radio.ui.listFragment
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -295,30 +294,41 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         viewModel.updateRadioWave(radioWave)
     }
 
+    private fun updateButtonEvent(
+        nameEditText: EditText, radioWave: RadioWave,
+        urlEditText: EditText, builder: AlertDialog
+    ) {
+        if (nameEditText.text.trim() { it <= ' ' }
+                .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
+            Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            radioWave.name = nameEditText.text.toString()
+            radioWave.image = getString(R.string.default_logo_url)
+            radioWave.custom = true
+            radioWave.url = urlEditText.text.toString()
+            viewModel.updateRadioWave(radioWave)
+            builder.dismiss()
+            initAdapter()
+        }
+    }
+
+    private fun delButtonEvent(radioWave: RadioWave, builder: AlertDialog) {
+        viewModel.delete(radioWave)
+        builder.dismiss()
+        initAdapter()
+    }
+
     private fun initListenersAlertDialog(
         updateButton: ImageButton, nameEditText: EditText,
         urlEditText: EditText, radioWave: RadioWave, delButton: ImageButton, builder: AlertDialog
     ) {
         updateButton.setOnClickListener {
-            if (nameEditText.text.trim() { it <= ' ' }
-                    .isEmpty() || urlEditText.text.trim() { it <= ' ' }.isEmpty()) {
-                Toast.makeText(activity, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                radioWave.name = nameEditText.text.toString()
-                radioWave.image = getString(R.string.default_logo_url)
-                radioWave.custom = true
-                radioWave.url = urlEditText.text.toString()
-                viewModel.updateRadioWave(radioWave)
-                builder.dismiss()
-                initAdapter()
-            }
+            updateButtonEvent(nameEditText, radioWave, urlEditText, builder)
         }
 
         delButton.setOnClickListener {
-            viewModel.delete(radioWave)
-            builder.dismiss()
-            initAdapter()
+            delButtonEvent(radioWave, builder)
         }
     }
 

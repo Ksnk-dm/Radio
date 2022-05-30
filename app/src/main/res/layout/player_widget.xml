@@ -12,14 +12,15 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="3"
-        android:focusable="true">
+        android:weightSum="3">
 
         <ImageView
             android:id="@+id/widgetImageView"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/ic_next_button_svgrepo_com"
             app:srcCompat="@drawable/ic_next_button_svgrepo_com" />
 
@@ -34,14 +35,20 @@
             <TextView
                 android:id="@+id/nameWidgetTextView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white" />
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="bottom"
+                android:text="@string/title_widget"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/trackWidgetTextView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
                 android:maxLength="30"
+                android:text="@string/sub_title_widget"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
         </LinearLayout>

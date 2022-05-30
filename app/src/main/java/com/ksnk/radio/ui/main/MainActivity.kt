@@ -44,7 +44,6 @@ import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
-import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var searchImageButton: ImageButton
 
-    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val radioWaveBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val radioWave: RadioWave =
                 intent.getSerializableExtra(getString(R.string.serializable_extra)) as RadioWave
@@ -128,11 +127,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(radioWaveBroadcastReceiver)
         setMediaInfoInMiniPlayer()
     }
 
-    private val br: BroadcastReceiver = object : BroadcastReceiver() {
+    private val timerBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             updateGUI(intent!!)
         }
@@ -140,17 +139,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        registerReceiver(br, IntentFilter(getString(R.string.intent_filter)))
+        registerReceiver(timerBroadcastReceiver, IntentFilter(getString(R.string.intent_filter)))
     }
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(br)
+        unregisterReceiver(timerBroadcastReceiver)
     }
 
     override fun onStop() {
         try {
-            unregisterReceiver(br)
+            unregisterReceiver(timerBroadcastReceiver)
         } catch (e: java.lang.Exception) {
             e.stackTrace
         }
@@ -169,7 +168,7 @@ class MainActivity : AppCompatActivity() {
     private fun initBroadcastManager() {
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(
-                receiver,
+                radioWaveBroadcastReceiver,
                 IntentFilter(getString(R.string.intent_filter_notification))
             )
     }
@@ -448,24 +447,28 @@ class MainActivity : AppCompatActivity() {
         database.addValueEventListener(valueEventListener)
     }
 
+    private fun setMediaItem() {
+        val id = preferencesHelper.getIdPlayMedia()
+        val url: String?
+        try {
+            if (mExoPlayer!!.currentMediaItem == null) {
+                url = viewModel.getRadioWaveForId(id).url
+                val mediaItem: MediaItem =
+                    MediaItem.fromUri(url!!)
+                mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
+                mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+            }
+        } catch (e: NullPointerException) {
+            e.stackTrace
+        }
+    }
+
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
-            val id = preferencesHelper.getIdPlayMedia()
-            val url: String?
-            try {
-                if (mExoPlayer!!.currentMediaItem == null) {
-                    url = viewModel.getRadioWaveForId(id).url
-                    val mediaItem: MediaItem =
-                        MediaItem.fromUri(url!!)
-                    mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
-                    mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
-                }
-            } catch (e: NullPointerException) {
-                e.stackTrace
-            }
+            setMediaItem()
             isPlayingMedia(mExoPlayer!!.isPlaying)
             mPlayerService?.getPlayer()?.addListener(playerListener)
         }
@@ -559,48 +562,67 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun ifTagWork(
+        stopTimerButton: Button,
+        timerTextViewDialog: TextView,
+        minTextView: TextView
+    ) {
+        setTimerButton.visibility = View.GONE
+        stopTimerButton.visibility = View.VISIBLE
+        minuteEditText.visibility = View.GONE
+        timerTextViewDialog.text = getString(R.string.timer_work)
+        minTextView.visibility = View.GONE
+    }
+
+    private fun stopTimerEvents(
+        stopTimerButton: Button,
+        timerTextViewDialog: TextView,
+        minTextView: TextView
+    ) {
+        stopService(Intent(this, TimerService::class.java))
+        setTimerButton.visibility = View.VISIBLE
+        stopTimerButton.visibility = View.GONE
+        minuteEditText.visibility = View.VISIBLE
+        timerTextView.visibility = View.GONE
+        timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
+        timerTextViewDialog.text = getString(R.string.timer_set)
+        timerImageButton.tag = getString(R.string.tag_stop)
+        minTextView.visibility = View.VISIBLE
+    }
+
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun createTimerAlertDialog() {
         val builder = AlertDialog.Builder(this)
             .create()
         val view = layoutInflater.inflate(R.layout.timer_custom_alert_dialog, null)
         val setTimerButton = view.findViewById<Button>(R.id.setTimerButton)
-        val minuteEditText = view.findViewById<EditText>(R.id.minuteEditText)
+        val minuteEditTextDialog = view.findViewById<EditText>(R.id.minuteEditText)
         val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
         if (timerImageButton.tag == getString(R.string.tag_work)) {
-            setTimerButton.visibility = View.GONE
-            stopTimerButton.visibility = View.VISIBLE
-            minuteEditText.visibility = View.GONE
-            timerTextViewDialog.text = getString(R.string.timer_work)
-            minTextView.visibility = View.GONE
-
+            ifTagWork(stopTimerButton, timerTextViewDialog, minTextView)
         }
         stopTimerButton.setOnClickListener {
-            stopService(Intent(this, TimerService::class.java))
-            setTimerButton.visibility = View.VISIBLE
-            stopTimerButton.visibility = View.GONE
-            minuteEditText.visibility = View.VISIBLE
-            timerTextView.visibility = View.GONE
-            timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
-            timerTextViewDialog.text = getString(R.string.timer_set)
-            timerImageButton.tag = getString(R.string.tag_stop)
-            minTextView.visibility = View.VISIBLE
+            stopTimerEvents(stopTimerButton, timerTextViewDialog, minTextView)
         }
 
         builder.setView(view)
         setTimerButton.setOnClickListener {
-            val intent = Intent(this, TimerService::class.java)
-            intent.putExtra(
-                getString(R.string.serializable_extra_min),
-                minuteEditText.text.toString()
-            )
-            startService(intent)
+            startTimerService(minuteEditTextDialog)
             builder.dismiss()
         }
         builder.setCanceledOnTouchOutside(true)
         builder.show()
+    }
+
+    private fun startTimerService(minuteEditTextDialog:EditText) {
+        val intent = Intent(this, TimerService::class.java)
+        intent.putExtra(
+            getString(R.string.serializable_extra_min),
+            minuteEditTextDialog.text.toString()
+        )
+        startService(intent)
     }
 
     private fun createInsertAlertDialog() {
@@ -611,23 +633,31 @@ class MainActivity : AppCompatActivity() {
         val nameEditText = view.findViewById<EditText>(R.id.name_edit_text)
         val urlEditText = view.findViewById<EditText>(R.id.url_edit_text)
         saveButton.setOnClickListener {
-            val radioWave: RadioWave = RadioWave()
-            radioWave.name = nameEditText.text.toString()
-            radioWave.image = getString(R.string.default_logo_url)
-            radioWave.custom = true
-            radioWave.url = urlEditText.text.toString()
-            if (nameEditText.text.trim { it <= ' ' }
-                    .isEmpty() || urlEditText.text.trim { it <= ' ' }.isEmpty()) {
-                Toast.makeText(this, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.insert(radioWave)
-                fragmentSettingListener?.update()
-                builder.dismiss()
-            }
+            insertRadioWave(nameEditText, urlEditText, builder)
         }
         builder.setView(view)
         builder.setCanceledOnTouchOutside(true)
         builder.show()
+    }
+
+    private fun insertRadioWave(
+        nameEditText: EditText,
+        urlEditText: EditText,
+        builder: AlertDialog
+    ) {
+        val radioWave = RadioWave()
+        radioWave.name = nameEditText.text.toString()
+        radioWave.image = getString(R.string.default_logo_url)
+        radioWave.custom = true
+        radioWave.url = urlEditText.text.toString()
+        if (nameEditText.text.trim { it <= ' ' }
+                .isEmpty() || urlEditText.text.trim { it <= ' ' }.isEmpty()) {
+            Toast.makeText(this, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.insert(radioWave)
+            fragmentSettingListener?.update()
+            builder.dismiss()
+        }
     }
 
     fun setSettingListener(fragmentSettingListener: FragmentSettingListener) {

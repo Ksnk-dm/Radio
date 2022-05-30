@@ -8,30 +8,26 @@ import com.ksnk.radio.R
 
 
 class TimerService : Service() {
-    var intentFilter ="count_down"
-    var bi = Intent(intentFilter)
-    var cdt: CountDownTimer? = null
-    var minutes: String? = null
+   private var intentFilter ="count_down"
+   private var timerIntent = Intent(intentFilter)
+   private var countDownTimer: CountDownTimer? = null
+   private var minutes: String? = null
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 
-    override fun onCreate() {
-        super.onCreate()
-    }
-
     override fun onDestroy() {
-        cdt!!.cancel()
+        countDownTimer!!.cancel()
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         minutes = intent?.getStringExtra(getString(R.string.serializable_extra_min))
-        cdt = object : CountDownTimer(minutes?.toLong()!! * 60000L, 1000) {
+        countDownTimer = object : CountDownTimer(minutes?.toLong()!! * 60000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                bi.putExtra(getString(R.string.serializable_extra_long), millisUntilFinished)
-                sendBroadcast(bi)
+                timerIntent.putExtra(getString(R.string.serializable_extra_long), millisUntilFinished)
+                sendBroadcast(timerIntent)
             }
 
             override fun onFinish() {
@@ -39,7 +35,7 @@ class TimerService : Service() {
                 stopService(Intent(this@TimerService, TimerService::class.java))
             }
         }
-        (cdt as CountDownTimer).start()
+        (countDownTimer as CountDownTimer).start()
         return START_STICKY
     }
 }

@@ -56,14 +56,13 @@
 
             <ImageView
                 android:id="@+id/favImageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="41dp"
+                android:layout_height="36dp"
                 android:layout_above="@+id/favAnimationView"
                 android:layout_gravity="center"
-                android:layout_marginEnd="117dp"
-                android:layout_marginBottom="76dp"
+                android:layout_marginEnd="79dp"
+                android:layout_marginBottom="44dp"
                 android:layout_toStartOf="@+id/menuImageButton"
-                android:layout_weight="1"
                 android:visibility="invisible"
                 app:srcCompat="@drawable/ic_baseline_favorite_24"
                 tools:visibility="invisible" />
@@ -84,7 +83,8 @@
                 android:layout_marginLeft="5dp"
                 android:gravity="center"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -100,7 +100,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textColor="@color/white"
-                    android:textSize="16sp" />
+                    android:textSize="10sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 

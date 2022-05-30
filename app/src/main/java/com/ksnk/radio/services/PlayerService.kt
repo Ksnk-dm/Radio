@@ -43,6 +43,9 @@ class PlayerService() : Service(), Parcelable {
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
     private val mediaSessionTag = "MediaSessionManager"
+    private val openAction = "com.ksnk.radio.ACTION_OPEN"
+    private val playAction = "com.ksnk.radio.ACTION_PLAY"
+    private val pauseAction = "com.ksnk.radio.ACTION_PAUSE"
     private var trackTitle = ""
     var remoteViews: RemoteViews? = null
     var thisWidget: ComponentName? = null
@@ -64,17 +67,13 @@ class PlayerService() : Service(), Parcelable {
         super.onCreate()
         playerBinder = PlayerBinder()
         initPlayer()
-
         appWidgetManager = AppWidgetManager.getInstance(applicationContext)
-
         remoteViews = RemoteViews(applicationContext.packageName, R.layout.player_widget)
         thisWidget = ComponentName(applicationContext, PlayerWidget::class.java)
         remoteViews!!.setOnClickPendingIntent(
             R.id.widgetLinearLayout,
-            getPendingSelfIntent(applicationContext, "com.ksnk.radio.ACTION_OPEN")
+            getPendingSelfIntent(applicationContext, openAction)
         )
-
-
     }
 
     fun getPendingSelfIntent(context: Context?, action: String?): PendingIntent? {
@@ -88,18 +87,21 @@ class PlayerService() : Service(), Parcelable {
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action.equals("com.ksnk.radio.ACTION_PLAY")) {
-            mPlayer!!.play()
-        }
-        if (intent?.action.equals("com.ksnk.radio.ACTION_PAUSE")) {
-            mPlayer!!.pause()
-        }
-        if (intent?.action.equals("com.ksnk.radio.ACTION_OPEN")) {
-            startActivity()
-        }
+        actionEquals(intent)
         return super.onStartCommand(intent, flags, startId)
     }
 
+    private fun actionEquals(intent: Intent?) {
+        if (intent?.action.equals(playAction)) {
+            mPlayer!!.play()
+        }
+        if (intent?.action.equals(pauseAction)) {
+            mPlayer!!.pause()
+        }
+        if (intent?.action.equals(openAction)) {
+            startActivity()
+        }
+    }
 
     private fun initPlayer() {
         mPlayer = ExoPlayer.Builder(this)
@@ -201,7 +203,6 @@ class PlayerService() : Service(), Parcelable {
 
     private fun startActivity() {
         val i = Intent(this@PlayerService, MainActivity::class.java)
-        // i.putExtra(getString(R.string.get_serializable_extra), radioWave)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
         applicationContext.startActivity(i)
     }
@@ -279,7 +280,7 @@ class PlayerService() : Service(), Parcelable {
                 )
                 remoteViews!!.setOnClickPendingIntent(
                     R.id.playWidgetImageButton,
-                    getPendingSelfIntent(applicationContext, "com.ksnk.radio.ACTION_PAUSE")
+                    getPendingSelfIntent(applicationContext, pauseAction)
                 )
             } else {
                 remoteViews!!.setImageViewResource(
@@ -288,15 +289,11 @@ class PlayerService() : Service(), Parcelable {
                 )
                 remoteViews!!.setOnClickPendingIntent(
                     R.id.playWidgetImageButton,
-                    getPendingSelfIntent(applicationContext, "com.ksnk.radio.ACTION_PLAY")
+                    getPendingSelfIntent(applicationContext, playAction)
                 )
 
             }
-
             appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
-
         }
     }
-
-
 }
