@@ -391,7 +391,7 @@ class MainActivity : AppCompatActivity() {
         searchImageButton = findViewById(R.id.searchImageButton)
         titleTextViewPlayer = findViewById(R.id.titlePlayerTextView)
         trackInfoMiniPlayerTextView = findViewById(R.id.track_info_textView)
-        trackInfoMiniPlayerTextView.isSelected=true
+        trackInfoMiniPlayerTextView.isSelected = true
     }
 
 
@@ -456,11 +456,13 @@ class MainActivity : AppCompatActivity() {
             val id = preferencesHelper.getIdPlayMedia()
             val url: String?
             try {
-                url = viewModel.getRadioWaveForId(id).url
-                val mediaItem: MediaItem =
-                    MediaItem.fromUri(url!!)
-                mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
-                mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+                if (mExoPlayer!!.currentMediaItem == null) {
+                    url = viewModel.getRadioWaveForId(id).url
+                    val mediaItem: MediaItem =
+                        MediaItem.fromUri(url!!)
+                    mPlayerService?.getPlayer()?.setMediaItem(mediaItem)
+                    mPlayerService?.setRadioWave(viewModel.getRadioWaveForId(id))
+                }
             } catch (e: NullPointerException) {
                 e.stackTrace
             }
