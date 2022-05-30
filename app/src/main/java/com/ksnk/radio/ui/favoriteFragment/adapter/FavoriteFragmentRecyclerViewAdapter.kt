@@ -10,7 +10,6 @@ import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.enums.DisplayListType
 import com.ksnk.radio.services.PlayerService
-import com.ksnk.radio.ui.listFragment.adapter.WaveViewHolder
 import com.squareup.picasso.Picasso
 
 class FavoriteFragmentRecyclerViewAdapter(

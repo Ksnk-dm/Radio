@@ -6,21 +6,19 @@ import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.app.Service
 import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.content.Intent
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.icu.number.NumberFormatter.with
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
 import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaMetadata
@@ -29,10 +27,10 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
-import com.ksnk.radio.PlayerWidget
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
 import com.ksnk.radio.ui.main.MainActivity
+import com.ksnk.radio.widget.PlayerWidget
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom
 
@@ -45,6 +43,9 @@ class PlayerService() : Service(), Parcelable {
     private var radioWave: RadioWave? = null
     private var bitMapPoster: Bitmap? = null
     private val mediaSessionTag = "MediaSessionManager"
+    private val openAction = "com.ksnk.radio.ACTION_OPEN"
+    private val playAction = "com.ksnk.radio.ACTION_PLAY"
+    private val pauseAction = "com.ksnk.radio.ACTION_PAUSE"
     private var trackTitle = ""
     var remoteViews: RemoteViews? = null
     var thisWidget: ComponentName? = null
@@ -69,11 +70,42 @@ class PlayerService() : Service(), Parcelable {
         appWidgetManager = AppWidgetManager.getInstance(applicationContext)
         remoteViews = RemoteViews(applicationContext.packageName, R.layout.player_widget)
         thisWidget = ComponentName(applicationContext, PlayerWidget::class.java)
+        remoteViews!!.setOnClickPendingIntent(
+            R.id.widgetLinearLayout,
+            getPendingSelfIntent(applicationContext, openAction)
+        )
+    }
 
+    fun getPendingSelfIntent(context: Context?, action: String?): PendingIntent? {
+        val intent = Intent(context, javaClass)
+        intent.action = action
+        return PendingIntent.getService(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        actionEquals(intent)
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun actionEquals(intent: Intent?) {
+        if (intent?.action.equals(playAction)) {
+            mPlayer!!.play()
+        }
+        if (intent?.action.equals(pauseAction)) {
+            mPlayer!!.pause()
+        }
+        if (intent?.action.equals(openAction)) {
+            startActivity()
+        }
     }
 
     private fun initPlayer() {
-        mPlayer = ExoPlayer.Builder(this).setUseLazyPreparation(false)
+        mPlayer = ExoPlayer.Builder(this)
+            .setUseLazyPreparation(false)
             .setHandleAudioBecomingNoisy(true)
             .setPauseAtEndOfMediaItems(false).build()
         mPlayer!!.addListener(playerListener)
@@ -81,7 +113,6 @@ class PlayerService() : Service(), Parcelable {
 
     override fun onDestroy() {
         mPlayer?.release()
-        //  clearSharedPrefsVar()
     }
 
     fun getPlayer(): ExoPlayer? {
@@ -107,12 +138,8 @@ class PlayerService() : Service(), Parcelable {
                 }
 
                 override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                    val i = Intent(this@PlayerService, MainActivity::class.java)
-                    i.putExtra(getString(R.string.get_serializable_extra), radioWave)
-                    return PendingIntent.getActivity(
-                        this@PlayerService, 0, i,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
+                    return startPendingActivity()
+
                 }
 
                 override fun getCurrentContentText(player: Player): CharSequence? {
@@ -174,6 +201,21 @@ class PlayerService() : Service(), Parcelable {
         sessionConnector.setPlayer(mPlayer)
     }
 
+    private fun startActivity() {
+        val i = Intent(this@PlayerService, MainActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+        applicationContext.startActivity(i)
+    }
+
+    private fun startPendingActivity(): PendingIntent {
+        val i = Intent(this@PlayerService, MainActivity::class.java)
+        i.putExtra(getString(R.string.get_serializable_extra), radioWave)
+        return PendingIntent.getActivity(
+            this@PlayerService, 0, i,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     fun setRadioWave(radioWave: RadioWave) {
         this.radioWave = radioWave
         val i = Intent(getString(R.string.intent_filter_notification))
@@ -210,7 +252,6 @@ class PlayerService() : Service(), Parcelable {
             stationName = mediaMetadata.station.toString()
             remoteViews!!.setTextViewText(R.id.trackWidgetTextView, trackTitle)
             remoteViews!!.setTextViewText(R.id.nameWidgetTextView, stationName)
-
             Picasso.get()
                 .load(radioWave?.image)
                 .into(object : com.squareup.picasso.Target {
@@ -228,6 +269,7 @@ class PlayerService() : Service(), Parcelable {
 
                 })
             appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -236,11 +278,20 @@ class PlayerService() : Service(), Parcelable {
                     R.id.playWidgetImageButton,
                     R.drawable.ic_baseline_pause_24
                 )
+                remoteViews!!.setOnClickPendingIntent(
+                    R.id.playWidgetImageButton,
+                    getPendingSelfIntent(applicationContext, pauseAction)
+                )
             } else {
                 remoteViews!!.setImageViewResource(
                     R.id.playWidgetImageButton,
                     R.drawable.ic_baseline_play_arrow_24
                 )
+                remoteViews!!.setOnClickPendingIntent(
+                    R.id.playWidgetImageButton,
+                    getPendingSelfIntent(applicationContext, playAction)
+                )
+
             }
             appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
         }

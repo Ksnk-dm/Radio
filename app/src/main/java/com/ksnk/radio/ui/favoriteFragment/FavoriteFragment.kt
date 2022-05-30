@@ -34,8 +34,10 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
     private lateinit var displayListType: DisplayListType
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
+
     @Inject
     lateinit var preferencesHelper: PreferenceHelper
+
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
@@ -50,7 +52,6 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
         super.onAttach(context)
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,10 +60,14 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
         return inflater.inflate(R.layout.favorite_fragment, container, false);
     }
 
+    private fun init(view: View) {
+        mRecyclerView = view.findViewById(R.id.favoriteRecyclerView)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
-        mRecyclerView = view.findViewById(R.id.favoriteRecyclerView)
+        init(view)
         displayListType = preferencesHelper.getDisplayListType()
         mGridLayoutManager = when (displayListType) {
             DisplayListType.List -> {
@@ -81,22 +86,29 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
         requireActivity().startService(intent)
     }
 
-    companion object fun newInstance(): FavoriteFragment {
+    companion object
+
+    fun newInstance(): FavoriteFragment {
         return FavoriteFragment()
+    }
+
+    private fun initRecycler() {
+        mAdapter = ListFragmentRecyclerViewAdapter(
+            items,
+            activity?.applicationContext,
+            mExoPlayer!!,
+            mPlayerService!!,
+            this@FavoriteFragment
+        )
+        mRecyclerView.adapter = mAdapter
+        mAdapter.setDisplayListType(displayListType)
     }
 
     private var myConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             mPlayerService = (binder as PlayerService.PlayerBinder).getService()
             mExoPlayer = mPlayerService?.getPlayer()
-            mAdapter = ListFragmentRecyclerViewAdapter(
-                items,
-                activity?.applicationContext,
-                mExoPlayer!!,
-                mPlayerService!!,
-            this@FavoriteFragment)
-            mRecyclerView.adapter = mAdapter
-            mAdapter.setDisplayListType(displayListType)
+            initRecycler()
             mPlayerService?.initNotification()
         }
 

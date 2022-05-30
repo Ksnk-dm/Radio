@@ -63,5 +63,4 @@ class MainViewModel
     fun getPopularDesc(): List<RadioWave> {
         return radioWaveRepository.getPopularSortDesc()
     }
-
 }
