@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_baseline_favorite_24"
         android:title="@string/fav_menu_item" />
     <item
+        android:id="@+id/historyFragmentItem"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:title="История" />
+    <item
         android:id="@+id/settingFragmentItem"
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/set_menu_item" />

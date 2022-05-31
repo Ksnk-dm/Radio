@@ -9,7 +9,7 @@ import com.ksnk.radio.R
 
 class FavoriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var imageViewWave: ImageView? = itemView.findViewById(R.id.imageViewWave)
-    var nameTextView: TextView? = itemView.findViewById(R.id.textViewName)
-    var frequencyTextView: TextView? = itemView.findViewById(R.id.textViewFrequency)
+    var nameTextView: TextView? = itemView.findViewById(R.id.textViewTrackName)
+    var frequencyTextView: TextView? = itemView.findViewById(R.id.historyDateTextView)
     var lottieAnimationView: LottieAnimationView? =itemView.findViewById(R.id.favAnimationView)
 }

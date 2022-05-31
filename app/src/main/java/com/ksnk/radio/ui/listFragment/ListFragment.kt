@@ -3,6 +3,7 @@ package com.ksnk.radio.ui.listFragment
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,6 +80,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         initListeners()
         loadPrefsAndUpdateRadioButton()
         initRecycler()
+        Log.d("trackkkkk", viewModel.getAllTracks().toString())
     }
 
     override fun onCreateView(
@@ -141,7 +143,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             updateRecyclerView(defaultListItem)
         } else {
             preferencesHelper.setSwitchEnabled(false)
-            defaultListItem = viewModel.getAll()
+            defaultListItem = viewModel.getAllRadioWaves()
             updateRecyclerView(defaultListItem)
         }
     }
@@ -190,7 +192,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
         if (defaultRadioButtonStatus) {
             sortNameRadioGroup.check(R.id.radioButtonDefault)
-            items = viewModel.getAll().toMutableList()
+            items = viewModel.getAllRadioWaves().toMutableList()
         }
     }
 
@@ -314,7 +316,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     }
 
     private fun delButtonEvent(radioWave: RadioWave, builder: AlertDialog) {
-        viewModel.delete(radioWave)
+        viewModel.deleteRadioWave(radioWave)
         builder.dismiss()
         initAdapter()
     }

@@ -32,7 +32,6 @@ class App : DaggerApplication(), HasActivityInjector,
     override fun onCreate() {
         super.onCreate()
         instance = this
-
     }
 
 

@@ -1,6 +1,7 @@
 package com.ksnk.radio.di.modules
 
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
+import com.ksnk.radio.ui.historyFragment.HistoryFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.settingFragment.SettingFragment
 import dagger.Module
@@ -16,4 +17,7 @@ abstract class FragmentBuildersModule {
 
     @ContributesAndroidInjector
     abstract fun favoriteFragment(): FavoriteFragment?
+
+    @ContributesAndroidInjector
+    abstract fun historyFragment():HistoryFragment?
 }

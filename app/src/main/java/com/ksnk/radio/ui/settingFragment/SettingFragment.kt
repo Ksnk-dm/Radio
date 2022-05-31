@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.airbnb.lottie.LottieAnimationView
@@ -30,6 +31,7 @@ class SettingFragment : Fragment() {
     @Inject
     lateinit var preferencesHelper: PreferenceHelper
     private lateinit var updateLottieAnimView: LottieAnimationView
+    private lateinit var trashLottieAnimationView: LottieAnimationView
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
@@ -49,6 +51,7 @@ class SettingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         updateLottieAnimView = view.findViewById(R.id.lottieAnimUpdateDb)
         displayTypeRadioGroup = view.findViewById(R.id.displayTypeRadioGroup)
+        trashLottieAnimationView = view.findViewById(R.id.lottieAnimTrash)
         val displayListType = preferencesHelper.getDisplayListType()
         if (displayListType == DisplayListType.List) {
             displayTypeRadioGroup.check(R.id.listRadioButton)
@@ -71,6 +74,12 @@ class SettingFragment : Fragment() {
         updateLottieAnimView.setOnClickListener {
             updateLottieAnimView.playAnimation()
             (activity as MainActivity?)?.updateDb()
+        }
+
+        trashLottieAnimationView.setOnClickListener {
+            trashLottieAnimationView.playAnimation()
+            viewModel.deleteAllHistory()
+            Toast.makeText(context, "История очищена", Toast.LENGTH_SHORT).show()
         }
     }
 

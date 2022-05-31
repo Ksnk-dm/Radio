@@ -37,9 +37,10 @@
     <string name="list_rb">Список</string>
     <string name="grid_rb">Сетка</string>
     <string name="view_tv">Отображение</string>
-    <string name="list_menu_item">Список станций</string>
+    <string name="list_menu_item">Станции</string>
     <string name="fav_menu_item">Избранное</string>
     <string name="set_menu_item">Настройки</string>
+    <string name="history_menu_item">История</string>
     <string name="set_title">Основные</string>
     <string name="minute_title">мин</string>
     <string name="timer_work">Таймер запущен</string>
