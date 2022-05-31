@@ -2,26 +2,43 @@ package com.ksnk.radio.ui.main
 
 import com.ksnk.radio.base.BaseViewModel
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.data.entity.Track
 import com.ksnk.radio.data.repository.RadioWaveRepository
+import com.ksnk.radio.data.repository.TrackRepository
 import javax.inject.Inject
 
 class MainViewModel
-@Inject constructor(var radioWaveRepository: RadioWaveRepository) : BaseViewModel() {
+@Inject constructor(
+    var radioWaveRepository: RadioWaveRepository,
+    var trackRepository: TrackRepository
+) : BaseViewModel() {
 
-    fun insert(radioWave: RadioWave) {
+    fun insertRadioWave(radioWave: RadioWave) {
         radioWaveRepository.insertRadioWave(radioWave)
     }
 
-    fun delete(radioWave: RadioWave) {
+    fun insertTrack(track: Track) {
+        trackRepository.insertTrack(track)
+    }
+
+    fun deleteRadioWave(radioWave: RadioWave) {
         radioWaveRepository.deleteRadioWave(radioWave)
+    }
+
+    fun deleteTrack(track: Track) {
+        trackRepository.deleteTrack(track)
     }
 
     fun createListRadioWave(listRadioWave: List<RadioWave>) {
         radioWaveRepository.insertListRadioWave(listRadioWave)
     }
 
-    fun getAll(): List<RadioWave> {
+    fun getAllRadioWaves(): List<RadioWave> {
         return radioWaveRepository.getAllRadioWave()
+    }
+
+    fun getAllTracks(): List<Track> {
+        return trackRepository.getAllTrack()
     }
 
     fun updateRadioWave(radioWave: RadioWave) {
@@ -62,5 +79,9 @@ class MainViewModel
 
     fun getPopularDesc(): List<RadioWave> {
         return radioWaveRepository.getPopularSortDesc()
+    }
+
+    fun deleteAllHistory(){
+        return trackRepository.deleteAll()
     }
 }

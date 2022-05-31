@@ -1,6 +1,7 @@
 package com.ksnk.radio.services
 
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
@@ -29,10 +30,15 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager.BitmapCallback
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.data.entity.Track
+import com.ksnk.radio.data.repository.TrackRepository
 import com.ksnk.radio.ui.main.MainActivity
 import com.ksnk.radio.widget.PlayerWidget
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.inject.Inject
 
 
 class PlayerService() : Service(), Parcelable {
@@ -47,10 +53,13 @@ class PlayerService() : Service(), Parcelable {
     private val playAction = "com.ksnk.radio.ACTION_PLAY"
     private val pauseAction = "com.ksnk.radio.ACTION_PAUSE"
     private var trackTitle = ""
-    var remoteViews: RemoteViews? = null
-    var thisWidget: ComponentName? = null
-    var appWidgetManager: AppWidgetManager? = null
+    private var remoteViews: RemoteViews? = null
+    private var thisWidget: ComponentName? = null
+    private var appWidgetManager: AppWidgetManager? = null
     private var stationName = ""
+
+    @set:Inject
+    internal var trackRepository: TrackRepository? =null
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -203,7 +212,7 @@ class PlayerService() : Service(), Parcelable {
 
     private fun startActivity() {
         val i = Intent(this@PlayerService, MainActivity::class.java)
-        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK;
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         applicationContext.startActivity(i)
     }
 
@@ -246,30 +255,54 @@ class PlayerService() : Service(), Parcelable {
         }
     }
 
+    private fun loadPoster() {
+        Picasso.get()
+            .load(radioWave?.image)
+            .into(object : com.squareup.picasso.Target {
+                override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
+                    remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+                }
+
+                override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
+
+                }
+
+                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+
+                }
+
+            })
+    }
+
     private var playerListener = object : Player.Listener {
+        @SuppressLint("SimpleDateFormat")
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-            trackTitle = mediaMetadata.title.toString()
-            stationName = mediaMetadata.station.toString()
-            remoteViews!!.setTextViewText(R.id.trackWidgetTextView, trackTitle)
-            remoteViews!!.setTextViewText(R.id.nameWidgetTextView, stationName)
-            Picasso.get()
-                .load(radioWave?.image)
-                .into(object : com.squareup.picasso.Target {
-                    override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
-                        remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+            if (mediaMetadata.title != null) {
+                trackTitle = mediaMetadata.title.toString()
+                stationName = mediaMetadata.station.toString()
+                remoteViews!!.setTextViewText(R.id.trackWidgetTextView, trackTitle)
+                remoteViews!!.setTextViewText(R.id.nameWidgetTextView, stationName)
+                loadPoster()
+                appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
+                if (!mediaMetadata.title.isNullOrEmpty()) {
+                    if (mediaMetadata.title.toString().contains("-") and
+                        !mediaMetadata.title.toString()
+                            .contains(mediaMetadata.station.toString()) and
+                        !mediaMetadata.title.toString().contains("UNKNOWN") and
+                        !mediaMetadata.title.toString().contains("RADIO") and
+                        !mediaMetadata.title.toString().contains("=›") and
+                        !mediaMetadata.title.toString().contains(".UA")
+                    ) {
+                        val track = Track()
+                        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                        val currentDate = sdf.format(Date())
+                        track.name = mediaMetadata.title.toString()
+                        track.date = currentDate
+                        track.station=mediaMetadata.station.toString()
+                        trackRepository?.insertTrack(track)
                     }
-
-                    override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
-
-                    }
-
-                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-
-                    }
-
-                })
-            appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
-
+                }
+            }
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {

@@ -7,17 +7,19 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ksnk.radio.data.dao.RadioWaveDao
+import com.ksnk.radio.data.dao.TrackDao
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.data.entity.Track
 
 @Database(
     version = 1,
     exportSchema = false,
-    entities = [(RadioWave::class)]
+    entities = [(RadioWave::class), (Track::class)]
 )
 
-abstract class AppDataBase: RoomDatabase() {
+abstract class AppDataBase : RoomDatabase() {
     abstract fun getRadioWaveDao(): RadioWaveDao?
-
+    abstract fun getTrackDao(): TrackDao?
 
     companion object {
         @Volatile

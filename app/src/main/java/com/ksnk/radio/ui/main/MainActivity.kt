@@ -7,6 +7,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -34,16 +35,20 @@ import com.google.firebase.database.*
 import com.google.firebase.database.annotations.NotNull
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.RadioWave
+import com.ksnk.radio.data.entity.Track
 import com.ksnk.radio.helper.PreferenceHelper
 import com.ksnk.radio.listeners.FragmentSettingListener
 import com.ksnk.radio.services.PlayerService
 import com.ksnk.radio.services.TimerService
 import com.ksnk.radio.ui.favoriteFragment.FavoriteFragment
+import com.ksnk.radio.ui.historyFragment.HistoryFragment
 import com.ksnk.radio.ui.listFragment.ListFragment
 import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -83,6 +88,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    var listMedia: MutableList<String> = mutableListOf()
 
     @Inject
     lateinit var viewModel: MainViewModel
@@ -239,8 +245,10 @@ class MainActivity : AppCompatActivity() {
     private fun checkStatusSearchViewVisible() {
         if (searchView.visibility == View.VISIBLE) {
             searchView.visibility = View.GONE
+            titleToolTextView.visibility = View.VISIBLE
         } else {
             searchView.visibility = View.VISIBLE
+            titleToolTextView.visibility = View.GONE
         }
     }
 
@@ -282,6 +290,15 @@ class MainActivity : AppCompatActivity() {
         titleToolTextView.text = getString(R.string.set_menu_item)
     }
 
+    private fun createHistoryFragment() {
+        fragment = HistoryFragment().newInstance()
+        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragmentContainerView, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+        titleToolTextView.text = getString(R.string.history_menu_item)
+    }
+
     private fun createFavFragment() {
         fragment = FavoriteFragment().newInstance()
         val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
@@ -301,6 +318,9 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.settingFragmentItem -> {
                 createSettingFragment()
+            }
+            R.id.historyFragmentItem -> {
+                createHistoryFragment()
             }
         }
         return@OnItemSelectedListener true
@@ -470,6 +490,7 @@ class MainActivity : AppCompatActivity() {
             mPlayerService?.getRadioWave()?.id?.let { preferencesHelper.setIdPlayMedia(it) }
             setMediaItem()
             isPlayingMedia(mExoPlayer!!.isPlaying)
+            setTrackInfo()
             mPlayerService?.getPlayer()?.addListener(playerListener)
         }
 
@@ -479,14 +500,51 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setTrackInfo() {
+        if (mPlayerService?.getPlayer()?.mediaMetadata?.title != null) {
+            trackInfoMiniPlayerTextView.text =
+                mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
+            titleTextViewPlayer.text = mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
+        }
+    }
+
     private var playerListener = object : Player.Listener {
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-            titleTextViewPlayer.text = mediaMetadata.title.toString()
-            trackInfoMiniPlayerTextView.text = mediaMetadata.title.toString()
+            if (mediaMetadata.title != null) {
+                titleTextViewPlayer.text = mediaMetadata.title.toString()
+                trackInfoMiniPlayerTextView.text = mediaMetadata.title.toString()
+                mediaMetadataCheckEmptyAndContains(mediaMetadata)
+            }
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             isPlayingMedia(isPlaying)
+        }
+
+        private fun mediaMetadataCheckEmptyAndContains(mediaMetadata: MediaMetadata) {
+            if (!mediaMetadata.title.isNullOrEmpty()) {
+                if (mediaMetadata.title.toString().contains("-") and
+                    !mediaMetadata.title.toString()
+                        .contains(mediaMetadata.station.toString()) and
+                    !mediaMetadata.title.toString().contains("UNKNOWN") and
+                    !mediaMetadata.title.toString().contains("RADIO") and
+                    !mediaMetadata.title.toString().contains("=›") and
+                    !mediaMetadata.title.toString().contains(".UA")
+                ) {
+                    insertTrack(mediaMetadata)
+                }
+            }
+        }
+
+        @SuppressLint("SimpleDateFormat")
+        private fun insertTrack(mediaMetadata: MediaMetadata) {
+            val track = Track()
+            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+            val currentDate = sdf.format(Date())
+            track.name = mediaMetadata.title.toString()
+            track.date = currentDate
+            track.station = mediaMetadata.station.toString()
+            viewModel.insertTrack(track)
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -616,7 +674,7 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun startTimerService(minuteEditTextDialog:EditText) {
+    private fun startTimerService(minuteEditTextDialog: EditText) {
         val intent = Intent(this, TimerService::class.java)
         intent.putExtra(
             getString(R.string.serializable_extra_min),
@@ -654,7 +712,7 @@ class MainActivity : AppCompatActivity() {
                 .isEmpty() || urlEditText.text.trim { it <= ' ' }.isEmpty()) {
             Toast.makeText(this, getText(R.string.empty_edit_text), Toast.LENGTH_SHORT).show()
         } else {
-            viewModel.insert(radioWave)
+            viewModel.insertRadioWave(radioWave)
             fragmentSettingListener?.update()
             builder.dismiss()
         }

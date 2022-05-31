@@ -68,6 +68,10 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
         super.onViewCreated(view, savedInstanceState)
         startPlayerService()
         init(view)
+        setDisplayListType()
+    }
+
+    private fun setDisplayListType() {
         displayListType = preferencesHelper.getDisplayListType()
         mGridLayoutManager = when (displayListType) {
             DisplayListType.List -> {
