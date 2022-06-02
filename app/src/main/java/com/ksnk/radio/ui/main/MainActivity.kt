@@ -48,6 +48,7 @@ import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
 import okhttp3.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -532,30 +533,43 @@ class MainActivity : AppCompatActivity() {
                     !mediaMetadata.title.toString().contains("UNKNOWN") and
                     !mediaMetadata.title.toString().contains("RADIO") and
                     !mediaMetadata.title.toString().contains("=›") and
-                    !mediaMetadata.title.toString().contains(".UA")
+                    !mediaMetadata.title.toString().contains(".UA") and
+                    !mediaMetadata.title.toString().contains("www")
                 ) {
                     insertTrack(mediaMetadata)
-                    okhttp()
+
                 }
             }
         }
 
-        private fun okhttp() {
-            val URL = "https://www.theaudiodb.com/api/v1/json/2/search.php?s=%D0%B1%D1%83%D0%BC%D0%B1%D0%BE%D0%BA%D1%81"
+        private fun okhttp(trackString: String, track: Track) {
+            val URL =
+                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=$trackString"
             var okHttpClient: OkHttpClient = OkHttpClient()
             val request: Request = Request.Builder().url(URL).build()
             okHttpClient.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call?, e: IOException?) {
+                override fun onFailure(call: Call, e: IOException) {
                     Log.d("tracckkkjsonerr", e.toString())
 
 
                 }
 
-                override fun onResponse(call: Call?, response: Response?) {
+                override fun onResponse(call: Call, response: Response) {
+
+
+
                     Log.d("tracckkkjson", response?.toString().toString())
                     val json = JSONObject(response?.body()?.string())
-                    val req = json.getJSONArray("artists")
-                    Log.i("tracckkkjson", "Res: " + req.getString(0))
+                    var req: JSONArray? =null
+                    try {
+                        req = json.getJSONArray("artists")
+                        track.image=req?.getJSONObject(0)?.getString("strArtistFanart")
+                        Log.i(
+                            "tracckkkjson",
+                            "Res: " + req?.getJSONObject(0)?.getString("strArtistFanart"))
+                    } catch (e:java.lang.Exception){
+
+                    }
 
 
                 }
@@ -568,6 +582,14 @@ class MainActivity : AppCompatActivity() {
             val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
             val currentDate = sdf.format(Date())
             track.name = mediaMetadata.title.toString()
+            var artist = mediaMetadata.title.toString().split("-")
+            Log.d("artttiii", artist[0])
+            try {
+                okhttp(artist[0], track)
+            } catch (e:java.lang.Exception){
+
+            }
+
             track.date = currentDate
             track.station = mediaMetadata.station.toString()
             viewModel.insertTrack(track)

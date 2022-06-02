@@ -9,10 +9,11 @@ class Track(
     @PrimaryKey(autoGenerate = true)
     var id: Int?,
     var name: String?,
-    var station:String?,
-    var date:String?
+    var station: String?,
+    var date: String?,
+    var image: String?
 ) {
-    constructor() : this(null, null, null, null)
+    constructor() : this(null, null, null, null, null)
 
     override fun toString(): String {
         return "Track(id=$id, name=$name, station=$station, date=$date)"
