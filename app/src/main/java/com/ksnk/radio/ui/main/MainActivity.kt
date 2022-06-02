@@ -14,11 +14,11 @@ import android.widget.*
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
@@ -47,6 +47,9 @@ import com.ksnk.radio.ui.settingFragment.SettingFragment
 import com.squareup.picasso.Picasso
 import dagger.android.AndroidInjection
 import de.hdodenhof.circleimageview.CircleImageView
+import okhttp3.*
+import org.json.JSONObject
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -532,8 +535,31 @@ class MainActivity : AppCompatActivity() {
                     !mediaMetadata.title.toString().contains(".UA")
                 ) {
                     insertTrack(mediaMetadata)
+                    okhttp()
                 }
             }
+        }
+
+        private fun okhttp() {
+            val URL = "https://www.theaudiodb.com/api/v1/json/2/search.php?s=%D0%B1%D1%83%D0%BC%D0%B1%D0%BE%D0%BA%D1%81"
+            var okHttpClient: OkHttpClient = OkHttpClient()
+            val request: Request = Request.Builder().url(URL).build()
+            okHttpClient.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call?, e: IOException?) {
+                    Log.d("tracckkkjsonerr", e.toString())
+
+
+                }
+
+                override fun onResponse(call: Call?, response: Response?) {
+                    Log.d("tracckkkjson", response?.toString().toString())
+                    val json = JSONObject(response?.body()?.string())
+                    val req = json.getJSONArray("artists")
+                    Log.i("tracckkkjson", "Res: " + req.getString(0))
+
+
+                }
+            })
         }
 
         @SuppressLint("SimpleDateFormat")
