@@ -19,6 +19,7 @@
             android:layout_height="65dp">
 
             <ImageView
+                android:id="@+id/trackImageView"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
                 android:src="@drawable/music"

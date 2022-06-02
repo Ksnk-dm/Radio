@@ -87,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var addImageButton: ImageButton
     private lateinit var titleTextViewPlayer: TextView
     private lateinit var trackInfoMiniPlayerTextView: TextView
+    private var artistPoster = ""
 
     private var fragmentSettingListener: FragmentSettingListener? = null
 
@@ -542,9 +543,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        private fun okhttp(trackString: String, track: Track) {
+        private fun okhttp(mediaMetadata: MediaMetadata) {
+            var artist = mediaMetadata.title.toString().split("-")
             val URL =
-                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=$trackString"
+                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=$artist"
             var okHttpClient: OkHttpClient = OkHttpClient()
             val request: Request = Request.Builder().url(URL).build()
             okHttpClient.newCall(request).enqueue(object : Callback {
@@ -555,19 +557,26 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-
-
-
                     Log.d("tracckkkjson", response?.toString().toString())
                     val json = JSONObject(response?.body()?.string())
-                    var req: JSONArray? =null
+                    var req: JSONArray? = null
                     try {
                         req = json.getJSONArray("artists")
-                        track.image=req?.getJSONObject(0)?.getString("strArtistFanart")
-                        Log.i(
-                            "tracckkkjson",
-                            "Res: " + req?.getJSONObject(0)?.getString("strArtistFanart"))
-                    } catch (e:java.lang.Exception){
+                        artistPoster =
+                            req?.getJSONObject(0)?.getString("strArtistFanart").toString()
+                        val track = Track()
+                        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                        val currentDate = sdf.format(Date())
+                        track.name = mediaMetadata.title.toString()
+                        var artist = mediaMetadata.title.toString().split("-")
+                        Log.d("artttiii", artist[0])
+                        track.date = currentDate
+                        track.image = artistPoster.toString()
+                        track.station = mediaMetadata.station.toString()
+                        viewModel.insertTrack(track)
+
+
+                    } catch (e: java.lang.Exception) {
 
                     }
 
@@ -578,21 +587,22 @@ class MainActivity : AppCompatActivity() {
 
         @SuppressLint("SimpleDateFormat")
         private fun insertTrack(mediaMetadata: MediaMetadata) {
-            val track = Track()
-            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-            val currentDate = sdf.format(Date())
-            track.name = mediaMetadata.title.toString()
-            var artist = mediaMetadata.title.toString().split("-")
-            Log.d("artttiii", artist[0])
+//            val track = Track()
+//            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+//            val currentDate = sdf.format(Date())
+//            track.name = mediaMetadata.title.toString()
+//            var artist = mediaMetadata.title.toString().split("-")
+//            Log.d("artttiii", artist[0])
             try {
-                okhttp(artist[0], track)
-            } catch (e:java.lang.Exception){
+                okhttp(mediaMetadata)
+            } catch (e: java.lang.Exception) {
 
             }
-
-            track.date = currentDate
-            track.station = mediaMetadata.station.toString()
-            viewModel.insertTrack(track)
+//
+//            track.date = currentDate
+//            track.image= artistPoster.toString()
+//            track.station = mediaMetadata.station.toString()
+//            viewModel.insertTrack(track)
         }
 
         override fun onPlayerError(error: PlaybackException) {
