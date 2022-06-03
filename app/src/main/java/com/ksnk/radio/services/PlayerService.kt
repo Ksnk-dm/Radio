@@ -16,7 +16,6 @@ import android.os.IBinder
 import android.os.Parcel
 import android.os.Parcelable
 import android.support.v4.media.session.MediaSessionCompat
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
@@ -36,6 +35,10 @@ import com.ksnk.radio.ui.main.MainActivity
 import com.ksnk.radio.widget.PlayerWidget
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom
+import okhttp3.*
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -57,9 +60,10 @@ class PlayerService() : Service(), Parcelable {
     private var thisWidget: ComponentName? = null
     private var appWidgetManager: AppWidgetManager? = null
     private var stationName = ""
+    private var artistPoster = ""
 
     @set:Inject
-    internal var trackRepository: TrackRepository? =null
+    internal var trackRepository: TrackRepository? = null
 
     constructor(parcel: Parcel) : this() {
         playerBinder = parcel.readStrongBinder()
@@ -291,18 +295,65 @@ class PlayerService() : Service(), Parcelable {
                         !mediaMetadata.title.toString().contains("UNKNOWN") and
                         !mediaMetadata.title.toString().contains("RADIO") and
                         !mediaMetadata.title.toString().contains("=›") and
-                        !mediaMetadata.title.toString().contains(".UA")
+                        !mediaMetadata.title.toString().contains(".UA") and
+                        !mediaMetadata.title.toString().contains("www")
                     ) {
-                        val track = Track()
-                        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                        val currentDate = sdf.format(Date())
-                        track.name = mediaMetadata.title.toString()
-                        track.date = currentDate
-                        track.station=mediaMetadata.station.toString()
-                        trackRepository?.insertTrack(track)
+                        posterRequestOkhttp(mediaMetadata)
                     }
                 }
             }
+        }
+
+        @SuppressLint("SimpleDateFormat")
+        private fun insertTrackAndSetDefaultPoster(mediaMetadata: MediaMetadata) {
+            artistPoster =
+                "https://i.ibb.co/G3yqPVB/generalimage.jpg"
+            val track = Track()
+            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+            val currentDate = sdf.format(Date())
+            track.name = mediaMetadata.title.toString()
+            track.date = currentDate
+            track.image = artistPoster.toString()
+            track.station = mediaMetadata.station.toString()
+            trackRepository?.insertTrack(track)
+        }
+
+        @SuppressLint("SimpleDateFormat")
+        private fun insertTrackAndLoadPoster(mediaMetadata: MediaMetadata, jsonArray: JSONArray) {
+            val track = Track()
+            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+            val currentDate = sdf.format(Date())
+            track.name = mediaMetadata.title.toString()
+            artistPoster =
+                jsonArray.getJSONObject(0)?.getString("strArtistFanart").toString()
+            track.date = currentDate
+            track.image = artistPoster.toString()
+            track.station = mediaMetadata.station.toString()
+            trackRepository?.insertTrack(track)
+        }
+
+        private fun posterRequestOkhttp(mediaMetadata: MediaMetadata) {
+            val artist = mediaMetadata.title.toString().split("-")
+            val url =
+                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=${artist[0]}"
+            val okHttpClient: OkHttpClient = OkHttpClient()
+            val request: Request = Request.Builder().url(url).build()
+            okHttpClient.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                }
+
+                @SuppressLint("SimpleDateFormat")
+                override fun onResponse(call: Call, response: Response) {
+                    val json = response.body()?.string()?.let { JSONObject(it) }
+                    val jsonArray: JSONArray
+                    try {
+                        jsonArray = json!!.getJSONArray("artists")
+                        insertTrackAndLoadPoster(mediaMetadata, jsonArray)
+                    } catch (e: java.lang.Exception) {
+                        insertTrackAndSetDefaultPoster(mediaMetadata)
+                    }
+                }
+            })
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -324,7 +375,6 @@ class PlayerService() : Service(), Parcelable {
                     R.id.playWidgetImageButton,
                     getPendingSelfIntent(applicationContext, playAction)
                 )
-
             }
             appWidgetManager!!.updateAppWidget(thisWidget, remoteViews)
         }

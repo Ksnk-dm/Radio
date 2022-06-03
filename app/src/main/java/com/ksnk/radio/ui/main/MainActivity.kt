@@ -7,7 +7,6 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -105,8 +104,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fragment: Fragment
     private var firstStartStatus: Boolean = true
 
-    private lateinit var setTimerButton: Button
-    private lateinit var minuteEditText: EditText
+//    private lateinit var setTimerButton: Button
+//    private lateinit var minuteEditText: EditText
 
     private lateinit var searchImageButton: ImageButton
 
@@ -537,72 +536,69 @@ class MainActivity : AppCompatActivity() {
                     !mediaMetadata.title.toString().contains(".UA") and
                     !mediaMetadata.title.toString().contains("www")
                 ) {
-                    insertTrack(mediaMetadata)
-
+                    posterRequestOkhttp(mediaMetadata)
                 }
             }
         }
 
-        private fun okhttp(mediaMetadata: MediaMetadata) {
-            var artist = mediaMetadata.title.toString().split("-")
-            val URL =
-                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=$artist"
-            var okHttpClient: OkHttpClient = OkHttpClient()
-            val request: Request = Request.Builder().url(URL).build()
+
+        private fun posterRequestOkhttp(mediaMetadata: MediaMetadata) {
+            val artist = mediaMetadata.title.toString().split("-")
+            val url =
+                "https://www.theaudiodb.com/api/v1/json/2/search.php?s=${artist[0]}"
+            val okHttpClient: OkHttpClient = OkHttpClient()
+            val request: Request = Request.Builder().url(url).build()
             okHttpClient.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Log.d("tracckkkjsonerr", e.toString())
-
 
                 }
 
+                @SuppressLint("SimpleDateFormat")
                 override fun onResponse(call: Call, response: Response) {
-                    Log.d("tracckkkjson", response?.toString().toString())
-                    val json = JSONObject(response?.body()?.string())
-                    var req: JSONArray? = null
-                    try {
-                        req = json.getJSONArray("artists")
-                        artistPoster =
-                            req?.getJSONObject(0)?.getString("strArtistFanart").toString()
-                        val track = Track()
-                        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                        val currentDate = sdf.format(Date())
-                        track.name = mediaMetadata.title.toString()
-                        var artist = mediaMetadata.title.toString().split("-")
-                        Log.d("artttiii", artist[0])
-                        track.date = currentDate
-                        track.image = artistPoster.toString()
-                        track.station = mediaMetadata.station.toString()
-                        viewModel.insertTrack(track)
 
+                    val json = response.body()?.string()?.let { JSONObject(it) }
+                    val jsonArray: JSONArray
+                    try {
+                        jsonArray = json!!.getJSONArray("artists")
+                        runOnUiThread {
+                            insertTrackAndLoadPoster(mediaMetadata, jsonArray)
+                        }
 
                     } catch (e: java.lang.Exception) {
-
+                        runOnUiThread {
+                            insertTrackAndSetDefaultPoster(mediaMetadata)
+                        }
                     }
-
-
                 }
             })
         }
 
         @SuppressLint("SimpleDateFormat")
-        private fun insertTrack(mediaMetadata: MediaMetadata) {
-//            val track = Track()
-//            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-//            val currentDate = sdf.format(Date())
-//            track.name = mediaMetadata.title.toString()
-//            var artist = mediaMetadata.title.toString().split("-")
-//            Log.d("artttiii", artist[0])
-            try {
-                okhttp(mediaMetadata)
-            } catch (e: java.lang.Exception) {
+        private fun insertTrackAndSetDefaultPoster(mediaMetadata: MediaMetadata) {
+            artistPoster =
+                "https://i.ibb.co/G3yqPVB/generalimage.jpg"
+            val track = Track()
+            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+            val currentDate = sdf.format(Date())
+            track.name = mediaMetadata.title.toString()
+            track.date = currentDate
+            track.image = artistPoster.toString()
+            track.station = mediaMetadata.station.toString()
+            viewModel.insertTrack(track)
+        }
 
-            }
-//
-//            track.date = currentDate
-//            track.image= artistPoster.toString()
-//            track.station = mediaMetadata.station.toString()
-//            viewModel.insertTrack(track)
+        @SuppressLint("SimpleDateFormat")
+        private fun insertTrackAndLoadPoster(mediaMetadata: MediaMetadata, jsonArray: JSONArray) {
+            val track = Track()
+            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+            val currentDate = sdf.format(Date())
+            track.name = mediaMetadata.title.toString()
+            artistPoster =
+                jsonArray.getJSONObject(0)?.getString("strArtistFanart").toString()
+            track.date = currentDate
+            track.image = artistPoster.toString()
+            track.station = mediaMetadata.station.toString()
+            viewModel.insertTrack(track)
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -681,7 +677,8 @@ class MainActivity : AppCompatActivity() {
     private fun ifTagWork(
         stopTimerButton: Button,
         timerTextViewDialog: TextView,
-        minTextView: TextView
+        minTextView: TextView,
+        setTimerButton: Button, minuteEditText: EditText
     ) {
         setTimerButton.visibility = View.GONE
         stopTimerButton.visibility = View.VISIBLE
@@ -693,7 +690,9 @@ class MainActivity : AppCompatActivity() {
     private fun stopTimerEvents(
         stopTimerButton: Button,
         timerTextViewDialog: TextView,
-        minTextView: TextView
+        minTextView: TextView,
+        setTimerButton: Button,
+        minuteEditText: EditText
     ) {
         stopService(Intent(this, TimerService::class.java))
         setTimerButton.visibility = View.VISIBLE
@@ -717,10 +716,22 @@ class MainActivity : AppCompatActivity() {
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
         if (timerImageButton.tag == getString(R.string.tag_work)) {
-            ifTagWork(stopTimerButton, timerTextViewDialog, minTextView)
+            ifTagWork(
+                stopTimerButton,
+                timerTextViewDialog,
+                minTextView,
+                setTimerButton,
+                minuteEditTextDialog
+            )
         }
         stopTimerButton.setOnClickListener {
-            stopTimerEvents(stopTimerButton, timerTextViewDialog, minTextView)
+            stopTimerEvents(
+                stopTimerButton,
+                timerTextViewDialog,
+                minTextView,
+                setTimerButton,
+                minuteEditTextDialog
+            )
         }
 
         builder.setView(view)

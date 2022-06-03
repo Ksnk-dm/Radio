@@ -10,7 +10,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="15dp"
         android:orientation="horizontal"
         android:weightSum="3">
 
@@ -52,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -78,7 +80,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:visibility="invisible"
-            app:srcCompat="@drawable/ic_baseline_favorite_24"
+            app:srcCompat="@drawable/lover"
             tools:visibility="invisible" />
 
         <ImageButton
