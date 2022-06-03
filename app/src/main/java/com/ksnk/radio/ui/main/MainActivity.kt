@@ -7,6 +7,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -28,6 +29,9 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
 import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
 import com.google.android.exoplayer2.ui.PlayerControlView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.database.*
@@ -60,16 +64,13 @@ class MainActivity : AppCompatActivity() {
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
     private lateinit var mPlayerView: PlayerControlView
-
     private lateinit var database: DatabaseReference
     private lateinit var bottomNavView: BottomNavigationView
     private var fragmentView: FragmentContainerView? = null
-
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
     private lateinit var mPosterImageView: CircleImageView
     private lateinit var mNameTextView: TextView
     private lateinit var mFmFrequencyTextView: TextView
-
     private lateinit var radioWave: RadioWave
     private lateinit var lottieAnimationView: LottieAnimationView
     private lateinit var mVisualizer: CircleLineVisualizer
@@ -87,27 +88,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var titleTextViewPlayer: TextView
     private lateinit var trackInfoMiniPlayerTextView: TextView
     private var artistPoster = ""
-
     private var fragmentSettingListener: FragmentSettingListener? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    var listMedia: MutableList<String> = mutableListOf()
 
     @Inject
     lateinit var viewModel: MainViewModel
 
     @Inject
     lateinit var preferencesHelper: PreferenceHelper
-    lateinit var titleTextView: TextView
-    lateinit var posterImageView: ImageView
+    private lateinit var titleTextView: TextView
+    private lateinit var posterImageView: ImageView
     private lateinit var fragment: Fragment
     private var firstStartStatus: Boolean = true
-
-//    private lateinit var setTimerButton: Button
-//    private lateinit var minuteEditText: EditText
-
     private lateinit var searchImageButton: ImageButton
+    private lateinit var mAdView: AdView
 
     private val radioWaveBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -133,12 +129,16 @@ class MainActivity : AppCompatActivity() {
         setMediaInfoInMiniPlayer()
         setListeners()
         performSearch()
+        MobileAds.initialize(this) {}
+
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(radioWaveBroadcastReceiver)
         setMediaInfoInMiniPlayer()
+        mAdView.destroy()
     }
 
     private val timerBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -150,6 +150,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         registerReceiver(timerBroadcastReceiver, IntentFilter(getString(R.string.intent_filter)))
+        mAdView.resume()
     }
 
     override fun onPause() {
@@ -330,6 +331,16 @@ class MainActivity : AppCompatActivity() {
         return@OnItemSelectedListener true
     }
 
+    private fun loadBanner(progress: Float) {
+        if (progress > 0.99F) {
+            mAdView.visibility = View.VISIBLE
+            val adRequest = AdRequest.Builder().build()
+            mAdView.loadAd(adRequest)
+        } else {
+            mAdView.visibility = View.GONE
+        }
+    }
+
     private val transitionListener = object : MotionLayout.TransitionListener {
         override fun onTransitionStarted(p0: MotionLayout?, startId: Int, endId: Int) {}
 
@@ -339,6 +350,7 @@ class MainActivity : AppCompatActivity() {
             endId: Int,
             progress: Float
         ) {
+            loadBanner(progress)
         }
 
         override fun onTransitionCompleted(p0: MotionLayout?, currentId: Int) {
@@ -389,6 +401,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun init() {
+        mAdView = findViewById(R.id.adView)
         mPlayerView = findViewById(R.id.playerView)
         bottomNavView = findViewById(R.id.bottomNavViewMain)
         fragmentView = findViewById(R.id.fragmentContainerView)
@@ -555,7 +568,6 @@ class MainActivity : AppCompatActivity() {
 
                 @SuppressLint("SimpleDateFormat")
                 override fun onResponse(call: Call, response: Response) {
-
                     val json = response.body()?.string()?.let { JSONObject(it) }
                     val jsonArray: JSONArray
                     try {
@@ -563,7 +575,6 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             insertTrackAndLoadPoster(mediaMetadata, jsonArray)
                         }
-
                     } catch (e: java.lang.Exception) {
                         runOnUiThread {
                             insertTrackAndSetDefaultPoster(mediaMetadata)

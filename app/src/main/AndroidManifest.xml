@@ -52,10 +52,15 @@
                 <action android:name="com.ksnk.radio.ACTION_PLAY" />
                 <action android:name="com.ksnk.radio.ACTION_PAUSE" />
                 <action android:name="com.ksnk.radio.ACTION_OPEN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
         <service android:name=".services.TimerService" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2981423664535117~7292759327" />
     </application>
 
 </manifest>
