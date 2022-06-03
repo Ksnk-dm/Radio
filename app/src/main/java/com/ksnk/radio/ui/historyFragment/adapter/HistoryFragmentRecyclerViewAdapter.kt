@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ksnk.radio.R
 import com.ksnk.radio.data.entity.Track
+import com.squareup.picasso.Picasso
 
 
 class HistoryFragmentRecyclerViewAdapter(
@@ -30,6 +31,9 @@ class HistoryFragmentRecyclerViewAdapter(
         holder.trackNameTextView.text = items[position].name
         holder.stationTextView.text = items[position].station
         holder.dateTextView.text = items[position].date
+        Picasso.get()
+            .load(items[position].image)
+            .into(holder.trackImageView)
         holder.itemView.setOnClickListener { openYouTube(items[position].name.toString()) }
     }
 

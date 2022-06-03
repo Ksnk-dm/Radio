@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +22,8 @@ import javax.inject.Inject
 
 class SettingFragment : Fragment() {
     private lateinit var displayTypeRadioGroup: RadioGroup
+    private lateinit var updateStationTextView: TextView
+    private lateinit var clearHistoryTextView: TextView
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -47,18 +50,24 @@ class SettingFragment : Fragment() {
         return inflater.inflate(R.layout.setting_fragment, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun init(view: View) {
         updateLottieAnimView = view.findViewById(R.id.lottieAnimUpdateDb)
         displayTypeRadioGroup = view.findViewById(R.id.displayTypeRadioGroup)
         trashLottieAnimationView = view.findViewById(R.id.lottieAnimTrash)
+        clearHistoryTextView = view.findViewById(R.id.clearHistoryTextView)
+        updateStationTextView = view.findViewById(R.id.updateStationTextView)
+    }
+
+    private fun loadDisplayListType() {
         val displayListType = preferencesHelper.getDisplayListType()
         if (displayListType == DisplayListType.List) {
             displayTypeRadioGroup.check(R.id.listRadioButton)
         } else {
             displayTypeRadioGroup.check(R.id.gridRadioButton)
         }
+    }
 
+    private fun setListeners() {
         displayTypeRadioGroup.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.listRadioButton -> {
@@ -69,18 +78,29 @@ class SettingFragment : Fragment() {
                 }
             }
         }
+        updateLottieAnimView.setOnClickListener { updateDbAndAnim() }
+        trashLottieAnimationView.setOnClickListener { clearHistoryAndAnim() }
+        clearHistoryTextView.setOnClickListener { clearHistoryAndAnim() }
+        updateStationTextView.setOnClickListener { updateDbAndAnim() }
+    }
 
+    private fun clearHistoryAndAnim() {
+        trashLottieAnimationView.playAnimation()
+        viewModel.deleteAllHistory()
+        Toast.makeText(context, getString(R.string.history_clear_toast), Toast.LENGTH_SHORT)
+            .show()
+    }
 
-        updateLottieAnimView.setOnClickListener {
-            updateLottieAnimView.playAnimation()
-            (activity as MainActivity?)?.updateDb()
-        }
+    private fun updateDbAndAnim() {
+        updateLottieAnimView.playAnimation()
+        (activity as MainActivity?)?.updateDb()
+    }
 
-        trashLottieAnimationView.setOnClickListener {
-            trashLottieAnimationView.playAnimation()
-            viewModel.deleteAllHistory()
-            Toast.makeText(context, "История очищена", Toast.LENGTH_SHORT).show()
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init(view)
+        loadDisplayListType()
+        setListeners()
     }
 
     companion object
