@@ -18,7 +18,7 @@ Listening to many Ukrainian radio stations online in good quality. With the abil
 ![gradle](https://img.shields.io/badge/Gradle-7.1.1-orange)
 
 
-![first screen](https://i.ibb.co/qBnMRvC/video5404423460988392922.gif)
+![first screen](https://i.ibb.co/qBnMRvC/video5404423460988392922.gif](https://i.ibb.co/2d5Qwby/photo1654506109.jpg))
 
 ## Libraries and tools used in the project
 
