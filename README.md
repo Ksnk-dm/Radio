@@ -38,5 +38,9 @@ Is an open source animation file format that's tiny, high quality, interactive, 
 A light-weight and easy-to-use Audio Visualizer for Android using the Android Canvas.
 * [Dagger 2](https://dagger.dev/)
 Dagger is a fully static, compile-time dependency injection framework for Java, Kotlin, and Android. It is an adaptation of an earlier version created by Square and now maintained by Google.
-* [Room] (https://developer.android.com/jetpack/androidx/releases/room)
+* [Room](https://developer.android.com/jetpack/androidx/releases/room)
 The Room persistence library provides an abstraction layer over SQLite to allow for more robust database access while harnessing the full power of SQLite.
+* [OkHttp](https://square.github.io/okhttp/)
+HTTP is the way modern applications network. It’s how we exchange data & media. Doing HTTP efficiently makes your stuff load faster and saves bandwidth.
+* [Google AdMob](https://admob.google.com/home/)
+AdMob is one of the largest advertising networks. AdMob allows you to show ads in any country or region.
