@@ -19,10 +19,10 @@ Listening to many Ukrainian radio stations online in good quality. With the abil
 
 <table style="width:100%">
   <tr>
-    <th><img width="180" height="400" src='https://i.ibb.co/2d5Qwby/photo1654506109.jpg' border='0' /></th>
-    <th><img width="180" height="400" src='https://i.ibb.co/pznpWr8/photo1654506180.jpg' border='0' /></th>
-    <th><img width="180" height="400" src='https://i.ibb.co/pdz1wJg/photo1654506338.jpg' border='0' /></th>
-    <th><img width="180" height="400" src='https://i.ibb.co/X5W3pKc/photo1654506680.jpg' border='0' /></th>
+    <th><img width="180" height="380" src='https://i.ibb.co/2d5Qwby/photo1654506109.jpg' border='0' /></th>
+    <th><img width="180" height="380" src='https://i.ibb.co/pznpWr8/photo1654506180.jpg' border='0' /></th>
+    <th><img width="180" height="380" src='https://i.ibb.co/pdz1wJg/photo1654506338.jpg' border='0' /></th>
+    <th><img width="180" height="380" src='https://i.ibb.co/X5W3pKc/photo1654506680.jpg' border='0' /></th>
   </tr>
 </table>
 
