@@ -80,7 +80,6 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         initListeners()
         loadPrefsAndUpdateRadioButton()
         initRecycler()
-        Log.d("trackkkkk", viewModel.getAllTracks().toString())
     }
 
     override fun onCreateView(

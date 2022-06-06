@@ -29,9 +29,9 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
 import com.google.android.exoplayer2.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
 import com.google.android.exoplayer2.ui.PlayerControlView
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.database.*
@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
     private var firstStartStatus: Boolean = true
     private lateinit var searchImageButton: ImageButton
     private lateinit var mAdView: AdView
+    private var mInterstitialAd: InterstitialAd? = null
 
     private val radioWaveBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -114,6 +115,40 @@ class MainActivity : AppCompatActivity() {
                 .load(radioWave.image)
                 .into(posterImageView)
             preferencesHelper.setIdPlayMedia(radioWave.id!!)
+        }
+    }
+
+    private var interstitialAdLoadCallback: InterstitialAdLoadCallback =
+        object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(p0: LoadAdError) {
+                mInterstitialAd = null
+            }
+
+            override fun onAdLoaded(p0: InterstitialAd) {
+                mInterstitialAd = p0
+            }
+
+        }
+
+    private fun initAds() {
+        MobileAds.initialize(this) {}
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            this,
+            "ca-app-pub-2981423664535117/5977546332",
+            adRequest,
+            interstitialAdLoadCallback
+        )
+        mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+            }
+
+            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                mInterstitialAd = null
+            }
         }
     }
 
@@ -129,9 +164,7 @@ class MainActivity : AppCompatActivity() {
         setMediaInfoInMiniPlayer()
         setListeners()
         performSearch()
-        MobileAds.initialize(this) {}
-
-
+        initAds()
     }
 
     override fun onDestroy() {
@@ -317,18 +350,31 @@ class MainActivity : AppCompatActivity() {
         when (it.itemId) {
             R.id.listFragmentItem -> {
                 createListFragment()
+                searchImageButton.visibility=View.VISIBLE
             }
             R.id.favoriteFragmentItem -> {
                 createFavFragment()
+                searchImageButton.visibility=View.INVISIBLE
             }
             R.id.settingFragmentItem -> {
                 createSettingFragment()
+                loadPageAds()
+                searchImageButton.visibility=View.INVISIBLE
             }
             R.id.historyFragmentItem -> {
                 createHistoryFragment()
+                loadPageAds()
+                searchImageButton.visibility=View.INVISIBLE
             }
         }
         return@OnItemSelectedListener true
+    }
+
+    private fun loadPageAds() {
+        if (mInterstitialAd != null) {
+            mInterstitialAd?.show(this)
+        } else {
+        }
     }
 
     private fun loadBanner(progress: Float) {
