@@ -300,6 +300,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setMediaInfoInMiniPlayer() {
         val id: Int = preferencesHelper.getIdPlayMedia()
+        try {
+            setTitleMiniPlayer(id)
+        } catch (e: Exception) {
+            e.stackTrace
+            setTitleMiniPlayer(1)
+        }
+
+    }
+
+    private fun setTitleMiniPlayer(id: Int) {
         val radioWave: RadioWave = viewModel.getRadioWaveForId(id)
         if (radioWave != null) {
             titleTextView.text = radioWave.name
@@ -350,21 +360,21 @@ class MainActivity : AppCompatActivity() {
         when (it.itemId) {
             R.id.listFragmentItem -> {
                 createListFragment()
-                searchImageButton.visibility=View.VISIBLE
+                searchImageButton.visibility = View.VISIBLE
             }
             R.id.favoriteFragmentItem -> {
                 createFavFragment()
-                searchImageButton.visibility=View.INVISIBLE
+                searchImageButton.visibility = View.INVISIBLE
             }
             R.id.settingFragmentItem -> {
                 createSettingFragment()
                 loadPageAds()
-                searchImageButton.visibility=View.INVISIBLE
+                searchImageButton.visibility = View.INVISIBLE
             }
             R.id.historyFragmentItem -> {
                 createHistoryFragment()
                 loadPageAds()
-                searchImageButton.visibility=View.INVISIBLE
+                searchImageButton.visibility = View.INVISIBLE
             }
         }
         return@OnItemSelectedListener true
@@ -567,7 +577,8 @@ class MainActivity : AppCompatActivity() {
         if (mPlayerService?.getPlayer()?.mediaMetadata?.title != null) {
             trackInfoMiniPlayerTextView.text =
                 mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
-            titleTextViewPlayer.text = mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
+            titleTextViewPlayer.text =
+                mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
         }
     }
 
@@ -645,7 +656,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         @SuppressLint("SimpleDateFormat")
-        private fun insertTrackAndLoadPoster(mediaMetadata: MediaMetadata, jsonArray: JSONArray) {
+        private fun insertTrackAndLoadPoster(
+            mediaMetadata: MediaMetadata,
+            jsonArray: JSONArray
+        ) {
             val track = Track()
             val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
             val currentDate = sdf.format(Date())
@@ -846,5 +860,4 @@ class MainActivity : AppCompatActivity() {
 
     fun setSettingListener(fragmentSettingListener: FragmentSettingListener) {
         this.fragmentSettingListener = fragmentSettingListener
-    }
-}
+    }}
