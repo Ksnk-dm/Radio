@@ -19,6 +19,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.widget.RemoteViews
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaMetadata
@@ -39,6 +40,7 @@ import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -262,9 +264,10 @@ class PlayerService() : Service(), Parcelable {
     private fun loadPoster() {
         Picasso.get()
             .load(radioWave?.image)
+            .resize(100,70)
             .into(object : com.squareup.picasso.Target {
                 override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
-                    remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+                        remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
                 }
 
                 override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
