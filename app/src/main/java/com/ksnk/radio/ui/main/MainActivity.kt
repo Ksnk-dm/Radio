@@ -7,7 +7,6 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
@@ -63,30 +62,30 @@ import kotlin.properties.Delegates
 class MainActivity : AppCompatActivity() {
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
-    private lateinit var mPlayerView: PlayerControlView
-    private lateinit var database: DatabaseReference
-    private lateinit var bottomNavView: BottomNavigationView
+    private  var mPlayerView: PlayerControlView? = null
+    private  var database: DatabaseReference? = null
+    private  var bottomNavView: BottomNavigationView? = null
     private var fragmentView: FragmentContainerView? = null
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
-    private lateinit var mPosterImageView: CircleImageView
-    private lateinit var mNameTextView: TextView
-    private lateinit var mFmFrequencyTextView: TextView
-    private lateinit var radioWave: RadioWave
-    private lateinit var lottieAnimationView: LottieAnimationView
-    private lateinit var mVisualizer: CircleLineVisualizer
+    private  var mPosterImageView: CircleImageView? = null
+    private  var mNameTextView: TextView? = null
+    private  var mFmFrequencyTextView: TextView? = null
+    private  var radioWave: RadioWave? = null
+    private  var lottieAnimationView: LottieAnimationView? = null
+    private  var mVisualizer: CircleLineVisualizer? = null
     private var audioSessionId by Delegates.notNull<Int>()
-    private lateinit var motionLayout: MotionLayout
-    private lateinit var favoriteImageButton: ImageButton
-    private lateinit var playImageView: ImageView
-    private lateinit var animNetLottieAnimationView: LottieAnimationView
-    private lateinit var backImageButton: ImageButton
-    private lateinit var titleToolTextView: TextView
-    private lateinit var searchView: SearchView
-    private lateinit var timerTextView: TextView
-    private lateinit var timerImageButton: ImageButton
-    private lateinit var addImageButton: ImageButton
-    private lateinit var titleTextViewPlayer: TextView
-    private lateinit var trackInfoMiniPlayerTextView: TextView
+    private  var motionLayout: MotionLayout? = null
+    private  var favoriteImageButton: ImageButton? = null
+    private var playImageView: ImageView? = null
+    private var animNetLottieAnimationView: LottieAnimationView? = null
+    private var backImageButton: ImageButton? = null
+    private var titleToolTextView: TextView? = null
+    private var searchView: SearchView? = null
+    private var timerTextView: TextView? = null
+    private var timerImageButton: ImageButton? = null
+    private var addImageButton: ImageButton? = null
+    private var titleTextViewPlayer: TextView? = null
+    private var trackInfoMiniPlayerTextView: TextView? = null
     private var artistPoster = ""
     private var fragmentSettingListener: FragmentSettingListener? = null
 
@@ -218,22 +217,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun favoriteStatusFalse() {
-        radioWave.favorite = true
+        radioWave?.favorite = true
         viewModel.updateRadioWave(radioWave)
-        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
-        lottieAnimationView.visibility = View.VISIBLE
-        lottieAnimationView.playAnimation()
+        favoriteImageButton?.setImageResource(R.drawable.ic_baseline_favorite_24)
+        lottieAnimationView?.visibility = View.VISIBLE
+        lottieAnimationView?.playAnimation()
     }
 
     private fun favoriteStatusTrue() {
-        radioWave.favorite = false
+        radioWave?.favorite = false
         viewModel.updateRadioWave(radioWave)
-        favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+        favoriteImageButton?.setImageResource(R.drawable.ic_baseline_favorite_border_24)
     }
 
     private fun initRadioWaveFromService() {
         radioWave = mPlayerService?.getRadioWave()!!
-        if (radioWave.favorite == false) {
+        if (radioWave?.favorite == false) {
             favoriteStatusFalse()
         } else {
             favoriteStatusTrue()
@@ -246,7 +245,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onAnimationEnd(animation: Animator) {
-            lottieAnimationView.visibility = View.INVISIBLE
+            lottieAnimationView?.visibility = View.INVISIBLE
         }
 
         override fun onAnimationCancel(animation: Animator) {
@@ -258,18 +257,18 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setListeners() {
-        favoriteImageButton.setOnClickListener {
+        favoriteImageButton?.setOnClickListener {
             initRadioWaveFromService()
         }
-        timerImageButton.setOnClickListener {
-            timerTextView.visibility = View.VISIBLE
+        timerImageButton?.setOnClickListener {
+            timerTextView?.visibility = View.VISIBLE
             createTimerAlertDialog()
         }
-        addImageButton.setOnClickListener { createInsertAlertDialog() }
-        backImageButton.setOnClickListener { motionLayout.transitionToStart() }
-        lottieAnimationView.addAnimatorListener(lottieAnimationListener)
-        bottomNavView.setOnItemSelectedListener(bottomNavViewOnItemSelectListener)
-        playImageView.setOnTouchListener { _, event ->
+        addImageButton?.setOnClickListener { createInsertAlertDialog() }
+        backImageButton?.setOnClickListener { motionLayout?.transitionToStart() }
+        lottieAnimationView?.addAnimatorListener(lottieAnimationListener)
+        bottomNavView?.setOnItemSelectedListener(bottomNavViewOnItemSelectListener)
+        playImageView?.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 checkStatusClickPlayInMiniPlayer()
             }
@@ -281,12 +280,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkStatusSearchViewVisible() {
-        if (searchView.visibility == View.VISIBLE) {
-            searchView.visibility = View.GONE
-            titleToolTextView.visibility = View.VISIBLE
+        if (searchView?.visibility == View.VISIBLE) {
+            searchView?.visibility = View.GONE
+            titleToolTextView?.visibility = View.VISIBLE
         } else {
-            searchView.visibility = View.VISIBLE
-            titleToolTextView.visibility = View.GONE
+            searchView?.visibility = View.VISIBLE
+            titleToolTextView?.visibility = View.GONE
         }
     }
 
@@ -326,7 +325,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
-        titleToolTextView.text = getString(R.string.list_menu_item)
+        titleToolTextView?.text = getString(R.string.list_menu_item)
     }
 
     private fun createSettingFragment() {
@@ -335,7 +334,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
-        titleToolTextView.text = getString(R.string.set_menu_item)
+        titleToolTextView?.text = getString(R.string.set_menu_item)
     }
 
     private fun createHistoryFragment() {
@@ -344,7 +343,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
-        titleToolTextView.text = getString(R.string.history_menu_item)
+        titleToolTextView?.text = getString(R.string.history_menu_item)
     }
 
     private fun createFavFragment() {
@@ -353,7 +352,7 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.fragmentContainerView, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
-        titleToolTextView.text = getString(R.string.fav_menu_item)
+        titleToolTextView?.text = getString(R.string.fav_menu_item)
     }
 
     private var bottomNavViewOnItemSelectListener = NavigationBarView.OnItemSelectedListener {
@@ -427,9 +426,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkButtonPlayInMiniPlayer() {
         if (mPlayerService?.getRadioWave()?.favorite == true) {
-            favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_24)
+            favoriteImageButton?.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
-            favoriteImageButton.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+            favoriteImageButton?.setImageResource(R.drawable.ic_baseline_favorite_border_24)
         }
     }
 
@@ -440,18 +439,18 @@ class MainActivity : AppCompatActivity() {
             .load(mPlayerService?.getRadioWave()?.image)
             .resize(150, 150)
             .into(mPosterImageView)
-        mPlayerView.player = mPlayerService?.getPlayer()
-        mNameTextView.text = mPlayerService?.getRadioWave()?.name
-        mFmFrequencyTextView.text = mPlayerService?.getRadioWave()?.fmFrequency
+        mPlayerView?.player = mPlayerService?.getPlayer()
+        mNameTextView?.text = mPlayerService?.getRadioWave()?.name
+        mFmFrequencyTextView?.text = mPlayerService?.getRadioWave()?.fmFrequency
     }
 
     private fun setMediaSessionAndVisual() {
         audioSessionId = mExoPlayer!!.audioSessionId
         try {
-            mVisualizer.setAudioSessionId(audioSessionId)
+            mVisualizer?.setAudioSessionId(audioSessionId)
         } catch (e: Exception) {
-            mVisualizer.release()
-            mVisualizer.setAudioSessionId(audioSessionId)
+            mVisualizer?.release()
+            mVisualizer?.setAudioSessionId(audioSessionId)
         }
     }
 
@@ -469,13 +468,13 @@ class MainActivity : AppCompatActivity() {
         favoriteImageButton = findViewById(R.id.favoriteImageButton)
         motionLayout = findViewById(R.id.motion_layout)
         titleTextView = findViewById(R.id.title_textView)
-        motionLayout.addTransitionListener(transitionListener)
+        motionLayout?.addTransitionListener(transitionListener)
         posterImageView = findViewById(R.id.main_imageView)
         playImageView = findViewById(R.id.play_imageView)
         animNetLottieAnimationView = findViewById(R.id.netAnim)
         backImageButton = findViewById(R.id.backImageButton)
         titleToolTextView = findViewById(R.id.titleToolTextView)
-        titleToolTextView.text = getString(R.string.list_menu_item)
+        titleToolTextView?.text = getString(R.string.list_menu_item)
         searchView = findViewById(R.id.radio_search)
         timerTextView = findViewById(R.id.timerTextView)
         timerImageButton = findViewById(R.id.timerImageButton)
@@ -483,7 +482,7 @@ class MainActivity : AppCompatActivity() {
         searchImageButton = findViewById(R.id.searchImageButton)
         titleTextViewPlayer = findViewById(R.id.titlePlayerTextView)
         trackInfoMiniPlayerTextView = findViewById(R.id.track_info_textView)
-        trackInfoMiniPlayerTextView.isSelected = true
+        trackInfoMiniPlayerTextView?.isSelected = true
     }
 
 
@@ -518,7 +517,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
         }
-        database.addValueEventListener(valueEventListener)
+        database?.addValueEventListener(valueEventListener)
     }
 
     fun updateDb() {
@@ -537,7 +536,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onCancelled(@NonNull @NotNull error: DatabaseError) {}
         }
-        database.addValueEventListener(valueEventListener)
+        database?.addValueEventListener(valueEventListener)
     }
 
     private fun setMediaItem() {
@@ -575,9 +574,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setTrackInfo() {
         if (mPlayerService?.getPlayer()?.mediaMetadata?.title != null) {
-            trackInfoMiniPlayerTextView.text =
+            trackInfoMiniPlayerTextView?.text =
                 mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
-            titleTextViewPlayer.text =
+            titleTextViewPlayer?.text =
                 mPlayerService?.getPlayer()?.mediaMetadata?.title.toString()
         }
     }
@@ -585,8 +584,8 @@ class MainActivity : AppCompatActivity() {
     private var playerListener = object : Player.Listener {
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             if (mediaMetadata.title != null) {
-                titleTextViewPlayer.text = mediaMetadata.title.toString()
-                trackInfoMiniPlayerTextView.text = mediaMetadata.title.toString()
+                titleTextViewPlayer?.text = mediaMetadata.title.toString()
+                trackInfoMiniPlayerTextView?.text = mediaMetadata.title.toString()
                 mediaMetadataCheckEmptyAndContains(mediaMetadata)
             }
         }
@@ -675,7 +674,7 @@ class MainActivity : AppCompatActivity() {
         override fun onPlayerError(error: PlaybackException) {
             when (error.errorCode) {
                 ERROR_CODE_IO_NETWORK_CONNECTION_FAILED -> {
-                    animNetLottieAnimationView.visibility = View.VISIBLE
+                    animNetLottieAnimationView?.visibility = View.VISIBLE
                 }
                 ERROR_CODE_IO_FILE_NOT_FOUND -> {
                     Toast.makeText(
@@ -688,12 +687,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPlayerErrorChanged(error: PlaybackException?) {
-            animNetLottieAnimationView.visibility = View.INVISIBLE
+            animNetLottieAnimationView?.visibility = View.INVISIBLE
         }
     }
 
     private fun performSearch() {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 fragmentSettingListener?.search(query)
                 return true
@@ -709,9 +708,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun isPlayingMedia(isPlaying: Boolean) {
         if (isPlaying) {
-            playImageView.setImageResource(R.drawable.ic_baseline_pause_24)
+            playImageView?.setImageResource(R.drawable.ic_baseline_pause_24)
         } else {
-            playImageView.setImageResource(R.drawable.ic_baseline_play_arrow_24)
+            playImageView?.setImageResource(R.drawable.ic_baseline_play_arrow_24)
         }
     }
 
@@ -722,25 +721,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        motionLayout.transitionToStart()
+        motionLayout?.transitionToStart()
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateGUI(intent: Intent) {
         if (intent.extras != null) {
-            timerImageButton.setImageResource(R.drawable.ic_baseline_timer_red_24)
-            timerImageButton.tag = getString(R.string.tag_work)
+            timerImageButton?.setImageResource(R.drawable.ic_baseline_timer_red_24)
+            timerImageButton?.tag = getString(R.string.tag_work)
             val millisUntilFinished =
                 intent.getLongExtra(getString(R.string.serializable_extra_long), 0)
             val min: Long = (millisUntilFinished / 1000) / 60
             val sec: Long = (millisUntilFinished / 1000) % 60
-            timerTextView.text = "$min:$sec " + getString(R.string.minute_title)
+            timerTextView?.text = "$min:$sec " + getString(R.string.minute_title)
             if (sec == 0L) {
                 mExoPlayer?.stop()
                 stopService(Intent(this, PlayerService::class.java))
-                timerTextView.visibility = View.GONE
-                timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
-                timerImageButton.tag = getString(R.string.tag_stop)
+                timerTextView?.visibility = View.GONE
+                timerImageButton?.setImageResource(R.drawable.ic_baseline_timer_24)
+                timerImageButton?.tag = getString(R.string.tag_stop)
             }
         }
     }
@@ -769,10 +768,10 @@ class MainActivity : AppCompatActivity() {
         setTimerButton.visibility = View.VISIBLE
         stopTimerButton.visibility = View.GONE
         minuteEditText.visibility = View.VISIBLE
-        timerTextView.visibility = View.GONE
-        timerImageButton.setImageResource(R.drawable.ic_baseline_timer_24)
+        timerTextView?.visibility = View.GONE
+        timerImageButton?.setImageResource(R.drawable.ic_baseline_timer_24)
         timerTextViewDialog.text = getString(R.string.timer_set)
-        timerImageButton.tag = getString(R.string.tag_stop)
+        timerImageButton?.tag = getString(R.string.tag_stop)
         minTextView.visibility = View.VISIBLE
     }
 
@@ -786,7 +785,7 @@ class MainActivity : AppCompatActivity() {
         val stopTimerButton = view.findViewById<Button>(R.id.stopTimerButton)
         val timerTextViewDialog = view.findViewById<TextView>(R.id.timerTextViewDialog)
         val minTextView = view.findViewById<TextView>(R.id.minTextView)
-        if (timerImageButton.tag == getString(R.string.tag_work)) {
+        if (timerImageButton?.tag == getString(R.string.tag_work)) {
             ifTagWork(
                 stopTimerButton,
                 timerTextViewDialog,

@@ -27,11 +27,11 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 class FavoriteFragment : Fragment(), MenuItemIdListener {
-    private lateinit var mRecyclerView: RecyclerView
-    private lateinit var mGridLayoutManager: GridLayoutManager
-    private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
+    private  var mRecyclerView: RecyclerView?=null
+    private var mGridLayoutManager: GridLayoutManager?=null
+    private  var mAdapter: ListFragmentRecyclerViewAdapter?=null
     private var items: MutableList<RadioWave> = mutableListOf<RadioWave>()
-    private lateinit var displayListType: DisplayListType
+    private  var displayListType: DisplayListType?=null
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
 
@@ -80,8 +80,9 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
             DisplayListType.Grid -> {
                 GridLayoutManager(activity, 2)
             }
+            null -> TODO()
         }
-        mRecyclerView.layoutManager = mGridLayoutManager
+        mRecyclerView?.layoutManager = mGridLayoutManager
     }
 
     private fun startPlayerService() {
@@ -104,8 +105,8 @@ class FavoriteFragment : Fragment(), MenuItemIdListener {
             mPlayerService!!,
             this@FavoriteFragment
         )
-        mRecyclerView.adapter = mAdapter
-        mAdapter.setDisplayListType(displayListType)
+        mRecyclerView?.adapter = mAdapter
+        mAdapter?.setDisplayListType(displayListType!!)
     }
 
     private var myConnection = object : ServiceConnection {
