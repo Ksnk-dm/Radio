@@ -3,7 +3,6 @@ package com.ksnk.radio.ui.listFragment
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,20 +31,20 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
-    private lateinit var mRecyclerView: RecyclerView
-    private lateinit var mGridLayoutManager: GridLayoutManager
-    private lateinit var mAdapter: ListFragmentRecyclerViewAdapter
-    private lateinit var sortImageButton: ImageButton
+    private var mRecyclerView: RecyclerView? =null
+    private  var mGridLayoutManager: GridLayoutManager?=null
+    private  var mAdapter: ListFragmentRecyclerViewAdapter?=null
+    private  var sortImageButton: ImageButton?=null
     private var items: MutableList<RadioWave>? = null
     private var matchedRadioWave: ArrayList<RadioWave>? = null
-    private lateinit var switch: SwitchMaterial
+    private  var switch: SwitchMaterial?=null
     private var mExoPlayer: ExoPlayer? = null
     private var mPlayerService: PlayerService? = null
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
-    private lateinit var bottomSheet: ConstraintLayout
-    private lateinit var sortNameRadioGroup: RadioGroup
-    private lateinit var hideBottomSheetImageButton: ImageButton
-    private lateinit var titleSortTextView: TextView
+    private  var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>?=null
+    private  var bottomSheet: ConstraintLayout?=null
+    private  var sortNameRadioGroup: RadioGroup?=null
+    private  var hideBottomSheetImageButton: ImageButton?=null
+    private  var titleSortTextView: TextView?=null
     private var checkStateSwitch: Boolean = false
 
     @Inject
@@ -53,7 +52,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    private lateinit var displayListType: DisplayListType
+    private  var displayListType: DisplayListType?=null
 
     @Inject
     lateinit var viewModel: MainViewModel
@@ -97,18 +96,18 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
         sortImageButton = view.findViewById(R.id.sortImageButton)
         mRecyclerView = view.findViewById(R.id.list_fragment_recycler_view)
         bottomSheet = view.findViewById(R.id.bottomSheet)
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet!!)
         titleSortTextView = view.findViewById(R.id.titleSortTextView)
     }
 
     private fun initListeners() {
-        hideBottomSheetImageButton.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        hideBottomSheetImageButton?.setOnClickListener {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
-        switch.setOnClickListener {
+        switch?.setOnClickListener {
             switchIsChecked()
         }
-        sortNameRadioGroup.setOnCheckedChangeListener { _, i ->
+        sortNameRadioGroup?.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.radioButtonDefault -> {
                     defaultSetPrefsAndUpdateRv()
@@ -127,16 +126,16 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
                 }
             }
         }
-        sortImageButton.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        sortImageButton?.setOnClickListener {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
-        titleSortTextView.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        titleSortTextView?.setOnClickListener {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
 
     private fun switchIsChecked() {
-        if (switch.isChecked) {
+        if (switch?.isChecked==true) {
             preferencesHelper.setSwitchEnabled(true)
             defaultListItem = viewModel.getCustomAll()
             updateRecyclerView(defaultListItem)
@@ -190,7 +189,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private fun setDefaultStatusAndUpdateUI() {
         defaultRadioButtonStatus = preferencesHelper.getDefaultSortStatus()
         if (defaultRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonDefault)
+            sortNameRadioGroup?.check(R.id.radioButtonDefault)
             items = viewModel.getAllRadioWaves().toMutableList()
         }
     }
@@ -198,7 +197,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private fun setAscStatusAndUpdateUI() {
         ascRadioButtonStatus = preferencesHelper.getSortAscStatus()
         if (ascRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonAsc)
+            sortNameRadioGroup?.check(R.id.radioButtonAsc)
             items = viewModel.getAllSortAsc().toMutableList()
         }
     }
@@ -206,7 +205,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private fun setDescStatusAndUpdateUI() {
         descRadioButtonStatus = preferencesHelper.getSortDescStatus()
         if (descRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.radioButtonDesc)
+            sortNameRadioGroup?.check(R.id.radioButtonDesc)
             items = viewModel.getAllSortDesc().toMutableList()
         }
     }
@@ -214,7 +213,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private fun setPopularStatusAndUpdateUI() {
         popularRadioButtonStatus = preferencesHelper.getSortPopularStatus()
         if (popularRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.popularRadioButton)
+            sortNameRadioGroup?.check(R.id.popularRadioButton)
             items = viewModel.getPopularDesc().toMutableList()
         }
     }
@@ -222,7 +221,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
     private fun setNotPopularStatusAndUpdateUI() {
         notPopularRadioButtonStatus = preferencesHelper.getSortNotPopularStatus()
         if (notPopularRadioButtonStatus) {
-            sortNameRadioGroup.check(R.id.notPopularRadioButton)
+            sortNameRadioGroup?.check(R.id.notPopularRadioButton)
             items = viewModel.getPopularAsc().toMutableList()
         }
     }
@@ -244,9 +243,10 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             DisplayListType.Grid -> {
                 GridLayoutManager(activity, 2)
             }
+            null -> TODO()
         }
 
-        mRecyclerView.layoutManager = mGridLayoutManager
+        mRecyclerView?.layoutManager = mGridLayoutManager
         checkStateSwitch = preferencesHelper.getSwitchEnabled()
 
     }
@@ -381,8 +381,8 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
 
     private fun updateRecyclerView(updateList: List<RadioWave>) {
         mRecyclerView.apply {
-            mAdapter.setItems(updateList)
-            mAdapter.notifyDataSetChanged()
+            mAdapter?.setItems(updateList)
+            mAdapter?.notifyDataSetChanged()
         }
     }
 
@@ -394,7 +394,7 @@ class ListFragment : Fragment(), MenuItemIdListener, FragmentSettingListener {
             mPlayerService!!,
             this@ListFragment
         )
-        mRecyclerView.adapter = mAdapter
-        mAdapter.setDisplayListType(displayListType)
+        mRecyclerView?.adapter = mAdapter
+        mAdapter?.setDisplayListType(displayListType!!)
     }
 }

@@ -41,7 +41,7 @@ class MainViewModel
         return trackRepository.getAllTrack()
     }
 
-    fun updateRadioWave(radioWave: RadioWave) {
+    fun updateRadioWave(radioWave: RadioWave?) {
         radioWaveRepository.updateRadioWave(radioWave)
     }
 

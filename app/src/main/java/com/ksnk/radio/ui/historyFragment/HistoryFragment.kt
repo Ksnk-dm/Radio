@@ -21,7 +21,7 @@ import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 class HistoryFragment : Fragment() {
-    private lateinit var historyRecyclerView: RecyclerView
+    private var historyRecyclerView: RecyclerView?=null
     private var items: MutableList<Track> = mutableListOf<Track>()
 
     @Inject
@@ -30,9 +30,9 @@ class HistoryFragment : Fragment() {
     @Inject
     lateinit var viewModel: MainViewModel
 
-    private lateinit var mGridLayoutManager: GridLayoutManager
-    private lateinit var mAdapter: HistoryFragmentRecyclerViewAdapter
-    private lateinit var displayListType: DisplayListType
+    private var mGridLayoutManager: GridLayoutManager? = null
+    private  var mAdapter: HistoryFragmentRecyclerViewAdapter?=null
+    private var displayListType: DisplayListType?=null
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
@@ -43,7 +43,7 @@ class HistoryFragment : Fragment() {
 
     private fun setDisplayListType() {
         mGridLayoutManager = GridLayoutManager(activity, 1)
-        historyRecyclerView.layoutManager = mGridLayoutManager
+        historyRecyclerView?.layoutManager = mGridLayoutManager
     }
 
     private fun initRecycler() {
@@ -51,7 +51,7 @@ class HistoryFragment : Fragment() {
             items,
             activity?.applicationContext
         )
-        historyRecyclerView.adapter = mAdapter
+        historyRecyclerView?.adapter = mAdapter
     }
 
     override fun onCreateView(

@@ -21,9 +21,9 @@ import javax.inject.Inject
 
 
 class SettingFragment : Fragment() {
-    private lateinit var displayTypeRadioGroup: RadioGroup
-    private lateinit var updateStationTextView: TextView
-    private lateinit var clearHistoryTextView: TextView
+    private var displayTypeRadioGroup: RadioGroup? = null
+    private var updateStationTextView: TextView? = null
+    private var clearHistoryTextView: TextView? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -33,8 +33,8 @@ class SettingFragment : Fragment() {
 
     @Inject
     lateinit var preferencesHelper: PreferenceHelper
-    private lateinit var updateLottieAnimView: LottieAnimationView
-    private lateinit var trashLottieAnimationView: LottieAnimationView
+    private var updateLottieAnimView: LottieAnimationView? = null
+    private var trashLottieAnimationView: LottieAnimationView? = null
 
     override fun onAttach(context: Context) {
         AndroidSupportInjection.inject(this)
@@ -61,14 +61,14 @@ class SettingFragment : Fragment() {
     private fun loadDisplayListType() {
         val displayListType = preferencesHelper.getDisplayListType()
         if (displayListType == DisplayListType.List) {
-            displayTypeRadioGroup.check(R.id.listRadioButton)
+            displayTypeRadioGroup?.check(R.id.listRadioButton)
         } else {
-            displayTypeRadioGroup.check(R.id.gridRadioButton)
+            displayTypeRadioGroup?.check(R.id.gridRadioButton)
         }
     }
 
     private fun setListeners() {
-        displayTypeRadioGroup.setOnCheckedChangeListener { _, i ->
+        displayTypeRadioGroup?.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.listRadioButton -> {
                     preferencesHelper.setDisplayListType(DisplayListType.List)
@@ -78,21 +78,21 @@ class SettingFragment : Fragment() {
                 }
             }
         }
-        updateLottieAnimView.setOnClickListener { updateDbAndAnim() }
-        trashLottieAnimationView.setOnClickListener { clearHistoryAndAnim() }
-        clearHistoryTextView.setOnClickListener { clearHistoryAndAnim() }
-        updateStationTextView.setOnClickListener { updateDbAndAnim() }
+        updateLottieAnimView?.setOnClickListener { updateDbAndAnim() }
+        trashLottieAnimationView?.setOnClickListener { clearHistoryAndAnim() }
+        clearHistoryTextView?.setOnClickListener { clearHistoryAndAnim() }
+        updateStationTextView?.setOnClickListener { updateDbAndAnim() }
     }
 
     private fun clearHistoryAndAnim() {
-        trashLottieAnimationView.playAnimation()
+        trashLottieAnimationView?.playAnimation()
         viewModel.deleteAllHistory()
         Toast.makeText(context, getString(R.string.history_clear_toast), Toast.LENGTH_SHORT)
             .show()
     }
 
     private fun updateDbAndAnim() {
-        updateLottieAnimView.playAnimation()
+        updateLottieAnimView?.playAnimation()
         (activity as MainActivity?)?.updateDb()
     }
 

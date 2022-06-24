@@ -16,7 +16,7 @@ import com.ksnk.radio.ui.main.MainActivity
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
-    private lateinit var repeatImageButton: ImageButton
+    private var repeatImageButton: ImageButton? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         window.statusBarColor = ContextCompat.getColor(this, R.color.black)
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class SplashActivity : AppCompatActivity() {
             val handler = Handler()
             handler.postDelayed({ startMainActivity() }, 1000)
         } else {
-            repeatImageButton.visibility = View.VISIBLE
+            repeatImageButton?.visibility = View.VISIBLE
             Toast.makeText(this, getString(R.string.error_network), Toast.LENGTH_SHORT).show()
         }
     }
@@ -50,7 +50,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun initButton() {
         repeatImageButton = findViewById(R.id.imageButtonRepeat)
-        repeatImageButton.setOnClickListener {
+        repeatImageButton?.setOnClickListener {
             recreateActivity()
         }
     }
