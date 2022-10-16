@@ -264,10 +264,10 @@ class PlayerService() : Service(), Parcelable {
     private fun loadPoster() {
         Picasso.get()
             .load(radioWave?.image)
-            .resize(100,70)
+            .resize(100, 70)
             .into(object : com.squareup.picasso.Target {
                 override fun onBitmapLoaded(bitmap: Bitmap?, from: LoadedFrom?) {
-                        remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
+                    remoteViews!!.setImageViewBitmap(R.id.widgetImageView, bitmap)
                 }
 
                 override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
@@ -347,13 +347,17 @@ class PlayerService() : Service(), Parcelable {
 
                 @SuppressLint("SimpleDateFormat")
                 override fun onResponse(call: Call, response: Response) {
-                    val json = response.body()?.string()?.let { JSONObject(it) }
-                    val jsonArray: JSONArray
                     try {
-                        jsonArray = json!!.getJSONArray("artists")
-                        insertTrackAndLoadPoster(mediaMetadata, jsonArray)
-                    } catch (e: java.lang.Exception) {
-                        insertTrackAndSetDefaultPoster(mediaMetadata)
+                        val json = response.body()?.string()?.let { JSONObject(it) }
+                        val jsonArray: JSONArray
+                        try {
+                            jsonArray = json!!.getJSONArray("artists")
+                            insertTrackAndLoadPoster(mediaMetadata, jsonArray)
+                        } catch (e: java.lang.Exception) {
+                            insertTrackAndSetDefaultPoster(mediaMetadata)
+                        }
+                    } catch (e: Exception) {
+
                     }
                 }
             })

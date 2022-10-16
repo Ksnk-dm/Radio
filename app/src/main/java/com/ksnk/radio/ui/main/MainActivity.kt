@@ -624,7 +624,13 @@ class MainActivity : AppCompatActivity() {
 
                 @SuppressLint("SimpleDateFormat")
                 override fun onResponse(call: Call, response: Response) {
-                    val json = response.body()?.string()?.let { JSONObject(it) }
+                    var json: JSONObject? =null
+                    try {
+                       json = response.body()?.string()?.let { JSONObject(it) }
+                    } catch (e:Exception){
+
+                    }
+
                     val jsonArray: JSONArray
                     try {
                         jsonArray = json!!.getJSONArray("artists")
@@ -859,4 +865,5 @@ class MainActivity : AppCompatActivity() {
 
     fun setSettingListener(fragmentSettingListener: FragmentSettingListener) {
         this.fragmentSettingListener = fragmentSettingListener
-    }}
+    }
+}
